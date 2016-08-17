@@ -1,0 +1,16 @@
+apply plugin: 'java'
+
+project.ext.lwjglVersion = "3.0.0a"
+project.ext.jomlVersion = "1.8.2"
+project.ext.jsonVersion = "20160810"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.lwjgl:lwjgl:${lwjglVersion}"
+	compile "org.lwjgl:lwjgl-platform:${lwjglVersion}:natives-osx"
+	compile "org.joml:joml:${jomlVersion}"
+	compile "org.json:json:${jsonVersion}"
+}
