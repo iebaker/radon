@@ -48,12 +48,14 @@ import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
 
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_BACK;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FALSE;
 import static org.lwjgl.opengl.GL11.GL_INVALID_ENUM;
@@ -64,14 +66,17 @@ import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
 import static org.lwjgl.opengl.GL11.GL_OUT_OF_MEMORY;
 import static org.lwjgl.opengl.GL11.GL_STACK_OVERFLOW;
 import static org.lwjgl.opengl.GL11.GL_STACK_UNDERFLOW;
+import static org.lwjgl.opengl.GL11.GL_STENCIL_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL30.GL_INVALID_FRAMEBUFFER_OPERATION;
+
+import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glClearStencil;
 import static org.lwjgl.opengl.GL11.glCullFace;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glLineWidth;
-import static org.lwjgl.opengl.GL30.GL_INVALID_FRAMEBUFFER_OPERATION;
 
 public class Game {
 
@@ -197,6 +202,39 @@ public class Game {
         glCullFace(GL_BACK);
         glEnable(GL_LINE_SMOOTH);
         glLineWidth(1.0f);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glfwSwapBuffers(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    }
+
+    public void initializeGameSystems() {
+        gameSystems.forEach(GameSystem::initialize);
+    }
+
+    public void loop() {
+        float rightNow, elapsedTime;
+        while (glfwWindowShouldClose(window) == GL_FALSE) {
+            rightNow = (float) glfwGetTime();
+            elapsedTime = rightNow - previousTime;
+            previousTime = rightNow;
+
+            for (GameSystem gameSystem : gameSystems) {
+                gameSystem.update(elapsedTime);
+            }
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+
+            Game.exitOnGlErrorWithMessage("Error!");
+        }
+    }
+
+    public void releaseCallbacks() {
+        errorCallback.release();
+        keyCallback.release();
+        cursorPosCallback.release();
+        mouseButtonCallback.release();
     }
 
     public static void exitOnGlErrorWithMessage(String message) {
@@ -235,30 +273,9 @@ public class Game {
         createWindow();
         registerCallbacks();
         initializeGl();
-
-        gameSystems.forEach(GameSystem::initialize);
-
-        float rightNow, elapsedTime;
-        while (glfwWindowShouldClose(window) == GL_FALSE) {
-            rightNow = (float) glfwGetTime();
-            elapsedTime = rightNow - previousTime;
-            previousTime = rightNow;
-
-            for (GameSystem gameSystem : gameSystems) {
-                gameSystem.update(elapsedTime);
-            }
-
-            glfwSwapBuffers(window);
-            glfwPollEvents();
-
-            Game.exitOnGlErrorWithMessage("Error!");
-        }
-
-        errorCallback.release();
-        keyCallback.release();
-        cursorPosCallback.release();
-        mouseButtonCallback.release();
-
+        initializeGameSystems();
+        loop();
+        releaseCallbacks();
         System.out.printf("Game %s has run!%n", name);
     }
 }
