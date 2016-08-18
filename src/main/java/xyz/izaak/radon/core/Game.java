@@ -146,19 +146,19 @@ public class Game {
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 switch (action) {
                     case GLFW_PRESS:
-                        for (DefaultGameSystem gameSystem : gameSystems) {
+                        for (GameSystem gameSystem : gameSystems) {
                             gameSystem.onKeyDown(key);
                             gameSystem.onKeyHeld(key);
                         }
                         break;
                     case GLFW_REPEAT:
-                        for (DefaultGameSystem gameSystem : gameSystems) {
+                        for (GameSystem gameSystem : gameSystems) {
                             gameSystem.onKeyRepeat(key);
                             gameSystem.onKeyHeld(key);
                         }
                         break;
                     case GLFW_RELEASE:
-                        for (DefaultGameSystem gameSystem : gameSystems) {
+                        for (GameSystem gameSystem : gameSystems) {
                             gameSystem.onKeyUp(key);
                         }
                         break;
@@ -170,7 +170,7 @@ public class Game {
             public void invoke(long window, double xPos, double yPos) {
                 mouseDelta.set((float) xPos, (float) yPos).sub(previousMousePosition);
                 previousMousePosition.set((float) xPos, (float) yPos);
-                for (DefaultGameSystem gameSystem : gameSystems) {
+                for (GameSystem gameSystem : gameSystems) {
                     gameSystem.onMouseMove(mouseDelta);
                 }
             }
@@ -180,12 +180,12 @@ public class Game {
             public void invoke(long window, int button, int action, int mods) {
                 switch (action) {
                     case GLFW_PRESS:
-                        for (DefaultGameSystem gameSystem : gameSystems) {
+                        for (GameSystem gameSystem : gameSystems) {
                             gameSystem.onMouseDown(previousMousePosition, button);
                         }
                         break;
                     case GLFW_RELEASE:
-                        for (DefaultGameSystem gameSystem : gameSystems) {
+                        for (GameSystem gameSystem : gameSystems) {
                             gameSystem.onMouseUp(previousMousePosition, button);
                         }
                         break;
@@ -209,7 +209,7 @@ public class Game {
     }
 
     private void initializeGameSystems() {
-        gameSystems.forEach(DefaultGameSystem::initialize);
+        gameSystems.forEach(GameSystem::initialize);
     }
 
     private void loop() {
@@ -219,7 +219,7 @@ public class Game {
             elapsedTime = rightNow - previousTime;
             previousTime = rightNow;
 
-            for (DefaultGameSystem gameSystem : gameSystems) {
+            for (GameSystem gameSystem : gameSystems) {
                 gameSystem.update(elapsedTime);
             }
 
