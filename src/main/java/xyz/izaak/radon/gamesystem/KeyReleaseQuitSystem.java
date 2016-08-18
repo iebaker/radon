@@ -3,7 +3,7 @@ package xyz.izaak.radon.gamesystem;
 /**
  * Created by ibaker on 17/08/2016.
  */
-public class KeyReleaseQuitSystem extends GameSystem {
+public class KeyReleaseQuitSystem extends DefaultGameSystem {
     private int trigger;
 
     public KeyReleaseQuitSystem(int trigger) {

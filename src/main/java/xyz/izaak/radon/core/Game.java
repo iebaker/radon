@@ -1,7 +1,7 @@
 package xyz.izaak.radon.core;
 
 import org.joml.Vector3f;
-import xyz.izaak.radon.gamesystem.GameSystem;
+import xyz.izaak.radon.gamesystem.DefaultGameSystem;
 
 import org.joml.Vector2f;
 
@@ -88,7 +88,7 @@ public class Game {
     private int width;
     private int height;
     private String name;
-    private List<GameSystem> gameSystems;
+    private List<DefaultGameSystem> gameSystems;
     private GLFWErrorCallback errorCallback;
     private GLFWKeyCallback keyCallback;
     private GLFWCursorPosCallback cursorPosCallback;
@@ -105,18 +105,18 @@ public class Game {
         this.mouseDelta = new Vector2f();
     }
 
-    public void addGameSystem(GameSystem gameSystem) {
+    public void addGameSystem(DefaultGameSystem gameSystem) {
         gameSystems.add(gameSystem);
     }
 
-    public void initializeGlfw() {
+    private void initializeGlfw() {
         if (glfwInit() != GL_TRUE) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
         previousTime = (float) glfwGetTime();
     }
 
-    public void createWindow() {
+    private void createWindow() {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
@@ -138,7 +138,7 @@ public class Game {
         GLContext.createFromCurrent();
     }
 
-    public void registerCallbacks() {
+    private void registerCallbacks() {
         glfwSetErrorCallback(errorCallback = errorCallbackPrint(System.err));
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
@@ -146,19 +146,19 @@ public class Game {
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 switch (action) {
                     case GLFW_PRESS:
-                        for (GameSystem gameSystem : gameSystems) {
+                        for (DefaultGameSystem gameSystem : gameSystems) {
                             gameSystem.onKeyDown(key);
                             gameSystem.onKeyHeld(key);
                         }
                         break;
                     case GLFW_REPEAT:
-                        for (GameSystem gameSystem : gameSystems) {
+                        for (DefaultGameSystem gameSystem : gameSystems) {
                             gameSystem.onKeyRepeat(key);
                             gameSystem.onKeyHeld(key);
                         }
                         break;
                     case GLFW_RELEASE:
-                        for (GameSystem gameSystem : gameSystems) {
+                        for (DefaultGameSystem gameSystem : gameSystems) {
                             gameSystem.onKeyUp(key);
                         }
                         break;
@@ -170,7 +170,7 @@ public class Game {
             public void invoke(long window, double xPos, double yPos) {
                 mouseDelta.set((float) xPos, (float) yPos).sub(previousMousePosition);
                 previousMousePosition.set((float) xPos, (float) yPos);
-                for (GameSystem gameSystem : gameSystems) {
+                for (DefaultGameSystem gameSystem : gameSystems) {
                     gameSystem.onMouseMove(mouseDelta);
                 }
             }
@@ -180,12 +180,12 @@ public class Game {
             public void invoke(long window, int button, int action, int mods) {
                 switch (action) {
                     case GLFW_PRESS:
-                        for (GameSystem gameSystem : gameSystems) {
+                        for (DefaultGameSystem gameSystem : gameSystems) {
                             gameSystem.onMouseDown(previousMousePosition, button);
                         }
                         break;
                     case GLFW_RELEASE:
-                        for (GameSystem gameSystem : gameSystems) {
+                        for (DefaultGameSystem gameSystem : gameSystems) {
                             gameSystem.onMouseUp(previousMousePosition, button);
                         }
                         break;
@@ -194,7 +194,7 @@ public class Game {
         });
     }
 
-    public void initializeGl() {
+    private void initializeGl() {
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
         glClearStencil(1);
         glEnable(GL_DEPTH_TEST);
@@ -208,40 +208,40 @@ public class Game {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
-    public void initializeGameSystems() {
-        gameSystems.forEach(GameSystem::initialize);
+    private void initializeGameSystems() {
+        gameSystems.forEach(DefaultGameSystem::initialize);
     }
 
-    public void loop() {
+    private void loop() {
         float rightNow, elapsedTime;
         while (glfwWindowShouldClose(window) == GL_FALSE) {
             rightNow = (float) glfwGetTime();
             elapsedTime = rightNow - previousTime;
             previousTime = rightNow;
 
-            for (GameSystem gameSystem : gameSystems) {
+            for (DefaultGameSystem gameSystem : gameSystems) {
                 gameSystem.update(elapsedTime);
             }
 
             glfwSwapBuffers(window);
             glfwPollEvents();
 
-            Game.exitOnGlErrorWithMessage("Error!");
+            exitOnGlErrorWithMessage("Error!");
         }
     }
 
-    public void releaseCallbacks() {
+    private void releaseCallbacks() {
         errorCallback.release();
         keyCallback.release();
         cursorPosCallback.release();
         mouseButtonCallback.release();
     }
 
-    public static void exitOnGlErrorWithMessage(String message) {
-        Game.exitOnGlErrorWithMessage(message, false);
+    private void exitOnGlErrorWithMessage(String message) {
+        exitOnGlErrorWithMessage(message, false);
     }
 
-    public static void exitOnGlErrorWithMessage(String message, boolean printSuccessOutput) {
+    private void exitOnGlErrorWithMessage(String message, boolean printSuccessOutput) {
         int errorValue = glGetError();
         switch(errorValue) {
             case GL_INVALID_ENUM:
@@ -264,7 +264,6 @@ public class Game {
                 }
                 return;
         }
-
         System.exit(errorValue);
     }
 
