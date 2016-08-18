@@ -30,21 +30,9 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
 public class ShaderCompiler {
 
     private ShaderComponents shaderComponents = new ShaderComponents();
-    private String fragmentShaderFilename;
-    private String vertexShaderFilename;
 
     public ShaderCompiler with(ShaderComponents shaderComponents) {
         this.shaderComponents.joinWith(shaderComponents);
-        return this;
-    }
-
-    public ShaderCompiler vertexSource(String vertexShaderFilename) {
-        this.vertexShaderFilename = vertexShaderFilename;
-        return this;
-    }
-
-    public ShaderCompiler fragmentSource(String fragmentShaderFilename) {
-        this.fragmentShaderFilename = fragmentShaderFilename;
         return this;
     }
 
@@ -59,6 +47,9 @@ public class ShaderCompiler {
         shaderComponents.getFragmentOuts().forEach(variable ->
             stringBuilder.append(String.format("out %s %s;%n", variable.getType(), variable.getName())));
         stringBuilder.append("\n");
+        shaderComponents.getVertexShaderBlocks().forEach(blockFilename ->
+            stringBuilder.append(Resource.stringFromFile(blockFilename)));
+        stringBuilder.append("\n");
         return stringBuilder.toString();
     }
 
@@ -72,6 +63,9 @@ public class ShaderCompiler {
         stringBuilder.append("\n");
         stringBuilder.append("out vec4 fragColor;\n");
         stringBuilder.append("\n");
+        shaderComponents.getFragmentShaderBlocks().forEach(blockFilename ->
+                stringBuilder.append(Resource.stringFromFile(blockFilename)));
+        stringBuilder.append("\n");
         return stringBuilder.toString();
     }
 
@@ -79,8 +73,7 @@ public class ShaderCompiler {
         int status;
 
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        String vertexShaderSource = Resource.stringFromFile(vertexShaderFilename);
-        vertexShaderSource = getVertexShaderComponents().concat(vertexShaderSource);
+        String vertexShaderSource = getVertexShaderComponents();
         glShaderSource(vertexShader, vertexShaderSource);
         glCompileShader(vertexShader);
 
@@ -90,8 +83,7 @@ public class ShaderCompiler {
         }
 
         int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        String fragmentShaderSource = Resource.stringFromFile(fragmentShaderFilename);
-        fragmentShaderSource = getFragmentShaderComponents().concat(fragmentShaderSource);
+        String fragmentShaderSource = getFragmentShaderComponents();
         glShaderSource(fragmentShader, fragmentShaderSource);
         glCompileShader(fragmentShader);
 

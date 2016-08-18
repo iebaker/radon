@@ -1,5 +1,8 @@
 package xyz.izaak.radon.rendering;
 
+import xyz.izaak.radon.core.Resource;
+
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -7,9 +10,11 @@ import java.util.Set;
  */
 public class ShaderComponents {
 
-    private Set<TypedShaderVariable> fragmentIns;
-    private Set<TypedShaderVariable> uniforms;
-    private Set<TypedShaderVariable> fragmentOuts;
+    private Set<TypedShaderVariable> fragmentIns = new HashSet<>();
+    private Set<TypedShaderVariable> uniforms = new HashSet<>();
+    private Set<TypedShaderVariable> fragmentOuts = new HashSet<>();
+    private Set<String> vertexShaderBlocks = new HashSet<>();
+    private Set<String> fragmentShaderBlocks = new HashSet<>();
 
     public class TypedShaderVariable {
         private ShaderVariableType type;
@@ -41,6 +46,14 @@ public class ShaderComponents {
         fragmentOuts.add(new TypedShaderVariable(type, name));
     }
 
+    public void addVertexShaderBlock(String vertexShaderBlock) {
+        vertexShaderBlocks.add(vertexShaderBlock);
+    }
+
+    public void addFragmentShaderBlock(String fragmentShaderBlock) {
+        fragmentShaderBlocks.add(fragmentShaderBlock);
+    }
+
     public Set<TypedShaderVariable> getFragmentIns() {
         return fragmentIns;
     }
@@ -53,10 +66,20 @@ public class ShaderComponents {
         return fragmentOuts;
     }
 
+    public Set<String> getVertexShaderBlocks() {
+        return vertexShaderBlocks;
+    }
+
+    public Set<String> getFragmentShaderBlocks() {
+        return fragmentShaderBlocks;
+    }
+
     public void joinWith(ShaderComponents shaderComponents) {
         this.fragmentIns.addAll(shaderComponents.getFragmentIns());
         this.uniforms.addAll(shaderComponents.getUniforms());
         this.fragmentOuts.addAll(shaderComponents.getFragmentOuts());
+        this.vertexShaderBlocks.addAll(shaderComponents.getVertexShaderBlocks());
+        this.fragmentShaderBlocks.addAll(shaderComponents.getFragmentShaderBlocks());
     }
 }
 
