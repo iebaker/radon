@@ -1,7 +1,7 @@
 package xyz.izaak.radon.core;
 
 import org.joml.Vector3f;
-import xyz.izaak.radon.gamesystem.DefaultGameSystem;
+import xyz.izaak.radon.gamesystem.GameSystem;
 
 import org.joml.Vector2f;
 
@@ -88,7 +88,7 @@ public class Game {
     private int width;
     private int height;
     private String name;
-    private List<DefaultGameSystem> gameSystems;
+    private List<GameSystem> gameSystems;
     private GLFWErrorCallback errorCallback;
     private GLFWKeyCallback keyCallback;
     private GLFWCursorPosCallback cursorPosCallback;
@@ -105,7 +105,7 @@ public class Game {
         this.mouseDelta = new Vector2f();
     }
 
-    public void addGameSystem(DefaultGameSystem gameSystem) {
+    public void addGameSystem(GameSystem gameSystem) {
         gameSystems.add(gameSystem);
     }
 
