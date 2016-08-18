@@ -5,7 +5,7 @@ import java.util.Set;
 /**
  * Created by ibaker on 17/08/2016.
  */
-public class ShaderVariables {
+public class ShaderComponents {
 
     private Set<TypedShaderVariable> fragmentIns;
     private Set<TypedShaderVariable> uniforms;
@@ -53,10 +53,10 @@ public class ShaderVariables {
         return fragmentOuts;
     }
 
-    public void joinWith(ShaderVariables shaderVariables) {
-        this.fragmentIns.addAll(shaderVariables.getFragmentIns());
-        this.uniforms.addAll(shaderVariables.getUniforms());
-        this.fragmentOuts.addAll(shaderVariables.getFragmentOuts());
+    public void joinWith(ShaderComponents shaderComponents) {
+        this.fragmentIns.addAll(shaderComponents.getFragmentIns());
+        this.uniforms.addAll(shaderComponents.getUniforms());
+        this.fragmentOuts.addAll(shaderComponents.getFragmentOuts());
     }
 }
 

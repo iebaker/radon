@@ -29,12 +29,12 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
  */
 public class ShaderCompiler {
 
-    private ShaderVariables shaderVariables = new ShaderVariables();
+    private ShaderComponents shaderComponents = new ShaderComponents();
     private String fragmentShaderFilename;
     private String vertexShaderFilename;
 
-    public ShaderCompiler with(ShaderVariables shaderVariables) {
-        this.shaderVariables.joinWith(shaderVariables);
+    public ShaderCompiler with(ShaderComponents shaderComponents) {
+        this.shaderComponents.joinWith(shaderComponents);
         return this;
     }
 
@@ -48,26 +48,26 @@ public class ShaderCompiler {
         return this;
     }
 
-    private String getVertexShaderVariables() {
+    private String getVertexShaderComponents() {
         final StringBuilder stringBuilder = new StringBuilder();
-        shaderVariables.getFragmentIns().forEach(variable ->
+        shaderComponents.getFragmentIns().forEach(variable ->
             stringBuilder.append(String.format("in %s %s;%n", variable.getType(), variable.getName())));
         stringBuilder.append("\n");
-        shaderVariables.getUniforms().forEach(variable ->
+        shaderComponents.getUniforms().forEach(variable ->
             stringBuilder.append(String.format("uniform %s %s;%n", variable.getType(), variable.getName())));
         stringBuilder.append("\n");
-        shaderVariables.getFragmentOuts().forEach(variable ->
+        shaderComponents.getFragmentOuts().forEach(variable ->
             stringBuilder.append(String.format("out %s %s;%n", variable.getType(), variable.getName())));
         stringBuilder.append("\n");
         return stringBuilder.toString();
     }
 
-    private String getFragmentShaderVariables() {
+    private String getFragmentShaderComponents() {
         final StringBuilder stringBuilder = new StringBuilder();
-        shaderVariables.getFragmentOuts().forEach(variable ->
+        shaderComponents.getFragmentOuts().forEach(variable ->
             stringBuilder.append(String.format("in %s %s;%n", variable.getType(), variable.getName())));
         stringBuilder.append("\n");
-        shaderVariables.getUniforms().forEach(variable ->
+        shaderComponents.getUniforms().forEach(variable ->
             stringBuilder.append(String.format("uniform %s %s;%n", variable.getType(), variable.getName())));
         stringBuilder.append("\n");
         stringBuilder.append("out vec4 fragColor;\n");
@@ -80,7 +80,7 @@ public class ShaderCompiler {
 
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
         String vertexShaderSource = Resource.stringFromFile(vertexShaderFilename);
-        vertexShaderSource = getVertexShaderVariables().concat(vertexShaderSource);
+        vertexShaderSource = getVertexShaderComponents().concat(vertexShaderSource);
         glShaderSource(vertexShader, vertexShaderSource);
         glCompileShader(vertexShader);
 
@@ -91,7 +91,7 @@ public class ShaderCompiler {
 
         int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         String fragmentShaderSource = Resource.stringFromFile(fragmentShaderFilename);
-        fragmentShaderSource = getFragmentShaderVariables().concat(fragmentShaderSource);
+        fragmentShaderSource = getFragmentShaderComponents().concat(fragmentShaderSource);
         glShaderSource(fragmentShader, fragmentShaderSource);
         glCompileShader(fragmentShader);
 
@@ -116,7 +116,7 @@ public class ShaderCompiler {
 
         int offset = 0;
         final List<VertexAttribute> vertexAttributes = new ArrayList<>();
-        for(ShaderVariables.TypedShaderVariable variable : shaderVariables.getFragmentIns()) {
+        for(ShaderComponents.TypedShaderVariable variable : shaderComponents.getFragmentIns()) {
             switch (variable.getType()) {
                 case VEC2:
                     vertexAttributes.add(new VertexAttribute(variable.getName(), 2, offset++));

@@ -5,21 +5,21 @@ import java.util.Collection;
 /**
  * Created by ibaker on 17/08/2016.
  */
-public class DefaultCamera extends Camera implements ShaderVariableProvider {
+public class DefaultCamera extends Camera implements ShaderComponentProvider {
 
-    private static ShaderVariables shaderVariables = new ShaderVariables();
+    private static ShaderComponents shaderComponents = new ShaderComponents();
     private static final String VIEW = "view";
     private static final String PROJECTION = "projection";
     private static final String CAMERA_EYE = "cameraEye";
 
     static {
-        shaderVariables.addUniform(ShaderVariableType.MAT4, DefaultCamera.VIEW);
-        shaderVariables.addUniform(ShaderVariableType.MAT4, DefaultCamera.PROJECTION);
-        shaderVariables.addUniform(ShaderVariableType.VEC3, DefaultCamera.CAMERA_EYE);
+        shaderComponents.addUniform(ShaderVariableType.MAT4, DefaultCamera.VIEW);
+        shaderComponents.addUniform(ShaderVariableType.MAT4, DefaultCamera.PROJECTION);
+        shaderComponents.addUniform(ShaderVariableType.VEC3, DefaultCamera.CAMERA_EYE);
     }
 
-    public static ShaderVariables provideShaderVariables() {
-        return shaderVariables;
+    public static ShaderComponents provideShaderComponents() {
+        return shaderComponents;
     }
 
     @Override

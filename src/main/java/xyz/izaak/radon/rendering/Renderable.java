@@ -14,20 +14,24 @@ import java.util.Map;
 /**
  * Created by ibaker on 17/08/2016.
  */
-public class Renderable implements ShaderVariableProvider {
+public class Renderable implements ShaderComponentProvider {
 
-    private static ShaderVariables shaderVariables = new ShaderVariables();
+    private static ShaderComponents shaderComponents = new ShaderComponents();
+    private static final String MODEL = "model";
+    private static final String VERTEX_POSITION = "vertexPosition";
+    private static final String VERTEX_NORMAL = "vertexNormal";
 
     static {
-        shaderVariables.addUniform(ShaderVariableType.MAT4, "model");
+        shaderComponents.addUniform(ShaderVariableType.MAT4, MODEL);
+        shaderComponents.addFragmentIn(ShaderVariableType.VEC3, VERTEX_POSITION);
+        shaderComponents.addFragmentIn(ShaderVariableType.VEC3, VERTEX_NORMAL);
     }
 
-    public static ShaderVariables provideShaderVariables() {
-        return shaderVariables;
+    public static ShaderComponents provideShaderComponents() {
+        return shaderComponents;
     }
 
     public class Interval {
-
         public int mode;
         public int first;
         public int count;
