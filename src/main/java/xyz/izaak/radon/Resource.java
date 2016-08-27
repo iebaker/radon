@@ -1,4 +1,4 @@
-package xyz.izaak.radon.core;
+package xyz.izaak.radon;
 
 import java.io.File;
 import java.io.FileNotFoundException;

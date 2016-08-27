@@ -7,12 +7,14 @@ import org.joml.Vector3f;
  * Created by ibaker on 17/08/2016.
  */
 class Basis {
-    protected Vector3f i;
-    protected Vector3f j;
-    protected Vector3f k;
+    private static Matrix3f scratch;
+    private Matrix3f matrix;
+    private Vector3f i;
+    private Vector3f j;
+    private Vector3f k;
 
     public static void change(Vector3f vector, Basis from, Basis to) {
-        to.getMatrix().invert().mul(from.getMatrix()).transform(vector);
+        scratch.set(to.matrix).invert().mul(from.matrix).transform(vector);
     }
 
     Basis() {
@@ -39,8 +41,8 @@ class Basis {
         return k;
     }
 
-    public Matrix3f getMatrix() {
-        return new Matrix3f(
+    private Matrix3f getMatrix() {
+        return matrix.set(
                 i.x, j.x, k.x,
                 i.y, j.y, k.y,
                 i.z, j.z, k.z

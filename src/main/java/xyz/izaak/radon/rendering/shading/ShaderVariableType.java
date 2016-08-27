@@ -1,4 +1,4 @@
-package xyz.izaak.radon.rendering;
+package xyz.izaak.radon.rendering.shading;
 
 /**
  * Created by ibaker on 17/08/2016.
@@ -66,4 +66,5 @@ public enum ShaderVariableType {
     ShaderVariableType() {
         this.type = this.toString().toLowerCase();
     }
+
 }

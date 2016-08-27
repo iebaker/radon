@@ -1,6 +1,6 @@
-package xyz.izaak.radon.rendering;
+package xyz.izaak.radon.rendering.shading;
 
-import xyz.izaak.radon.core.Resource;
+import xyz.izaak.radon.Resource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +28,14 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
  * Created by ibaker on 17/08/2016.
  */
 public class ShaderCompiler {
+
+    public static ShaderCompiler instance() {
+        return new ShaderCompiler();
+    }
+
+    private ShaderCompiler() {
+        // Use ShaderCompiler.instance()
+    }
 
     private ShaderComponents shaderComponents = new ShaderComponents();
 
@@ -69,7 +77,7 @@ public class ShaderCompiler {
         return stringBuilder.toString();
     }
 
-    public Shader compile() throws IOException, RuntimeException {
+    public Shader compile(String name) throws IOException, RuntimeException {
         int status;
 
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -125,6 +133,6 @@ public class ShaderCompiler {
             }
         }
 
-        return new Shader(shaderProgram, vertexAttributes, vertexShaderSource, fragmentShaderSource);
+        return new Shader(name, shaderProgram, vertexAttributes, vertexShaderSource, fragmentShaderSource);
     }
 }

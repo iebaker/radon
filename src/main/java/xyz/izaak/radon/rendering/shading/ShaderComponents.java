@@ -1,6 +1,4 @@
-package xyz.izaak.radon.rendering;
-
-import xyz.izaak.radon.core.Resource;
+package xyz.izaak.radon.rendering.shading;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,8 +36,10 @@ public class ShaderComponents {
         fragmentIns.add(new TypedShaderVariable(type, name));
     }
 
-    public void addUniform(ShaderVariableType type, String name) {
-        uniforms.add(new TypedShaderVariable(type, name));
+    public void addUniform(ShaderVariableType type, String name, UniformStore store) {
+        TypedShaderVariable variable = new TypedShaderVariable(type, name);
+        uniforms.add(variable);
+        store.storeUniform(variable);
     }
 
     public void addFragmentOut(ShaderVariableType type, String name) {

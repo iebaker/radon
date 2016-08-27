@@ -1,4 +1,4 @@
-package xyz.izaak.radon.core;
+package xyz.izaak.radon;
 
 import org.joml.Vector3f;
 import xyz.izaak.radon.gamesystem.GameSystem;
