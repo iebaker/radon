@@ -123,13 +123,16 @@ public class ShaderCompiler {
         for(ShaderComponents.TypedShaderVariable variable : shaderComponents.getVertexIns()) {
             switch (variable.getType()) {
                 case VEC2:
-                    vertexAttributes.add(new VertexAttribute(variable.getName(), 2, offset++));
+                    vertexAttributes.add(new VertexAttribute(variable.getName(), 2, offset));
+                    offset += 2;
                     break;
                 case VEC3:
-                    vertexAttributes.add(new VertexAttribute(variable.getName(), 3, offset++));
+                    vertexAttributes.add(new VertexAttribute(variable.getName(), 3, offset));
+                    offset += 3;
                     break;
                 case VEC4:
-                    vertexAttributes.add(new VertexAttribute(variable.getName(), 4, offset++));
+                    vertexAttributes.add(new VertexAttribute(variable.getName(), 4, offset));
+                    offset += 4;
                     break;
                 default:
                     throw new IllegalStateException(

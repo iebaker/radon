@@ -52,9 +52,7 @@ import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
 
-import static org.lwjgl.opengl.GL11.GL_BACK;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FALSE;
@@ -73,7 +71,6 @@ import static org.lwjgl.opengl.GL30.GL_INVALID_FRAMEBUFFER_OPERATION;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glClearStencil;
-import static org.lwjgl.opengl.GL11.glCullFace;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glLineWidth;
@@ -198,8 +195,6 @@ public class Game {
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
         glClearStencil(1);
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
         glEnable(GL_LINE_SMOOTH);
         glLineWidth(1.0f);
 
@@ -222,6 +217,9 @@ public class Game {
             for (GameSystem gameSystem : gameSystems) {
                 gameSystem.update(elapsedTime);
             }
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
 
             exitOnGlErrorWithMessage("Error!");
         }
