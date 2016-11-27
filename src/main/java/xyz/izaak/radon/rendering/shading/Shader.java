@@ -5,12 +5,21 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import xyz.izaak.radon.math.Points;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform2fv;
+import static org.lwjgl.opengl.GL20.glUniform3fv;
+import static org.lwjgl.opengl.GL20.glUniform4fv;
+import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 
 /**
@@ -26,14 +35,19 @@ public class Shader {
     private String fragmentSource;
     private String name;
 
-    public Shader(
+    @FunctionalInterface
+    interface SetUniform { void set(int uniformLocation); }
+
+    Shader(
             String name,
             int program,
             List<VertexAttribute> vertexAttributes,
+            Map<ShaderComponents.TypedShaderVariable, UniformStore> uniformStores,
             String vertexSource,
             String fragmentSource) {
         this.program = program;
         this.vertexAttributes = vertexAttributes;
+        this.uniformStores = uniformStores;
         this.stride = vertexAttributes.stream().collect(Collectors.summingInt(VertexAttribute::getLength));
         this.vertexSource = vertexSource;
         this.fragmentSource = fragmentSource;
@@ -47,40 +61,47 @@ public class Shader {
         });
     }
 
-    public int getUniformLocation(String name) {
+    private int getUniformLocation(String name) {
         return glGetUniformLocation(program, name);
     }
 
-    public void setUniform(String name, Matrix3f value) {
-
+    private void setUniformIfLocationExists(String name, SetUniform setUniform) {
+        int uniformLocation = getUniformLocation(name);
+        if (uniformLocation >= 0) {
+            setUniform.set(uniformLocation);
+        }
     }
 
-    public void setUniform(String name, Matrix4f value) {
-
+    void setUniform(String name, Matrix3f value) {
+        setUniformIfLocationExists(name, location -> glUniformMatrix3fv(location, false, Points.floatBufferOf(value)));
     }
 
-    public void setUniform(String name, Vector2f value) {
-
+    void setUniform(String name, Matrix4f value) {
+        setUniformIfLocationExists(name, location -> glUniformMatrix4fv(location, false, Points.floatBufferOf(value)));
     }
 
-    public void setUniform(String name, Vector3f value) {
-
+    void setUniform(String name, Vector2f value) {
+        setUniformIfLocationExists(name, location -> glUniform2fv(location, Points.floatBufferOf(value)));
     }
 
-    public void setUniform(String name, Vector4f value) {
-
+    void setUniform(String name, Vector3f value) {
+        setUniformIfLocationExists(name, location -> glUniform3fv(location, Points.floatBufferOf(value)));
     }
 
-    public void setUniform(String name, float value) {
-
+    void setUniform(String name, Vector4f value) {
+        setUniformIfLocationExists(name, location -> glUniform4fv(location, Points.floatBufferOf(value)));
     }
 
-    public void setUniform(String name, int value) {
-
+    void setUniform(String name, float value) {
+        setUniformIfLocationExists(name, location -> glUniform1f(location, value));
     }
 
-    public void setUniform(String name, boolean value) {
+    void setUniform(String name, int value) {
+        setUniformIfLocationExists(name, location -> glUniform1i(location, value));
+    }
 
+    void setUniform(String name, boolean value) {
+        setUniformIfLocationExists(name, location -> glUniform1i(location, value ? 1 : 0));
     }
 
     public List<VertexAttribute> getVertexAttributes() {

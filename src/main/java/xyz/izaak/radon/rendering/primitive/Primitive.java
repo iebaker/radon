@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
+import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
@@ -40,12 +42,12 @@ public abstract class Primitive extends MatrixTransformable {
     private static final ShaderComponents shaderComponents = new ShaderComponents();
     private static final UniformStore uniformStore = new UniformStore();
     private static final int FLOAT_SIZE = 4;
-    protected static final String MODEL = "model";
-    protected static final String VERTEX_POSITION = "vertexPosition";
+    protected static final String MODEL = "rn_Model";
+    protected static final String VERTEX_POSITION = "rn_VertexPosition";
 
     static {
         shaderComponents.addUniform(ShaderVariableType.MAT4, MODEL, uniformStore);
-        shaderComponents.addFragmentIn(ShaderVariableType.VEC3, VERTEX_POSITION);
+        shaderComponents.addVertexIn(ShaderVariableType.VEC3, VERTEX_POSITION);
     }
 
     public static ShaderComponents provideShaderComponents() {
@@ -230,6 +232,11 @@ public abstract class Primitive extends MatrixTransformable {
         dataBuffer.put(data);
         dataBuffer.flip();
         return dataBuffer;
+    }
+
+    private void exitOnGLError() {
+        int error = glGetError();
+        if (error != GL_NO_ERROR) System.exit(error);
     }
 
     public void bufferFor(Shader shader) throws RenderingException {

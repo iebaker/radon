@@ -8,11 +8,11 @@ import xyz.izaak.radon.rendering.shading.ShaderVariableType;
  * Created by ibaker on 27/08/2016.
  */
 public interface FilledStroked {
-    String VERTEX_COLOR = "vertexColor";
+    String VERTEX_COLOR = "rn_VertexColor";
 
     static ShaderComponents provideShaderComponents() {
         ShaderComponents result = new ShaderComponents();
-        result.addFragmentIn(ShaderVariableType.VEC3, VERTEX_COLOR);
+        result.addVertexIn(ShaderVariableType.VEC3, VERTEX_COLOR);
         return result;
     }
 

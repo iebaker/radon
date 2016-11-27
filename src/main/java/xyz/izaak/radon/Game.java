@@ -223,9 +223,6 @@ public class Game {
                 gameSystem.update(elapsedTime);
             }
 
-            glfwSwapBuffers(window);
-            glfwPollEvents();
-
             exitOnGlErrorWithMessage("Error!");
         }
     }

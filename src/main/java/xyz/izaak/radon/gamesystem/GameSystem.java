@@ -6,15 +6,15 @@ import org.joml.Vector2f;
  * Created by ibaker on 17/08/2016.
  */
 public interface GameSystem {
-    void initialize();
-    void update(float seconds);
-    void onKeyDown(int key);
-    void onKeyHeld(int key);
-    void onKeyRepeat(int key);
-    void onKeyUp(int key);
-    void onMouseMove(Vector2f delta);
-    void onMouseDown(Vector2f position, int button);
-    void onMouseUp(Vector2f position, int button);
-    void onScroll(float x, float y);
-    void onResize(Vector2f newSize);
+    default void initialize() { }
+    default void update(float seconds) { }
+    default void onKeyDown(int key) { }
+    default void onKeyHeld(int key) { }
+    default void onKeyRepeat(int key) { }
+    default void onKeyUp(int key) { }
+    default void onMouseMove(Vector2f delta) { }
+    default void onMouseDown(Vector2f position, int button) { }
+    default void onMouseUp(Vector2f position, int button) { }
+    default void onScroll(float x, float y) { }
+    default void onResize(Vector2f newSize) { }
 }

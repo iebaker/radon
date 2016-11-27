@@ -13,7 +13,9 @@ import xyz.izaak.radon.rendering.shading.UniformStore;
 import xyz.izaak.radon.world.Entity;
 import xyz.izaak.radon.world.Scene;
 
+import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 /**
@@ -21,18 +23,17 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
  */
 public class Camera implements Transformable {
 
-    public static final int HEIGHT_ANGLE = 1;
-    public static final int NEAR_PLANE = 2;
-    public static final int FAR_PLANE = 3;
-    public static final int ASPECT_RATIO = 4;
-    public static final int FOV = 5;
+    public static final int NEAR_PLANE = 0;
+    public static final int FAR_PLANE = 1;
+    public static final int ASPECT_RATIO = 2;
+    public static final int FOV = 3;
 
     private static final ShaderComponents shaderComponents = new ShaderComponents();
     private static final UniformStore uniformStore = new UniformStore();
 
-    private static final String VIEW = "view";
-    private static final String PROJECTION = "projection";
-    private static final String CAMERA_EYE = "cameraEye";
+    private static final String VIEW = "rn_View";
+    private static final String PROJECTION = "rn_Projection";
+    private static final String CAMERA_EYE = "rn_CameraEye";
 
     static {
         shaderComponents.addUniform(ShaderVariableType.MAT4, VIEW, uniformStore);
@@ -48,7 +49,7 @@ public class Camera implements Transformable {
     private Matrix4f projection = new Matrix4f();
     private Matrix4f modifier = new Matrix4f();
 
-    private float[] parameters = new float[5];
+    private float[] parameters = new float[4];
     private Shader shader;
 
     public Camera(Shader shader) {
@@ -68,6 +69,10 @@ public class Camera implements Transformable {
         this.view.set(other.view);
         this.projection.set(other.projection);
         this.modifier.set(other.modifier);
+    }
+
+    public static ShaderComponents provideShaderComponents() {
+        return shaderComponents;
     }
 
     private void updateUniformStore() {
@@ -169,6 +174,11 @@ public class Camera implements Transformable {
 
     public Matrix4f getProjection() {
         return projection;
+    }
+
+    private void exitOnGLError() {
+        int error = glGetError();
+        if (error != GL_NO_ERROR) System.exit(error);
     }
 
     public void capture(Scene scene) throws RenderingException {

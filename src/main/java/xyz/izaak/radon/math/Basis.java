@@ -7,8 +7,8 @@ import org.joml.Vector3f;
  * Created by ibaker on 17/08/2016.
  */
 class Basis {
-    private static Matrix3f scratch;
-    private Matrix3f matrix;
+    private static Matrix3f scratch = new Matrix3f();
+    private Matrix3f matrix = new Matrix3f();
     private Vector3f i;
     private Vector3f j;
     private Vector3f k;

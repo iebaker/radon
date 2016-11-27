@@ -41,7 +41,7 @@ public enum ShaderVariableType {
     private String type;
     private int[] length;
 
-    public String getType() {
+    public String getTypeString() {
         return type;
     }
 

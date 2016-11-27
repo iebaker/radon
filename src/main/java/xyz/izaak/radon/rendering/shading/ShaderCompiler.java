@@ -1,10 +1,9 @@
 package xyz.izaak.radon.rendering.shading;
 
-import xyz.izaak.radon.Resource;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
@@ -46,33 +45,38 @@ public class ShaderCompiler {
 
     private String getVertexShaderComponents() {
         final StringBuilder stringBuilder = new StringBuilder();
-        shaderComponents.getFragmentIns().forEach(variable ->
-            stringBuilder.append(String.format("in %s %s;%n", variable.getType(), variable.getName())));
+        stringBuilder.append("#version 400\n");
+        shaderComponents.getVertexIns().forEach(variable ->
+            stringBuilder.append(String.format("in %s %s;%n",
+                    variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
         shaderComponents.getUniforms().forEach(variable ->
-            stringBuilder.append(String.format("uniform %s %s;%n", variable.getType(), variable.getName())));
+            stringBuilder.append(String.format("uniform %s %s;%n",
+                    variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
-        shaderComponents.getFragmentOuts().forEach(variable ->
-            stringBuilder.append(String.format("out %s %s;%n", variable.getType(), variable.getName())));
+        shaderComponents.getVertexOuts().forEach(variable ->
+            stringBuilder.append(String.format("out %s %s;%n",
+                    variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
-        shaderComponents.getVertexShaderBlocks().forEach(blockFilename ->
-            stringBuilder.append(Resource.stringFromFile(blockFilename)));
+        shaderComponents.getVertexShaderBlocks().forEach(stringBuilder::append);
         stringBuilder.append("\n");
         return stringBuilder.toString();
     }
 
     private String getFragmentShaderComponents() {
         final StringBuilder stringBuilder = new StringBuilder();
-        shaderComponents.getFragmentOuts().forEach(variable ->
-            stringBuilder.append(String.format("in %s %s;%n", variable.getType(), variable.getName())));
+        stringBuilder.append("#version 400\n");
+        shaderComponents.getVertexOuts().forEach(variable ->
+            stringBuilder.append(String.format("in %s %s;%n",
+                    variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
         shaderComponents.getUniforms().forEach(variable ->
-            stringBuilder.append(String.format("uniform %s %s;%n", variable.getType(), variable.getName())));
+            stringBuilder.append(String.format("uniform %s %s;%n",
+                    variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
         stringBuilder.append("out vec4 fragColor;\n");
         stringBuilder.append("\n");
-        shaderComponents.getFragmentShaderBlocks().forEach(blockFilename ->
-                stringBuilder.append(Resource.stringFromFile(blockFilename)));
+        shaderComponents.getFragmentShaderBlocks().forEach(stringBuilder::append);
         stringBuilder.append("\n");
         return stringBuilder.toString();
     }
@@ -116,7 +120,7 @@ public class ShaderCompiler {
 
         int offset = 0;
         final List<VertexAttribute> vertexAttributes = new ArrayList<>();
-        for(ShaderComponents.TypedShaderVariable variable : shaderComponents.getFragmentIns()) {
+        for(ShaderComponents.TypedShaderVariable variable : shaderComponents.getVertexIns()) {
             switch (variable.getType()) {
                 case VEC2:
                     vertexAttributes.add(new VertexAttribute(variable.getName(), 2, offset++));
@@ -133,6 +137,15 @@ public class ShaderCompiler {
             }
         }
 
-        return new Shader(name, shaderProgram, vertexAttributes, vertexShaderSource, fragmentShaderSource);
+        Map<ShaderComponents.TypedShaderVariable, UniformStore> uniformStoresByVariable =
+                shaderComponents.getUniformStoresByVariable();
+
+        return new Shader(
+                name,
+                shaderProgram,
+                vertexAttributes,
+                uniformStoresByVariable,
+                vertexShaderSource,
+                fragmentShaderSource);
     }
 }
