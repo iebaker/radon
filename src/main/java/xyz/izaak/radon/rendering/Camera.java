@@ -8,17 +8,12 @@ import xyz.izaak.radon.math.Transformable;
 import xyz.izaak.radon.rendering.primitive.Primitive;
 import xyz.izaak.radon.rendering.shading.Identifiers;
 import xyz.izaak.radon.rendering.shading.Shader;
-import xyz.izaak.radon.rendering.shading.ShaderComponents;
-import xyz.izaak.radon.rendering.shading.ShaderVariableType;
-import xyz.izaak.radon.rendering.shading.UniformStore;
 import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
 import xyz.izaak.radon.world.Entity;
 import xyz.izaak.radon.world.Scene;
 
-import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 /**

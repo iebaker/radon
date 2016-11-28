@@ -17,7 +17,6 @@ public class ShaderComponents {
     private Set<TypedShaderVariable> vertexOuts = new HashSet<>();
     private Set<String> vertexShaderBlocks = new HashSet<>();
     private Set<String> fragmentShaderBlocks = new HashSet<>();
-    private Map<TypedShaderVariable, UniformStore> uniformStoresByVariable = new HashMap<>();
 
     public class TypedShaderVariable {
         private ShaderVariableType type;
@@ -84,10 +83,6 @@ public class ShaderComponents {
 
     public Set<String> getFragmentShaderBlocks() {
         return fragmentShaderBlocks;
-    }
-
-    public Map<TypedShaderVariable, UniformStore> getUniformStoresByVariable() {
-        return uniformStoresByVariable;
     }
 
     public void joinWith(ShaderComponents shaderComponents) {

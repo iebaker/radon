@@ -10,9 +10,7 @@ import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.exception.RenderingException;
 import xyz.izaak.radon.rendering.shading.Identifiers;
 import xyz.izaak.radon.rendering.shading.Shader;
-import xyz.izaak.radon.rendering.shading.ShaderComponents;
 import xyz.izaak.radon.rendering.shading.ShaderVariableType;
-import xyz.izaak.radon.rendering.shading.UniformStore;
 import xyz.izaak.radon.rendering.shading.VertexAttribute;
 import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
@@ -25,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
-import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
