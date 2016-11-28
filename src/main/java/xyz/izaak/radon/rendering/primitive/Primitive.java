@@ -8,11 +8,14 @@ import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.exception.RenderingException;
+import xyz.izaak.radon.rendering.shading.Identifiers;
 import xyz.izaak.radon.rendering.shading.Shader;
 import xyz.izaak.radon.rendering.shading.ShaderComponents;
 import xyz.izaak.radon.rendering.shading.ShaderVariableType;
 import xyz.izaak.radon.rendering.shading.UniformStore;
 import xyz.izaak.radon.rendering.shading.VertexAttribute;
+import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.rendering.shading.annotation.VertexShaderInput;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -37,22 +40,11 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 /**
  * Created by ibaker on 17/08/2016.
  */
+@ProvidesShaderComponents
+@VertexShaderInput(type = ShaderVariableType.VEC3, identifier = Identifiers.VERTEX_POSITION)
 public abstract class Primitive extends MatrixTransformable {
 
-    private static final ShaderComponents shaderComponents = new ShaderComponents();
-    private static final UniformStore uniformStore = new UniformStore();
     private static final int FLOAT_SIZE = 4;
-    protected static final String MODEL = "rn_Model";
-    protected static final String VERTEX_POSITION = "rn_VertexPosition";
-
-    static {
-        shaderComponents.addUniform(ShaderVariableType.MAT4, MODEL, uniformStore);
-        shaderComponents.addVertexIn(ShaderVariableType.VEC3, VERTEX_POSITION);
-    }
-
-    public static ShaderComponents provideShaderComponents() {
-        return shaderComponents;
-    }
 
     public class Interval {
         public int mode;
@@ -75,11 +67,7 @@ public abstract class Primitive extends MatrixTransformable {
 
     public abstract void build();
 
-    public void updateUniformStore(Matrix4f root) {
-        uniformStore.updateUniformMatrix4f(MODEL).set(model).mul(root);
-    }
-
-    public void addInterval(int mode, int count) {
+    protected void addInterval(int mode, int count) {
         intervals.add(new Interval(mode, vertexCount, count));
         vertexCount += count;
     }

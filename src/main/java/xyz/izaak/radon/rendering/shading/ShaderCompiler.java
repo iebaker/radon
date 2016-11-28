@@ -1,7 +1,23 @@
 package xyz.izaak.radon.rendering.shading;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import xyz.izaak.radon.rendering.shading.annotation.FragmentShaderBlock;
+import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
+import xyz.izaak.radon.rendering.shading.annotation.VertexShaderBlock;
+import xyz.izaak.radon.rendering.shading.annotation.VertexShaderInput;
+import xyz.izaak.radon.rendering.shading.annotation.VertexShaderOutput;
+
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,10 +49,65 @@ public class ShaderCompiler {
     }
 
     private ShaderCompiler() {
-        // Use ShaderCompiler.instance()
+        shaderVariableTypeByClass.put(Vector2f.class, ShaderVariableType.VEC2);
+        shaderVariableTypeByClass.put(Vector3f.class, ShaderVariableType.VEC3);
+        shaderVariableTypeByClass.put(Vector4f.class, ShaderVariableType.VEC4);
+        shaderVariableTypeByClass.put(Matrix3f.class, ShaderVariableType.MAT3);
+        shaderVariableTypeByClass.put(Matrix4f.class, ShaderVariableType.MAT4);
+        shaderVariableTypeByClass.put(Boolean.TYPE, ShaderVariableType.BOOL);
+        shaderVariableTypeByClass.put(Integer.TYPE, ShaderVariableType.INT);
     }
 
     private ShaderComponents shaderComponents = new ShaderComponents();
+    private Map<Class<?>, ShaderVariableType> shaderVariableTypeByClass = new HashMap<>();
+
+    public ShaderCompiler with(Class<?> providerClass) throws IllegalArgumentException {
+        ProvidesShaderComponents test = providerClass.getAnnotation(ProvidesShaderComponents.class);
+        if (test == null) {
+            throw new IllegalArgumentException(
+                    String.format("Class %s does not provide shader components", providerClass.getSimpleName()));
+        }
+
+        for (VertexShaderInput input : providerClass.getAnnotationsByType(VertexShaderInput.class)) {
+            shaderComponents.addVertexIn(input.type(), input.identifier());
+        }
+
+        for (VertexShaderOutput output : providerClass.getAnnotationsByType(VertexShaderOutput.class)) {
+            shaderComponents.addVertexOut(output.type(), output.identifier());
+        }
+
+        for (Method method : providerClass.getMethods()) {
+            ShaderUniform uniform = method.getAnnotation(ShaderUniform.class);
+            if (uniform != null) {
+                ShaderVariableType type = shaderVariableTypeByClass.get(method.getReturnType());
+                if (type == null) {
+                    throw new IllegalArgumentException(
+                            String.format("Field %s has invalid Java type %s for shader uniform",
+                                    method.getName(), method.getReturnType().getSimpleName()));
+                }
+                shaderComponents.addUniform(type, uniform.identifier());
+            }
+
+            VertexShaderBlock vertexShaderBlock = method.getAnnotation(VertexShaderBlock.class);
+            if (vertexShaderBlock != null) {
+                try {
+                    shaderComponents.addVertexShaderBlock((String)method.invoke(null));
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            FragmentShaderBlock fragmentShaderBlock = method.getAnnotation(FragmentShaderBlock.class);
+            if (fragmentShaderBlock != null) {
+                try {
+                    shaderComponents.addFragmentShaderBlock((String)method.invoke(null));
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return this;
+    }
 
     public ShaderCompiler with(ShaderComponents shaderComponents) {
         this.shaderComponents.joinWith(shaderComponents);
@@ -140,14 +211,10 @@ public class ShaderCompiler {
             }
         }
 
-        Map<ShaderComponents.TypedShaderVariable, UniformStore> uniformStoresByVariable =
-                shaderComponents.getUniformStoresByVariable();
-
         return new Shader(
                 name,
                 shaderProgram,
                 vertexAttributes,
-                uniformStoresByVariable,
                 vertexShaderSource,
                 fragmentShaderSource);
     }

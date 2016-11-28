@@ -41,11 +41,9 @@ public class ShaderComponents {
         vertexIns.add(new TypedShaderVariable(type, name));
     }
 
-    public void addUniform(ShaderVariableType type, String name, UniformStore store) {
+    public void addUniform(ShaderVariableType type, String name) {
         TypedShaderVariable variable = new TypedShaderVariable(type, name);
         uniforms.add(variable);
-        store.storeUniform(variable);
-        uniformStoresByVariable.put(variable, store);
     }
 
     public void addVertexOut(ShaderVariableType type, String name) {

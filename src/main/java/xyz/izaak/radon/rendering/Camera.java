@@ -6,10 +6,13 @@ import xyz.izaak.radon.exception.RenderingException;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
 import xyz.izaak.radon.rendering.primitive.Primitive;
+import xyz.izaak.radon.rendering.shading.Identifiers;
 import xyz.izaak.radon.rendering.shading.Shader;
 import xyz.izaak.radon.rendering.shading.ShaderComponents;
 import xyz.izaak.radon.rendering.shading.ShaderVariableType;
 import xyz.izaak.radon.rendering.shading.UniformStore;
+import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
 import xyz.izaak.radon.world.Entity;
 import xyz.izaak.radon.world.Scene;
 
@@ -21,25 +24,13 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 /**
  * Created by ibaker on 17/08/2016.
  */
+@ProvidesShaderComponents
 public class Camera implements Transformable {
 
     public static final int NEAR_PLANE = 0;
     public static final int FAR_PLANE = 1;
     public static final int ASPECT_RATIO = 2;
     public static final int FOV = 3;
-
-    private static final ShaderComponents shaderComponents = new ShaderComponents();
-    private static final UniformStore uniformStore = new UniformStore();
-
-    private static final String VIEW = "rn_View";
-    private static final String PROJECTION = "rn_Projection";
-    private static final String CAMERA_EYE = "rn_CameraEye";
-
-    static {
-        shaderComponents.addUniform(ShaderVariableType.MAT4, VIEW, uniformStore);
-        shaderComponents.addUniform(ShaderVariableType.MAT4, PROJECTION, uniformStore);
-        shaderComponents.addUniform(ShaderVariableType.VEC3, CAMERA_EYE, uniformStore);
-    }
 
     private Vector3f eye = new Vector3f();
     private Vector3f eyePlusLook = new Vector3f();
@@ -69,16 +60,6 @@ public class Camera implements Transformable {
         this.view.set(other.view);
         this.projection.set(other.projection);
         this.modifier.set(other.modifier);
-    }
-
-    public static ShaderComponents provideShaderComponents() {
-        return shaderComponents;
-    }
-
-    private void updateUniformStore() {
-        uniformStore.updateUniformMatrix4f(VIEW).set(view);
-        uniformStore.updateUniformMatrix4f(PROJECTION).set(projection);
-        uniformStore.updateUniformVector3f(CAMERA_EYE).set(eye);
     }
 
     private void recomputeView() {
@@ -156,6 +137,7 @@ public class Camera implements Transformable {
         recomputeProjection();
     }
 
+    @ShaderUniform(identifier = Identifiers.CAMERA_EYE)
     public Vector3f getEye() {
         return eye;
     }
@@ -168,26 +150,22 @@ public class Camera implements Transformable {
         return up;
     }
 
+    @ShaderUniform(identifier = Identifiers.VIEW)
     public Matrix4f getView() {
         return view;
     }
 
+    @ShaderUniform(identifier = Identifiers.PROJECTION)
     public Matrix4f getProjection() {
         return projection;
     }
 
-    private void exitOnGLError() {
-        int error = glGetError();
-        if (error != GL_NO_ERROR) System.exit(error);
-    }
-
     public void capture(Scene scene) throws RenderingException {
-        this.updateUniformStore();
+        shader.setUniforms(this);
         for (Entity entity : scene.getEntities()) {
             for (Primitive primitive : entity.getPrimitives()) {
-                primitive.updateUniformStore(entity.getModel());
                 primitive.bufferFor(shader);
-                shader.setUniforms();
+                shader.setUniforms(primitive);
                 shader.validate();
                 shader.use();
 

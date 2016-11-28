@@ -262,6 +262,10 @@ public class Game {
         System.exit(errorValue);
     }
 
+    public long getWindow() {
+        return window;
+    }
+
     public void run() {
         initializeGlfw();
         createWindow();

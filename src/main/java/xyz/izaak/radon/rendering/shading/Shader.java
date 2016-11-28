@@ -6,7 +6,12 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import xyz.izaak.radon.math.Points;
+import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +35,6 @@ public class Shader {
     private int stride;
     private int program;
     private List<VertexAttribute> vertexAttributes;
-    private Map<ShaderComponents.TypedShaderVariable, UniformStore> uniformStores;
     private String vertexSource;
     private String fragmentSource;
     private String name;
@@ -42,23 +46,41 @@ public class Shader {
             String name,
             int program,
             List<VertexAttribute> vertexAttributes,
-            Map<ShaderComponents.TypedShaderVariable, UniformStore> uniformStores,
             String vertexSource,
             String fragmentSource) {
         this.program = program;
         this.vertexAttributes = vertexAttributes;
-        this.uniformStores = uniformStores;
         this.stride = vertexAttributes.stream().collect(Collectors.summingInt(VertexAttribute::getLength));
         this.vertexSource = vertexSource;
         this.fragmentSource = fragmentSource;
         this.name = name;
     }
 
-    public void setUniforms() {
-        uniformStores.entrySet().forEach(entry -> {
-            UniformStore uniformStore = entry.getValue();
-            uniformStore.setOn(this, entry.getKey());
-        });
+    public void setUniforms(Object object) throws IllegalArgumentException {
+        ProvidesShaderComponents test = object.getClass().getAnnotation(ProvidesShaderComponents.class);
+        if (test == null) {
+            throw new IllegalArgumentException(
+                    String.format("Class %s does not provide shader components", object.getClass().getSimpleName()));
+        }
+
+        for (Method targetMethod : object.getClass().getMethods()) {
+            ShaderUniform uniform = targetMethod.getAnnotation(ShaderUniform.class);
+            if (uniform == null) {
+                continue;
+            }
+
+            for (Method shaderMethod : Shader.class.getMethods()) {
+                if (shaderMethod.getName().equals("setUniform")) {
+                    if (shaderMethod.getParameterTypes()[1].equals(targetMethod.getReturnType())) {
+                        try {
+                            shaderMethod.invoke(this, uniform.identifier(), targetMethod.invoke(object));
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private int getUniformLocation(String name) {

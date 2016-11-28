@@ -1,12 +1,16 @@
 package xyz.izaak.radon.math;
 
 import org.joml.Matrix4f;
+import xyz.izaak.radon.rendering.shading.Identifiers;
+import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
 
 /**
  * Created by ibaker on 27/08/2016.
  */
+@ProvidesShaderComponents
 public class MatrixTransformable implements Transformable {
-    protected Matrix4f model = new Matrix4f();
+    private Matrix4f model = new Matrix4f();
     private Matrix4f scratch = new Matrix4f();
 
     @Override
@@ -29,6 +33,7 @@ public class MatrixTransformable implements Transformable {
         model.identity();
     }
 
+    @ShaderUniform(identifier = Identifiers.MODEL)
     public Matrix4f getModel() {
         return model;
     }
