@@ -1,17 +1,17 @@
-package xyz.izaak.radon.rendering.primitive;
+package xyz.izaak.radon.primitive;
 
 import org.joml.Vector3f;
 import xyz.izaak.radon.math.Points;
 
 import static org.lwjgl.opengl.GL11.GL_LINE_LOOP;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static xyz.izaak.radon.rendering.shading.Identifiers.VERTEX_COLOR;
-import static xyz.izaak.radon.rendering.shading.Identifiers.VERTEX_POSITION;
+import static xyz.izaak.radon.shading.Identifiers.VERTEX_COLOR;
+import static xyz.izaak.radon.shading.Identifiers.VERTEX_POSITION;
 
 /**
  * Created by ibaker on 27/08/2016.
  */
-public class Quad extends Primitive implements FilledStroked {
+public class QuadPrimitive extends Primitive implements FilledStroked {
     @Override
     public void build() {
         Vector3f point = new Vector3f();

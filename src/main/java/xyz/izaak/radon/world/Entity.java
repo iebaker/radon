@@ -2,10 +2,10 @@ package xyz.izaak.radon.world;
 
 import org.joml.Matrix4f;
 import xyz.izaak.radon.math.MatrixTransformable;
-import xyz.izaak.radon.rendering.primitive.Primitive;
-import xyz.izaak.radon.rendering.shading.Identifiers;
-import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
+import xyz.izaak.radon.primitive.Primitive;
+import xyz.izaak.radon.shading.Identifiers;
+import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
 import java.util.Arrays;
 import java.util.HashSet;

@@ -1,4 +1,4 @@
-package xyz.izaak.radon.rendering.shading;
+package xyz.izaak.radon.shading;
 
 /**
  * Created by ibaker on 27/11/2016.

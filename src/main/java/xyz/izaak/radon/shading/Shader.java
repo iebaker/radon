@@ -1,4 +1,4 @@
-package xyz.izaak.radon.rendering.shading;
+package xyz.izaak.radon.shading;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -6,15 +6,12 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import xyz.izaak.radon.math.Points;
-import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
+import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;

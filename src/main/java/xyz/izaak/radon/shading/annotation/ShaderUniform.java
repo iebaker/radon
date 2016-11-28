@@ -1,4 +1,4 @@
-package xyz.izaak.radon.rendering.shading.annotation;
+package xyz.izaak.radon.shading.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

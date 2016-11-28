@@ -1,9 +1,6 @@
 package xyz.izaak.radon.math;
 
 import org.joml.Matrix4f;
-import xyz.izaak.radon.rendering.shading.Identifiers;
-import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
 
 /**
  * Created by ibaker on 27/08/2016.

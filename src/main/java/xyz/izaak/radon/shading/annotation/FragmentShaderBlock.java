@@ -1,4 +1,4 @@
-package xyz.izaak.radon.rendering.shading.annotation;
+package xyz.izaak.radon.shading.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -7,4 +7,4 @@ import java.lang.annotation.RetentionPolicy;
  * Created by ibaker on 27/11/2016.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface VertexShaderBlock { }
+public @interface FragmentShaderBlock { }

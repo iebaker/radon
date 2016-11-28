@@ -1,17 +1,15 @@
-package xyz.izaak.radon.rendering;
+package xyz.izaak.radon.world;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import xyz.izaak.radon.exception.RenderingException;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
-import xyz.izaak.radon.rendering.primitive.Primitive;
-import xyz.izaak.radon.rendering.shading.Identifiers;
-import xyz.izaak.radon.rendering.shading.Shader;
-import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
-import xyz.izaak.radon.world.Entity;
-import xyz.izaak.radon.world.Scene;
+import xyz.izaak.radon.primitive.Primitive;
+import xyz.izaak.radon.shading.Identifiers;
+import xyz.izaak.radon.shading.Shader;
+import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;

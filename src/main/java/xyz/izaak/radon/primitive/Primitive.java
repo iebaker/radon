@@ -1,4 +1,4 @@
-package xyz.izaak.radon.rendering.primitive;
+package xyz.izaak.radon.primitive;
 
 import org.joml.AxisAngle4f;
 import org.joml.Matrix4f;
@@ -8,13 +8,13 @@ import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.exception.RenderingException;
-import xyz.izaak.radon.rendering.shading.Identifiers;
-import xyz.izaak.radon.rendering.shading.Shader;
-import xyz.izaak.radon.rendering.shading.ShaderVariableType;
-import xyz.izaak.radon.rendering.shading.VertexAttribute;
-import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
-import xyz.izaak.radon.rendering.shading.annotation.VertexShaderInput;
+import xyz.izaak.radon.shading.Identifiers;
+import xyz.izaak.radon.shading.Shader;
+import xyz.izaak.radon.shading.ShaderVariableType;
+import xyz.izaak.radon.shading.VertexAttribute;
+import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.shading.annotation.ShaderUniform;
+import xyz.izaak.radon.shading.annotation.VertexShaderInput;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
