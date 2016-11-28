@@ -2,9 +2,7 @@ package xyz.izaak.radon.rendering.shading;
 
 import xyz.izaak.radon.Resource;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**

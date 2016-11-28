@@ -64,8 +64,8 @@ public class ShaderCompiler {
     public ShaderCompiler with(Class<?> providerClass) throws IllegalArgumentException {
         ProvidesShaderComponents test = providerClass.getAnnotation(ProvidesShaderComponents.class);
         if (test == null) {
-            throw new IllegalArgumentException(
-                    String.format("Class %s does not provide shader components", providerClass.getSimpleName()));
+            String template = "Class %s does not provide shader components";
+            throw new IllegalArgumentException(String.format(template, providerClass.getSimpleName()));
         }
 
         for (VertexShaderInput input : providerClass.getAnnotationsByType(VertexShaderInput.class)) {
@@ -81,9 +81,10 @@ public class ShaderCompiler {
             if (uniform != null) {
                 ShaderVariableType type = shaderVariableTypeByClass.get(method.getReturnType());
                 if (type == null) {
+                    String template = "Field %s has invalid Java type %s for shader uniform";
                     throw new IllegalArgumentException(
-                            String.format("Field %s has invalid Java type %s for shader uniform",
-                                    method.getName(), method.getReturnType().getSimpleName()));
+                            String.format(template, method.getName(), method.getReturnType().getSimpleName())
+                    );
                 }
                 shaderComponents.addUniform(type, uniform.identifier());
             }

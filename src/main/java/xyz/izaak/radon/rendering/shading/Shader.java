@@ -97,8 +97,6 @@ public class Shader {
         int uniformLocation = getUniformLocation(name);
         if (uniformLocation >= 0) {
             setUniform.set(uniformLocation);
-        } else {
-            System.out.println("Location not found for uniform " + name);
         }
     }
 
@@ -107,11 +105,7 @@ public class Shader {
     }
 
     public void setUniform(String name, Matrix4f value) {
-        setUniformIfLocationExists(name, location -> {
-            System.out.println("Setting uniform " + name);
-            System.out.println(value);
-            glUniformMatrix4fv(location, false, Points.floatBufferOf(value));
-        });
+        setUniformIfLocationExists(name, location -> glUniformMatrix4fv(location, false, Points.floatBufferOf(value)));
     }
 
     public void setUniform(String name, Vector2f value) {

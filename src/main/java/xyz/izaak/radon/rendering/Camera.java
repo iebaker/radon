@@ -160,6 +160,8 @@ public class Camera implements Transformable {
         shader.setUniforms(this);
 
         for (Entity entity : scene.getEntities()) {
+            shader.setUniforms(entity);
+
             for (Primitive primitive : entity.getPrimitives()) {
                 primitive.bufferFor(shader);
                 shader.setUniforms(primitive);
