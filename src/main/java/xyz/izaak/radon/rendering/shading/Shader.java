@@ -75,7 +75,9 @@ public class Shader {
             } catch (NoSuchMethodException e) {
                 throw new IllegalArgumentException(
                         String.format("Shader class does not support uniform %s of type %s from class %s",
-                                uniform.identifier(), targetMethod.getReturnType(), object.getClass().getSimpleName()));
+                                uniform.identifier(),
+                                targetMethod.getReturnType().getSimpleName(),
+                                object.getClass().getSimpleName()));
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
@@ -93,35 +95,35 @@ public class Shader {
         }
     }
 
-    void setUniform(String name, Matrix3f value) {
+    public void setUniform(String name, Matrix3f value) {
         setUniformIfLocationExists(name, location -> glUniformMatrix3fv(location, false, Points.floatBufferOf(value)));
     }
 
-    void setUniform(String name, Matrix4f value) {
+    public void setUniform(String name, Matrix4f value) {
         setUniformIfLocationExists(name, location -> glUniformMatrix4fv(location, false, Points.floatBufferOf(value)));
     }
 
-    void setUniform(String name, Vector2f value) {
+    public void setUniform(String name, Vector2f value) {
         setUniformIfLocationExists(name, location -> glUniform2fv(location, Points.floatBufferOf(value)));
     }
 
-    void setUniform(String name, Vector3f value) {
+    public void setUniform(String name, Vector3f value) {
         setUniformIfLocationExists(name, location -> glUniform3fv(location, Points.floatBufferOf(value)));
     }
 
-    void setUniform(String name, Vector4f value) {
+    public void setUniform(String name, Vector4f value) {
         setUniformIfLocationExists(name, location -> glUniform4fv(location, Points.floatBufferOf(value)));
     }
 
-    void setUniform(String name, float value) {
+    public void setUniform(String name, float value) {
         setUniformIfLocationExists(name, location -> glUniform1f(location, value));
     }
 
-    void setUniform(String name, int value) {
+    public void setUniform(String name, int value) {
         setUniformIfLocationExists(name, location -> glUniform1i(location, value));
     }
 
-    void setUniform(String name, boolean value) {
+    public void setUniform(String name, boolean value) {
         setUniformIfLocationExists(name, location -> glUniform1i(location, value ? 1 : 0));
     }
 
