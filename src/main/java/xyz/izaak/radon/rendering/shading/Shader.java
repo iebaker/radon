@@ -69,16 +69,15 @@ public class Shader {
                 continue;
             }
 
-            for (Method shaderMethod : Shader.class.getMethods()) {
-                if (shaderMethod.getName().equals("setUniform")) {
-                    if (shaderMethod.getParameterTypes()[1].equals(targetMethod.getReturnType())) {
-                        try {
-                            shaderMethod.invoke(this, uniform.identifier(), targetMethod.invoke(object));
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+            try {
+                Method setUniform = Shader.class.getMethod("setUniform", String.class, targetMethod.getReturnType());
+                setUniform.invoke(this, uniform.identifier(), targetMethod.invoke(object));
+            } catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException(
+                        String.format("Shader class does not support uniform %s of type %s from class %s",
+                                uniform.identifier(), targetMethod.getReturnType(), object.getClass().getSimpleName()));
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
             }
         }
     }
