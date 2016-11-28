@@ -44,6 +44,7 @@ import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
@@ -232,11 +233,11 @@ public class Game {
         mouseButtonCallback.release();
     }
 
-    private void exitOnGlErrorWithMessage(String message) {
+    public static void exitOnGlErrorWithMessage(String message) {
         exitOnGlErrorWithMessage(message, false);
     }
 
-    private void exitOnGlErrorWithMessage(String message, boolean printSuccessOutput) {
+    public static void exitOnGlErrorWithMessage(String message, boolean printSuccessOutput) {
         int errorValue = glGetError();
         switch(errorValue) {
             case GL_INVALID_ENUM:

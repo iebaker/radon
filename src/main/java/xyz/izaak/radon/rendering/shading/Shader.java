@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
+import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
+import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1f;
 import static org.lwjgl.opengl.GL20.glUniform1i;
@@ -26,6 +30,7 @@ import static org.lwjgl.opengl.GL20.glUniform4fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
+import static org.lwjgl.opengl.GL20.glValidateProgram;
 
 /**
  * Created by ibaker on 17/08/2016.
@@ -92,6 +97,8 @@ public class Shader {
         int uniformLocation = getUniformLocation(name);
         if (uniformLocation >= 0) {
             setUniform.set(uniformLocation);
+        } else {
+            System.out.println("Location not found for uniform " + name);
         }
     }
 
@@ -100,7 +107,11 @@ public class Shader {
     }
 
     public void setUniform(String name, Matrix4f value) {
-        setUniformIfLocationExists(name, location -> glUniformMatrix4fv(location, false, Points.floatBufferOf(value)));
+        setUniformIfLocationExists(name, location -> {
+            System.out.println("Setting uniform " + name);
+            System.out.println(value);
+            glUniformMatrix4fv(location, false, Points.floatBufferOf(value));
+        });
     }
 
     public void setUniform(String name, Vector2f value) {
@@ -156,6 +167,10 @@ public class Shader {
     }
 
     public void validate() {
-
+        glValidateProgram(program);
+        int status = glGetProgrami(program, GL_VALIDATE_STATUS);
+        if (status != GL_TRUE) {
+            throw new RuntimeException(glGetProgramInfoLog(program));
+        }
     }
 }

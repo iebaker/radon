@@ -161,15 +161,16 @@ public class Camera implements Transformable {
     }
 
     public void capture(Scene scene) throws RenderingException {
+        shader.use();
         shader.setUniforms(this);
+
         for (Entity entity : scene.getEntities()) {
             for (Primitive primitive : entity.getPrimitives()) {
                 primitive.bufferFor(shader);
                 shader.setUniforms(primitive);
-                shader.validate();
-                shader.use();
 
                 glBindVertexArray(primitive.getVertexArrayFor(shader));
+                shader.validate();
                 for (Primitive.Interval interval : primitive.getIntervals()) {
                     glDrawArrays(interval.mode, interval.first, interval.count);
                 }

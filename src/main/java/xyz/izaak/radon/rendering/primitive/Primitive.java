@@ -15,6 +15,7 @@ import xyz.izaak.radon.rendering.shading.ShaderVariableType;
 import xyz.izaak.radon.rendering.shading.UniformStore;
 import xyz.izaak.radon.rendering.shading.VertexAttribute;
 import xyz.izaak.radon.rendering.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
 import xyz.izaak.radon.rendering.shading.annotation.VertexShaderInput;
 
 import java.nio.FloatBuffer;
@@ -170,6 +171,11 @@ public abstract class Primitive extends MatrixTransformable {
         all(attributeName, value.x, value.y, value.z, value.w);
     }
 
+    @ShaderUniform(identifier = Identifiers.PRIMITIVE_MODEL)
+    public Matrix4f getModel() {
+        return super.getModel();
+    }
+
     public int getVertexArrayFor(Shader shader) {
         return vertexArrays.get(shader);
     }
@@ -220,11 +226,6 @@ public abstract class Primitive extends MatrixTransformable {
         dataBuffer.put(data);
         dataBuffer.flip();
         return dataBuffer;
-    }
-
-    private void exitOnGLError() {
-        int error = glGetError();
-        if (error != GL_NO_ERROR) System.exit(error);
     }
 
     public void bufferFor(Shader shader) throws RenderingException {

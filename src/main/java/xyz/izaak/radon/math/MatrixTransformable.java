@@ -7,8 +7,7 @@ import xyz.izaak.radon.rendering.shading.annotation.ShaderUniform;
 
 /**
  * Created by ibaker on 27/08/2016.
- */
-@ProvidesShaderComponents
+*/
 public class MatrixTransformable implements Transformable {
     private Matrix4f model = new Matrix4f();
     private Matrix4f scratch = new Matrix4f();
@@ -33,7 +32,6 @@ public class MatrixTransformable implements Transformable {
         model.identity();
     }
 
-    @ShaderUniform(identifier = Identifiers.MODEL)
     public Matrix4f getModel() {
         return model;
     }
