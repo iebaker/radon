@@ -53,7 +53,11 @@ public class JBulletPhysicsSystem implements GameSystem {
 
         dynamicsWorld.setGravity(Points.toJavax(scene.getGravity()));
         scene.getEntities().forEach(entity -> {
-            Transform entityTransform = new Transform(Points.toJavax(entity.getModel()));
+            Transform entityTransform = new Transform();
+
+            float[] matrixData = new float[16];
+            entity.getModel().get(matrixData);
+            entityTransform.setFromOpenGLMatrix(matrixData);
             MotionState entityGroundMotionState = new DefaultMotionState(entityTransform);
             Vector3f entityInertia = new Vector3f(0, 0, 0);
             entity.getCollisionShape().calculateLocalInertia(entity.getMass(), entityInertia);
@@ -80,10 +84,13 @@ public class JBulletPhysicsSystem implements GameSystem {
         rigidBodiesByEntity.entrySet().forEach(entry -> {
             Entity entity = entry.getKey();
             RigidBody rigidBody = entry.getValue();
+
             Transform entityTransform = new Transform();
             rigidBody.getMotionState().getWorldTransform(entityTransform);
-            Matrix4f entityMatrix = new Matrix4f();
-            entityTransform.getMatrix(entityMatrix);
+            float[] matrixData = new float[16];
+            entityTransform.getOpenGLMatrix(matrixData);
+
+            Matrix4f entityMatrix = new Matrix4f(matrixData);
             entity.setTransform(Points.toJoml(entityMatrix));
         });
     }
