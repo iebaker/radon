@@ -10,6 +10,7 @@ import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
+import xyz.izaak.radon.world.arg.CameraConstructionArg;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -36,13 +37,20 @@ public class Camera implements Transformable {
     private float[] parameters = new float[4];
     private Shader shader;
 
-    public Camera(Shader shader) {
+    public Camera(Shader shader, CameraConstructionArg arg) {
         clearTransforms();
         this.shader = shader;
+        this.eye.set(arg.getEye());
+        this.up.set(arg.getUp());
+        this.look.set(arg.getLook());
+        this.set(NEAR_PLANE, arg.getNearPlane());
+        this.set(FAR_PLANE, arg.getFarPlane());
+        this.set(ASPECT_RATIO, arg.getAspectRatio());
+        this.set(FOV, arg.getFov());
     }
 
     public Camera(Camera other) {
-        this(other.shader);
+        this.shader = other.shader;
         for(int i = 0; i < parameters.length; i++) {
             set(i, other.get(i));
         }
@@ -87,6 +95,15 @@ public class Camera implements Transformable {
         eye.set(Points.ORIGIN_3D);
         up.set(Points._Y_);
         look.set(Points.__Z);
+        recomputeView();
+    }
+
+    @Override
+    public void setTransform(Matrix4f transform) {
+        clearTransforms();
+        transform.transformPosition(eye);
+        transform.transformDirection(up);
+        transform.transformDirection(look);
         recomputeView();
     }
 

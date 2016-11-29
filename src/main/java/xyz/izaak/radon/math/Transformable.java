@@ -1,5 +1,6 @@
 package xyz.izaak.radon.math;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 /**
@@ -10,6 +11,7 @@ public interface Transformable {
     void translate(float x, float y, float z);
     void rotate(float amount, float x, float y, float z);
     void clearTransforms();
+    void setTransform(Matrix4f transform);
 
     default void scale(float factor) {
         scale(factor, factor, factor);
