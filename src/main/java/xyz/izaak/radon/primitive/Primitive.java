@@ -8,6 +8,8 @@ import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.exception.RenderingException;
+import xyz.izaak.radon.primitive.geometry.Geometry;
+import xyz.izaak.radon.primitive.material.Material;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.ShaderVariableType;
@@ -34,12 +36,8 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
-/**
- * Created by ibaker on 17/08/2016.
- */
 @ProvidesShaderComponents
-@VertexShaderInput(type = ShaderVariableType.VEC3, identifier = Identifiers.VERTEX_POSITION)
-public abstract class Primitive extends MatrixTransformable {
+public class Primitive extends MatrixTransformable {
 
     private static final int FLOAT_SIZE = 4;
 
@@ -61,10 +59,28 @@ public abstract class Primitive extends MatrixTransformable {
     private List<Interval> intervals = new ArrayList<>();
     private AxisAngle4f axisAngle = new AxisAngle4f();
     private int vertexCount = 0;
+    private Geometry geometry;
+    private Material material;
 
-    public abstract void build();
+    public Primitive(Geometry geometry, Material material) {
+        this.geometry = geometry;
+        this.material = material;
+    }
 
-    protected void addInterval(int mode, int count) {
+    public Geometry getGeometry() {
+        return geometry;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public void build() {
+        geometry.build(this);
+        material.build(this);
+    }
+
+    public void addInterval(int mode, int count) {
         intervals.add(new Interval(mode, vertexCount, count));
         vertexCount += count;
     }
@@ -242,6 +258,9 @@ public abstract class Primitive extends MatrixTransformable {
 
         for (VertexAttribute attribute : shader.getVertexAttributes()) {
             int attributeLocation = glGetAttribLocation(shader.getProgram(), attribute.getName());
+            if (attributeLocation < 0) {
+                continue;
+            }
             glEnableVertexAttribArray(attributeLocation);
             glVertexAttribPointer(
                     attributeLocation,

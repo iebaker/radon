@@ -6,10 +6,12 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import xyz.izaak.radon.shading.annotation.FragmentShaderBlock;
+import xyz.izaak.radon.shading.annotation.FragmentShaderMain;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
 import xyz.izaak.radon.shading.annotation.VertexShaderBlock;
 import xyz.izaak.radon.shading.annotation.VertexShaderInput;
+import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 import xyz.izaak.radon.shading.annotation.VertexShaderOutput;
 
 import java.io.IOException;
@@ -88,22 +90,28 @@ public class ShaderCompiler {
                 shaderComponents.addUniform(type, uniform.identifier());
             }
 
-            VertexShaderBlock vertexShaderBlock = method.getAnnotation(VertexShaderBlock.class);
-            if (vertexShaderBlock != null) {
-                try {
+            try {
+                VertexShaderBlock vertexShaderBlock = method.getAnnotation(VertexShaderBlock.class);
+                if (vertexShaderBlock != null) {
                     shaderComponents.addVertexShaderBlock((String)method.invoke(null));
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
                 }
-            }
 
-            FragmentShaderBlock fragmentShaderBlock = method.getAnnotation(FragmentShaderBlock.class);
-            if (fragmentShaderBlock != null) {
-                try {
+                FragmentShaderBlock fragmentShaderBlock = method.getAnnotation(FragmentShaderBlock.class);
+                if (fragmentShaderBlock != null) {
                     shaderComponents.addFragmentShaderBlock((String)method.invoke(null));
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
                 }
+
+                VertexShaderMain vertexShaderMain = method.getAnnotation(VertexShaderMain.class);
+                if (vertexShaderMain != null) {
+                    shaderComponents.addToVertexMain((String)method.invoke(null));
+                }
+
+                FragmentShaderMain fragmentShaderMain = method.getAnnotation(FragmentShaderMain.class);
+                if (fragmentShaderMain != null) {
+                    shaderComponents.addToFragmentMain((String)method.invoke(null));
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
             }
         }
         return this;
@@ -117,38 +125,64 @@ public class ShaderCompiler {
     private String getVertexShaderComponents() {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("#version 400\n");
+
         shaderComponents.getVertexIns().forEach(variable ->
             stringBuilder.append(String.format("in %s %s;%n",
                     variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
+
         shaderComponents.getUniforms().forEach(variable ->
             stringBuilder.append(String.format("uniform %s %s;%n",
                     variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
+
         shaderComponents.getVertexOuts().forEach(variable ->
             stringBuilder.append(String.format("out %s %s;%n",
                     variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
+
         shaderComponents.getVertexShaderBlocks().forEach(stringBuilder::append);
         stringBuilder.append("\n");
+
+        List<String> vertexShaderMain = shaderComponents.getVertexShaderMain();
+        if (!vertexShaderMain.isEmpty()) {
+            stringBuilder.append("void main() {\n");
+            vertexShaderMain.forEach(line -> stringBuilder.append(String.format("\t%s%n", line.trim())));
+            stringBuilder.append("}\n");
+        }
+        stringBuilder.append("\n");
+
         return stringBuilder.toString();
     }
 
     private String getFragmentShaderComponents() {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("#version 400\n");
+
         shaderComponents.getVertexOuts().forEach(variable ->
             stringBuilder.append(String.format("in %s %s;%n",
                     variable.getType().getTypeString(), variable.getName())));
         stringBuilder.append("\n");
+
         shaderComponents.getUniforms().forEach(variable ->
             stringBuilder.append(String.format("uniform %s %s;%n",
                     variable.getType().getTypeString(), variable.getName())));
+
         stringBuilder.append("\n");
         stringBuilder.append("out vec4 fragColor;\n");
         stringBuilder.append("\n");
+
         shaderComponents.getFragmentShaderBlocks().forEach(stringBuilder::append);
         stringBuilder.append("\n");
+
+        List<String> fragmentShaderMain = shaderComponents.getFragmentShaderMain();
+        if (!fragmentShaderMain.isEmpty()) {
+            stringBuilder.append("void main() {\n");
+            fragmentShaderMain.forEach(line -> stringBuilder.append(String.format("\t%s%n", line.trim())));
+            stringBuilder.append("}\n");
+        }
+        stringBuilder.append("\n");
+
         return stringBuilder.toString();
     }
 

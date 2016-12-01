@@ -252,4 +252,11 @@ public class Points {
                 matrix.m20(), matrix.m21(), matrix.m22(), matrix.m23(),
                 matrix.m30(), matrix.m31(), matrix.m32(), matrix.m33());
     }
+
+    public static void setToCartesianCoordinates(Vector3f target, float azimuthAngle, float zenithAngle) {
+        float x = (float) (Math.sin(zenithAngle) * Math.cos(azimuthAngle));
+        float y = (float) (Math.sin(zenithAngle) * Math.sin(azimuthAngle));
+        float z = (float) (Math.cos(zenithAngle));
+        target.set(x, y, z);
+    }
 }

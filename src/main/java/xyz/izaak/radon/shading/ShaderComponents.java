@@ -3,6 +3,8 @@ package xyz.izaak.radon.shading;
 import xyz.izaak.radon.Resource;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,8 +15,10 @@ public class ShaderComponents {
     private Set<TypedShaderVariable> vertexIns = new HashSet<>();
     private Set<TypedShaderVariable> uniforms = new HashSet<>();
     private Set<TypedShaderVariable> vertexOuts = new HashSet<>();
-    private Set<String> vertexShaderBlocks = new HashSet<>();
-    private Set<String> fragmentShaderBlocks = new HashSet<>();
+    private List<String> vertexShaderBlocks = new LinkedList<>();
+    private List<String> fragmentShaderBlocks = new LinkedList<>();
+    private List<String> vertexShaderMain = new LinkedList<>();
+    private List<String> fragmentShaderMain = new LinkedList<>();
 
     public class TypedShaderVariable {
         private ShaderVariableType type;
@@ -48,19 +52,19 @@ public class ShaderComponents {
     }
 
     public void addVertexShaderBlock(String vertexShaderBlock) {
-        if (vertexShaderBlock.endsWith(".glsl")) {
-            vertexShaderBlocks.add(Resource.stringFromFile(vertexShaderBlock));
-        } else {
-            vertexShaderBlocks.add(vertexShaderBlock);
-        }
+        vertexShaderBlocks.add(vertexShaderBlock);
     }
 
     public void addFragmentShaderBlock(String fragmentShaderBlock) {
-        if (fragmentShaderBlock.endsWith(".glsl")) {
-            fragmentShaderBlocks.add(Resource.stringFromFile(fragmentShaderBlock));
-        } else {
-            fragmentShaderBlocks.add(fragmentShaderBlock);
-        }
+        fragmentShaderBlocks.add(fragmentShaderBlock);
+    }
+
+    public void addToVertexMain(String vertexMainBlock) {
+        vertexShaderMain.add(vertexMainBlock);
+    }
+
+    public void addToFragmentMain(String fragmentMainBlock) {
+        fragmentShaderMain.add(fragmentMainBlock);
     }
 
     public Set<TypedShaderVariable> getVertexIns() {
@@ -75,12 +79,20 @@ public class ShaderComponents {
         return vertexOuts;
     }
 
-    public Set<String> getVertexShaderBlocks() {
+    public List<String> getVertexShaderBlocks() {
         return vertexShaderBlocks;
     }
 
-    public Set<String> getFragmentShaderBlocks() {
+    public List<String> getFragmentShaderBlocks() {
         return fragmentShaderBlocks;
+    }
+
+    public List<String> getVertexShaderMain() {
+        return vertexShaderMain;
+    }
+
+    public List<String> getFragmentShaderMain() {
+        return fragmentShaderMain;
     }
 
     public void joinWith(ShaderComponents shaderComponents) {
