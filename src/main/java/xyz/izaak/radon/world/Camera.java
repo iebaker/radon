@@ -6,10 +6,12 @@ import xyz.izaak.radon.exception.RenderingException;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
 import xyz.izaak.radon.primitive.Primitive;
+import xyz.izaak.radon.primitive.geometry.Geometry;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
+import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 import xyz.izaak.radon.world.arg.CameraConstructionArg;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
@@ -18,7 +20,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 /**
  * Created by ibaker on 17/08/2016.
  */
-@ProvidesShaderComponents
+@ProvidesShaderComponents(requires = {Geometry.class, Primitive.class, Entity.class})
 public class Camera implements Transformable {
 
     public static final int NEAR_PLANE = 0;
@@ -170,6 +172,12 @@ public class Camera implements Transformable {
         return projection;
     }
 
+    @VertexShaderMain
+    public static String setGlPosition() {
+        return "gl_Position = rn_Projection * rn_View * rn_EntityModel" +
+                " * rn_PrimitiveModel * vec4(rn_VertexPosition, 1);\n";
+    }
+
     public void capture(Scene scene) throws RenderingException {
         shader.use();
         shader.setUniforms(this);
@@ -180,6 +188,8 @@ public class Camera implements Transformable {
             for (Primitive primitive : entity.getPrimitives()) {
                 primitive.bufferFor(shader);
                 shader.setUniforms(primitive);
+                shader.setUniforms(primitive.getGeometry());
+                shader.setUniforms(primitive.getMaterial());
 
                 glBindVertexArray(primitive.getVertexArrayFor(shader));
                 shader.validate();

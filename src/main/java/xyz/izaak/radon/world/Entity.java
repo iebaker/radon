@@ -54,7 +54,7 @@ public class Entity extends MatrixTransformable {
         this.primitives.addAll(Arrays.asList(primitives));
     }
 
-    public void setCollider(CollisionShape collisionShape) {
+    public void setCollisionShape(CollisionShape collisionShape) {
         this.collisionShape = collisionShape;
     }
 
