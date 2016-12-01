@@ -22,7 +22,6 @@ import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by ibaker on 28/11/2016.
@@ -80,6 +79,14 @@ public class JBulletPhysicsSystem implements GameSystem {
 
     @Override
     public void update(float seconds) {
+        rigidBodiesByEntity.entrySet().forEach(entry -> {
+            Entity entity = entry.getKey();
+            RigidBody rigidBody = entry.getValue();
+
+            rigidBody.applyCentralForce(Points.toJavax(entity.getForce()));
+            entity.clearForce();
+        });
+
         dynamicsWorld.stepSimulation(seconds);
         rigidBodiesByEntity.entrySet().forEach(entry -> {
             Entity entity = entry.getKey();

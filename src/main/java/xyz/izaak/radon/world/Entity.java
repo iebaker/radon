@@ -1,8 +1,11 @@
 package xyz.izaak.radon.world;
 
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.dynamics.RigidBody;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import xyz.izaak.radon.math.MatrixTransformable;
+import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.primitive.Primitive;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
@@ -20,6 +23,7 @@ import java.util.Set;
 public class Entity extends MatrixTransformable {
     private Set<Primitive> primitives = new HashSet<>();
     private CollisionShape collisionShape;
+    private Vector3f force = new Vector3f();
     private float mass;
     private float restitution;
     private float friction;
@@ -46,6 +50,18 @@ public class Entity extends MatrixTransformable {
         return primitives;
     }
 
+    public void applyForce(Vector3f force) {
+        this.force.add(force);
+    }
+
+    public void clearForce() {
+        this.force.set(Points.ORIGIN_3D);
+    }
+
+    public Vector3f getForce() {
+        return force;
+    }
+
     public CollisionShape getCollisionShape() {
         return collisionShape;
     }
@@ -54,7 +70,7 @@ public class Entity extends MatrixTransformable {
         this.primitives.addAll(Arrays.asList(primitives));
     }
 
-    public void setCollider(CollisionShape collisionShape) {
+    public void setCollisionShape(CollisionShape collisionShape) {
         this.collisionShape = collisionShape;
     }
 
