@@ -12,6 +12,7 @@ import xyz.izaak.radon.shading.annotation.ShaderUniform;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
@@ -40,6 +41,7 @@ public class Shader {
     private String vertexSource;
     private String fragmentSource;
     private String name;
+    private Set<Class<?>> providerClasses;
 
     @FunctionalInterface
     interface SetUniform { void set(int uniformLocation); }
@@ -49,13 +51,15 @@ public class Shader {
             int program,
             List<VertexAttribute> vertexAttributes,
             String vertexSource,
-            String fragmentSource) {
+            String fragmentSource,
+            Set<Class<?>> providerClasses) {
         this.program = program;
         this.vertexAttributes = vertexAttributes;
         this.stride = vertexAttributes.stream().collect(Collectors.summingInt(VertexAttribute::getLength));
         this.vertexSource = vertexSource;
         this.fragmentSource = fragmentSource;
         this.name = name;
+        this.providerClasses = providerClasses;
     }
 
     public void setUniforms(Object object) throws IllegalArgumentException {
@@ -131,6 +135,10 @@ public class Shader {
 
     public List<VertexAttribute> getVertexAttributes() {
         return vertexAttributes;
+    }
+
+    public boolean supports(Class<?> providerClass) {
+        return providerClasses.contains(providerClass);
     }
 
     public void use() {

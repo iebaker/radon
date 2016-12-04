@@ -2,17 +2,21 @@ package xyz.izaak.radon.world;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import xyz.izaak.radon.exception.RenderingException;
+import xyz.izaak.radon.exception.RadonException;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
 import xyz.izaak.radon.primitive.Primitive;
 import xyz.izaak.radon.primitive.geometry.Geometry;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
+import xyz.izaak.radon.shading.ShaderCompiler;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
 import xyz.izaak.radon.shading.annotation.VertexShaderMain;
-import xyz.izaak.radon.world.arg.CameraConstructionArg;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -28,6 +32,8 @@ public class Camera implements Transformable {
     public static final int ASPECT_RATIO = 2;
     public static final int FOV = 3;
 
+    private static Set<Shader> shaders = new HashSet<>();
+
     private Vector3f eye = new Vector3f();
     private Vector3f eyePlusLook = new Vector3f();
     private Vector3f look = new Vector3f();
@@ -39,20 +45,91 @@ public class Camera implements Transformable {
     private float[] parameters = new float[4];
     private Shader shader;
 
-    public Camera(Shader shader, CameraConstructionArg arg) {
-        clearTransforms();
-        this.shader = shader;
-        this.eye.set(arg.getEye());
-        this.up.set(arg.getUp());
-        this.look.set(arg.getLook());
-        this.set(NEAR_PLANE, arg.getNearPlane());
-        this.set(FAR_PLANE, arg.getFarPlane());
-        this.set(ASPECT_RATIO, arg.getAspectRatio());
-        this.set(FOV, arg.getFov());
+    public static void registerShader(Shader shader) {
+        shaders.add(shader);
+    }
+
+    public static void compileAndRegisterShader(ShaderCompiler shaderCompiler) {
+        try {
+            Shader shader = shaderCompiler.compile("" + System.nanoTime());
+            shaders.add(shader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private float nearPlane = 0.1f;
+        private float farPlane = 1000.0f;
+        private float aspectRatio = 1.3f;
+        private float fov = Points.piOver(2);
+        private Vector3f eye = Points.copyOf(Points.__z);
+        private Vector3f look = Points.copyOf(Points.__Z);
+        private Vector3f up = Points.copyOf(Points._Y_);
+
+        public Builder nearPlane(float nearPlane) {
+            this.nearPlane = nearPlane;
+            return this;
+        }
+
+        public Builder farPlane(float farPlane) {
+            this.farPlane = farPlane;
+            return this;
+        }
+
+        public Builder aspectRatio(float aspectRatio) {
+            this.aspectRatio = aspectRatio;
+            return this;
+        }
+
+        public Builder fov(float fov) {
+            this.fov = fov;
+            return this;
+        }
+
+        public Builder eye(Vector3f eye) {
+            this.eye.set(eye);
+            return this;
+        }
+
+        public Builder look(Vector3f look) {
+            this.look.set(look);
+            return this;
+        }
+
+        public Builder up(Vector3f up) {
+            this.up.set(up);
+            return this;
+        }
+
+        public Camera build() {
+            return new Camera(nearPlane, farPlane, aspectRatio, fov, eye, look, up);
+        }
+    }
+
+    public Camera(
+            float nearPlane,
+            float farPlane,
+            float aspectRatio,
+            float fov,
+            Vector3f eye,
+            Vector3f look,
+            Vector3f up) {
+        this.eye.set(eye);
+        this.up.set(up);
+        this.look.set(look);
+        recomputeView();
+        this.set(NEAR_PLANE, nearPlane);
+        this.set(FAR_PLANE, farPlane);
+        this.set(ASPECT_RATIO, aspectRatio);
+        this.set(FOV, fov);
     }
 
     public Camera(Camera other) {
-        this.shader = other.shader;
         for(int i = 0; i < parameters.length; i++) {
             set(i, other.get(i));
         }
@@ -178,18 +255,33 @@ public class Camera implements Transformable {
                 " * rn_PrimitiveModel * vec4(rn_VertexPosition, 1);\n";
     }
 
-    public void capture(Scene scene) throws RenderingException {
-        shader.use();
-        shader.setUniforms(this);
+    public Shader selectShaderFor(Primitive primitive) throws RadonException {
+        Shader selected = null;
+        for (Shader shader : shaders) {
+            if (shader.supports(primitive.getMaterial().getClass())) {
+                selected = shader;
+                break;
+            }
+        }
+        if (selected != null) {
+            return selected;
+        }
+        throw new RadonException(
+                String.format("Could not find shader which supports primitive %s with material %s",
+                        primitive.toString(), primitive.getMaterial().toString()));
+    }
 
+    public void capture(Scene scene) throws RadonException {
         for (Entity entity : scene.getEntities()) {
-            shader.setUniforms(entity);
-
             for (Primitive primitive : entity.getPrimitives()) {
-                primitive.bufferFor(shader);
+                Shader shader = selectShaderFor(primitive);
+                shader.use();
+                shader.setUniforms(this);
+                shader.setUniforms(entity);
                 shader.setUniforms(primitive);
                 shader.setUniforms(primitive.getGeometry());
                 shader.setUniforms(primitive.getMaterial());
+                primitive.bufferFor(shader);
 
                 glBindVertexArray(primitive.getVertexArrayFor(shader));
                 shader.validate();
