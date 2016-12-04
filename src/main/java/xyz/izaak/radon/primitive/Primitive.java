@@ -7,16 +7,14 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import xyz.izaak.radon.math.MatrixTransformable;
-import xyz.izaak.radon.exception.RenderingException;
+import xyz.izaak.radon.exception.RadonException;
 import xyz.izaak.radon.primitive.geometry.Geometry;
 import xyz.izaak.radon.primitive.material.Material;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
-import xyz.izaak.radon.shading.ShaderVariableType;
 import xyz.izaak.radon.shading.VertexAttribute;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
-import xyz.izaak.radon.shading.annotation.VertexShaderInput;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -192,7 +190,7 @@ public class Primitive extends MatrixTransformable {
         return vertexArrays.get(shader);
     }
 
-    private FloatBuffer getVertexDataFor(Shader shader) throws RenderingException {
+    private FloatBuffer getVertexDataFor(Shader shader) throws RadonException {
         int bufferSize = vertexCount * shader.getStride();
         float data[] = new float[bufferSize];
 
@@ -217,12 +215,12 @@ public class Primitive extends MatrixTransformable {
                 } else if (vertexData.containsKey(attributeName)) {
                     values = vertexData.get(attributeName);
                 } else {
-                    throw new RenderingException(String.format("%s does not have data for attribute '%s' required by shader '%s",
+                    throw new RadonException(String.format("%s does not have data for attribute '%s' required by shader '%s",
                             getClass().getName(), attributeName, shader.getName()));
                 }
 
                 if (values.size() < attributeLength) {
-                    throw new RenderingException(String.format("%s does not have enough data for attribute '%s' required by shader '%s'",
+                    throw new RadonException(String.format("%s does not have enough data for attribute '%s' required by shader '%s'",
                             getClass().getName(), attributeName, shader.getName()));
                 }
 
@@ -240,7 +238,7 @@ public class Primitive extends MatrixTransformable {
         return dataBuffer;
     }
 
-    public void bufferFor(Shader shader) throws RenderingException {
+    public void bufferFor(Shader shader) throws RadonException {
         if (vertexArrays.containsKey(shader)) {
             return;
         }

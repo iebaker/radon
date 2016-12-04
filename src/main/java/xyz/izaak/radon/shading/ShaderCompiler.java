@@ -5,6 +5,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import xyz.izaak.radon.primitive.Primitive;
+import xyz.izaak.radon.primitive.geometry.Geometry;
 import xyz.izaak.radon.shading.annotation.FragmentShaderBlock;
 import xyz.izaak.radon.shading.annotation.FragmentShaderMain;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
@@ -13,14 +15,18 @@ import xyz.izaak.radon.shading.annotation.VertexShaderBlock;
 import xyz.izaak.radon.shading.annotation.VertexShaderInput;
 import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 import xyz.izaak.radon.shading.annotation.VertexShaderOutput;
+import xyz.izaak.radon.world.Camera;
+import xyz.izaak.radon.world.Entity;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
@@ -45,8 +51,12 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
  */
 public class ShaderCompiler {
 
-    public static ShaderCompiler instance() {
+    public static ShaderCompiler blankInstance() {
         return new ShaderCompiler();
+    }
+
+    public static ShaderCompiler standardInstance() {
+        return blankInstance().with(Camera.class).with(Entity.class).with(Primitive.class).with(Geometry.class);
     }
 
     private ShaderCompiler() {
@@ -57,9 +67,11 @@ public class ShaderCompiler {
         shaderVariableTypeByClass.put(Matrix4f.class, ShaderVariableType.MAT4);
         shaderVariableTypeByClass.put(Boolean.TYPE, ShaderVariableType.BOOL);
         shaderVariableTypeByClass.put(Integer.TYPE, ShaderVariableType.INT);
+        shaderVariableTypeByClass.put(Float.TYPE, ShaderVariableType.FLOAT);
     }
 
     private ShaderComponents shaderComponents = new ShaderComponents();
+    private Set<Class<?>> providerClasses = new HashSet<>();
     private Map<Class<?>, ShaderVariableType> shaderVariableTypeByClass = new HashMap<>();
 
     public ShaderCompiler with(Class<?> providerClass) throws IllegalArgumentException {
@@ -68,6 +80,8 @@ public class ShaderCompiler {
             String template = "Class %s does not provide shader components";
             throw new IllegalArgumentException(String.format(template, providerClass.getSimpleName()));
         }
+
+        providerClasses.add(providerClass);
 
         for (VertexShaderInput input : providerClass.getAnnotationsByType(VertexShaderInput.class)) {
             shaderComponents.addVertexIn(input.type(), input.identifier());
@@ -186,6 +200,17 @@ public class ShaderCompiler {
         return stringBuilder.toString();
     }
 
+    public void printSource() {
+        String vertexShaderSource = getVertexShaderComponents();
+        String fragmentShaderSource = getFragmentShaderComponents();
+        System.out.println("VERTEX SHADER");
+        System.out.println("-------------");
+        System.out.print(vertexShaderSource);
+        System.out.println("FRAGMENT SHADER");
+        System.out.println("---------------");
+        System.out.print(fragmentShaderSource);
+    }
+
     public Shader compile(String name) throws IOException, RuntimeException {
         int status;
 
@@ -250,6 +275,7 @@ public class ShaderCompiler {
                 shaderProgram,
                 vertexAttributes,
                 vertexShaderSource,
-                fragmentShaderSource);
+                fragmentShaderSource,
+                providerClasses);
     }
 }
