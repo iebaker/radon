@@ -25,8 +25,8 @@ public class FirstPersonCameraSystem implements GameSystem {
 
     @Override
     public void onMouseMove(Vector2f delta) {
-        camera.rotate(delta.x / 100, Points.__z);
-        camera.rotate(delta.y / 100, Points.copyOf(camera.getUp()).cross(camera.getLook()));
+        camera.rotate(delta.x / 150, Points.__z);
+        camera.rotate(delta.y / 150, Points.copyOf(camera.getUp()).cross(camera.getLook()));
     }
 
     @Override

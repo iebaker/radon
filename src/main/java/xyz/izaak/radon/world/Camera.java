@@ -277,6 +277,7 @@ public class Camera implements Transformable {
                 Shader shader = selectShaderFor(primitive);
                 shader.use();
                 shader.setUniforms(this);
+                shader.setUniforms(scene);
                 shader.setUniforms(entity);
                 shader.setUniforms(primitive);
                 shader.setUniforms(primitive.getGeometry());

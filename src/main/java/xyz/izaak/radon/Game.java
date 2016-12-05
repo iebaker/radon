@@ -1,19 +1,18 @@
 package xyz.izaak.radon;
 
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL;
 import xyz.izaak.radon.gamesystem.GameSystem;
 
 import org.joml.Vector2f;
 
-import org.lwjgl.glfw.GLFWvidmode;
+import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.opengl.GLContext;
 import org.lwjgl.system.MemoryUtil;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,19 +38,15 @@ import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-
-import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -108,7 +103,7 @@ public class Game {
     }
 
     private void initializeGlfw() {
-        if (glfwInit() != GL_TRUE) {
+        if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
         previousTime = (float) glfwGetTime();
@@ -128,16 +123,15 @@ public class Game {
             throw new RuntimeException("Failed to create GLFW window");
         }
 
-        ByteBuffer videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowPos(window, (GLFWvidmode.width(videoMode) - width) / 2, (GLFWvidmode.height(videoMode) - height) / 2);
+        GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowPos(window, (videoMode.width() - width) / 2, (videoMode.height() - height) / 2);
         glfwMakeContextCurrent(window);
         glfwSwapInterval(1);
         glfwShowWindow(window);
-        GLContext.createFromCurrent();
     }
 
     private void registerCallbacks() {
-        glfwSetErrorCallback(errorCallback = errorCallbackPrint(System.err));
+        GLFWErrorCallback.createPrint(System.err).set();
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
             @Override
@@ -193,6 +187,8 @@ public class Game {
     }
 
     private void initializeGl() {
+        GL.createCapabilities();
+
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
         glClearStencil(1);
         glEnable(GL_DEPTH_TEST);
@@ -210,7 +206,7 @@ public class Game {
 
     private void loop() {
         float rightNow, elapsedTime;
-        while (glfwWindowShouldClose(window) == GL_FALSE) {
+        while (!glfwWindowShouldClose(window)) {
             rightNow = (float) glfwGetTime();
             elapsedTime = rightNow - previousTime;
             previousTime = rightNow;
@@ -220,17 +216,10 @@ public class Game {
             }
 
             glfwSwapBuffers(window);
-            glfwPollEvents();
+            if (!glfwWindowShouldClose(window)) glfwPollEvents();
 
             exitOnGlErrorWithMessage("Error!");
         }
-    }
-
-    private void releaseCallbacks() {
-        errorCallback.release();
-        keyCallback.release();
-        cursorPosCallback.release();
-        mouseButtonCallback.release();
     }
 
     public static void exitOnGlErrorWithMessage(String message) {
@@ -274,7 +263,6 @@ public class Game {
         initializeGl();
         initializeGameSystems();
         loop();
-        releaseCallbacks();
         System.out.printf("Game %s has run!%n", name);
     }
 }

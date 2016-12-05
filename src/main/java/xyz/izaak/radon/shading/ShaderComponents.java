@@ -23,10 +23,16 @@ public class ShaderComponents {
     public class TypedShaderVariable {
         private ShaderVariableType type;
         private String name;
+        private int length;
 
-        public TypedShaderVariable(ShaderVariableType type, String name) {
+        public TypedShaderVariable(ShaderVariableType type, String name, int length) {
             this.type = type;
             this.name = name;
+            this.length = length;
+        }
+
+        public TypedShaderVariable(ShaderVariableType type, String name) {
+            this(type, name, 1);
         }
 
         public ShaderVariableType getType() {
@@ -36,10 +42,19 @@ public class ShaderComponents {
         public String getName() {
             return name;
         }
+
+        public int getLength() {
+            return length;
+        }
     }
 
     public void addVertexIn(ShaderVariableType type, String name) {
         vertexIns.add(new TypedShaderVariable(type, name));
+    }
+
+    public void addUniform(ShaderVariableType type, String name, int length) {
+        TypedShaderVariable variable = new TypedShaderVariable(type, name, length);
+        uniforms.add(variable);
     }
 
     public void addUniform(ShaderVariableType type, String name) {

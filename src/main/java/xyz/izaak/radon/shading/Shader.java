@@ -11,6 +11,7 @@ import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -99,6 +100,19 @@ public class Shader {
         if (uniformLocation >= 0) {
             setUniform.set(uniformLocation);
         }
+    }
+
+    public void setUniform(String name, List<Vector3f> values) {
+        setUniformIfLocationExists(name, location -> {
+            float[] valueArray = new float[values.size() * 3];
+            int index = 0;
+            for (Vector3f value : values) {
+                valueArray[index++] = value.x;
+                valueArray[index++] = value.y;
+                valueArray[index++] = value.z;
+            }
+            glUniform3fv(location, valueArray);
+        });
     }
 
     public void setUniform(String name, Matrix3f value) {

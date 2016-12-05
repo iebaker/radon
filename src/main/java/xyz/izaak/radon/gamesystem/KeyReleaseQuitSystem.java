@@ -19,7 +19,7 @@ public class KeyReleaseQuitSystem implements GameSystem {
     @Override
     public void onKeyUp(int key) {
         if (key == trigger) {
-            GLFW.glfwSetWindowShouldClose(window, GL_TRUE);
+            GLFW.glfwSetWindowShouldClose(window, true);
         }
     }
 }
