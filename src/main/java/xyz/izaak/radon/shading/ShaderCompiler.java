@@ -17,11 +17,14 @@ import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 import xyz.izaak.radon.shading.annotation.VertexShaderOutput;
 import xyz.izaak.radon.world.Camera;
 import xyz.izaak.radon.world.Entity;
+import xyz.izaak.radon.world.Scene;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +59,12 @@ public class ShaderCompiler {
     }
 
     public static ShaderCompiler standardInstance() {
-        return blankInstance().with(Camera.class).with(Entity.class).with(Primitive.class).with(Geometry.class);
+        return blankInstance()
+                .with(Camera.class)
+                .with(Entity.class)
+                .with(Primitive.class)
+                .with(Geometry.class)
+                .with(Scene.class);
     }
 
     private ShaderCompiler() {
@@ -94,14 +102,33 @@ public class ShaderCompiler {
         for (Method method : providerClass.getMethods()) {
             ShaderUniform uniform = method.getAnnotation(ShaderUniform.class);
             if (uniform != null) {
-                ShaderVariableType type = shaderVariableTypeByClass.get(method.getReturnType());
-                if (type == null) {
-                    String template = "Field %s has invalid Java type %s for shader uniform";
-                    throw new IllegalArgumentException(
-                            String.format(template, method.getName(), method.getReturnType().getSimpleName())
-                    );
+                Class<?> javaType = method.getReturnType();
+                if (uniform.length() > 1) {
+                    if (!Collection.class.isAssignableFrom(javaType)) {
+                        String template = "Uniform %s has declared length %d" +
+                                "but provider method %s has invalid Java type %s";
+                        throw new IllegalArgumentException(String.format(
+                                template,
+                                uniform.identifier(),
+                                uniform.length(),
+                                method.getName(),
+                                method.getReturnType().getSimpleName()));
+                    } else {
+                        ParameterizedType collectionType = (ParameterizedType) method.getGenericReturnType();
+                        javaType = (Class<?>) collectionType.getActualTypeArguments()[0];
+                    }
                 }
-                shaderComponents.addUniform(type, uniform.identifier());
+                ShaderVariableType type = shaderVariableTypeByClass.get(javaType);
+                if (type == null) {
+                    String template = "Method %s has invalid Java type %s for shader uniform %s";
+                    throw new IllegalArgumentException(
+                            String.format(
+                                    template,
+                                    method.getName(),
+                                    javaType,
+                                    uniform.identifier()));
+                }
+                shaderComponents.addUniform(type, uniform.identifier(), uniform.length());
             }
 
             try {
@@ -146,8 +173,10 @@ public class ShaderCompiler {
         stringBuilder.append("\n");
 
         shaderComponents.getUniforms().forEach(variable ->
-            stringBuilder.append(String.format("uniform %s %s;%n",
-                    variable.getType().getTypeString(), variable.getName())));
+            stringBuilder.append(String.format("uniform %s %s%s;%n",
+                    variable.getType().getTypeString(),
+                    variable.getName(),
+                    variable.getLength() > 1 ? "[" + variable.getLength() + "]" : "")));
         stringBuilder.append("\n");
 
         shaderComponents.getVertexOuts().forEach(variable ->
@@ -179,8 +208,10 @@ public class ShaderCompiler {
         stringBuilder.append("\n");
 
         shaderComponents.getUniforms().forEach(variable ->
-            stringBuilder.append(String.format("uniform %s %s;%n",
-                    variable.getType().getTypeString(), variable.getName())));
+            stringBuilder.append(String.format("uniform %s %s%s;%n",
+                    variable.getType().getTypeString(),
+                    variable.getName(),
+                    variable.getLength() > 1 ? "[" + variable.getLength() + "]" : "")));
 
         stringBuilder.append("\n");
         stringBuilder.append("out vec4 fragColor;\n");

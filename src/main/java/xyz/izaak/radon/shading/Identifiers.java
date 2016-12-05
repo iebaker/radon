@@ -22,4 +22,8 @@ public class Identifiers {
     public static final String DIFFUSE_COEFFICIENT = "rn_DiffuseCoefficient";
     public static final String SPECULAR_COEFFICIENT = "rn_SpecularCoefficient";
     public static final String SPECULAR_EXPONENT = "rn_SpecularExponent";
+    public static final String DIRECTIONAL_LIGHT_DIRECTIONS = "rn_DirectionalLightDirections";
+    public static final String DIRECTIONAL_LIGHT_INTENSITIES = "rn_DirectionalLightIntensities";
+    public static final String POINT_LIGHT_POSITIONS = "rn_PositionalLightPositions";
+    public static final String POINT_LIGHT_INTENSITIES = "rn_PositionalLightIntensities";
 }

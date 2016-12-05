@@ -1,15 +1,20 @@
 package xyz.izaak.radon.world;
 
 import org.joml.Vector3f;
+import xyz.izaak.radon.shading.Identifiers;
+import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
+import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * Created by ibaker on 22/08/2016.
- */
+@ProvidesShaderComponents
 public class Scene {
     private Set<Entity> entities = new HashSet<>();
+    private Set<DirectionalLight> directionalLights = new HashSet<>();
+    private Set<PointLight> pointLights = new HashSet<>();
     private Vector3f gravity;
 
     public static Builder builder() {
@@ -37,11 +42,47 @@ public class Scene {
         entities.add(entity);
     }
 
+    public void addPointLight(PointLight pointLight) {
+        pointLights.add(pointLight);
+    }
+
+    public void addDirectionalLight(DirectionalLight directionalLight) {
+        directionalLights.add(directionalLight);
+    }
+
     public Vector3f getGravity() {
         return gravity;
     }
 
     public Set<Entity> getEntities() {
         return entities;
+    }
+
+    public Set<PointLight> getPointLights() {
+        return pointLights;
+    }
+
+    public Set<DirectionalLight> getDirectionalLights() {
+        return directionalLights;
+    }
+
+    @ShaderUniform(length = 256, identifier = Identifiers.DIRECTIONAL_LIGHT_DIRECTIONS)
+    public List<Vector3f> getDirectionalLightDirections() {
+        return directionalLights.stream().map(DirectionalLight::getDirection).collect(Collectors.toList());
+    }
+
+    @ShaderUniform(length = 256, identifier = Identifiers.DIRECTIONAL_LIGHT_INTENSITIES)
+    public List<Vector3f> getDirectionalLightIntensities() {
+        return directionalLights.stream().map(DirectionalLight::getIntensity).collect(Collectors.toList());
+    }
+
+    @ShaderUniform(length = 256, identifier = Identifiers.POINT_LIGHT_POSITIONS)
+    public List<Vector3f> getPointLightPositions() {
+        return pointLights.stream().map(PointLight::getPosition).collect(Collectors.toList());
+    }
+
+    @ShaderUniform(length = 256, identifier = Identifiers.POINT_LIGHT_INTENSITIES)
+    public List<Vector3f> getPointLightIntensities() {
+        return pointLights.stream().map(PointLight::getIntensity).collect(Collectors.toList());
     }
 }
