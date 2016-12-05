@@ -14,8 +14,9 @@ import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 import xyz.izaak.radon.shading.annotation.VertexShaderOutput;
 import xyz.izaak.radon.world.Camera;
 import xyz.izaak.radon.world.Entity;
+import xyz.izaak.radon.world.Scene;
 
-@ProvidesShaderComponents(requires = {Geometry.class, Primitive.class, Entity.class})
+@ProvidesShaderComponents(requires = {Geometry.class, Primitive.class, Entity.class, Scene.class})
 @VertexShaderOutput(type = ShaderVariableType.VEC3, identifier = Identifiers.WORLD_POSITION)
 @VertexShaderOutput(type = ShaderVariableType.VEC3, identifier = Identifiers.NORMAL)
 public class PhongMaterial extends Material {
@@ -44,15 +45,47 @@ public class PhongMaterial extends Material {
 
     @FragmentShaderMain
     public static String setFragColor() {
-        StringBuilder main = new StringBuilder();
-        main.append("vec3 rn_Look = normalize(rn_CameraEye - rn_WorldPosition);\n");
-        main.append("vec3 rn_LightDirection = normalize(vec3(1, 1, 1));\n");
-        main.append("vec3 rn_HalfAngle = normalize(rn_Look + rn_LightDirection);\n");
-        main.append("vec3 rn_Diffuse = rn_PosDot(rn_Normal, rn_LightDirection) * rn_DiffuseColor;\n");
-        main.append("vec3 rn_Specular = pow(rn_PosDot(rn_Normal, rn_HalfAngle), rn_SpecularExponent) * rn_SpecularColor;\n");
-        main.append("vec3 rn_DiffSpec = vec3(1, 1, 1) * (rn_DiffuseCoefficient * rn_Diffuse + rn_SpecularCoefficient * rn_Specular);\n");
-        main.append("fragColor = vec4((rn_AmbientCoefficient * rn_AmbientColor) + rn_DiffSpec, 1);\n");
-        return main.toString();
+        return ""
+
+                // declare light data storage
+                .concat("vec3 rn_Direction;\n")
+                .concat("vec3 rn_HalfAngle;\n")
+                .concat("float rn_DiffuseFactor;\n")
+                .concat("vec3 rn_Diffuse;\n")
+                .concat("float rn_SpecularFactor;\n")
+                .concat("vec3 rn_Specular;\n")
+                .concat("float rn_Attenuation;\n")
+
+                // set up final color accumulator, compute look vector
+                .concat("vec3 rn_FinalColor = rn_AmbientCoefficient * rn_AmbientColor;\n")
+                .concat("vec3 rn_Look = normalize(rn_CameraEye - rn_WorldPosition);\n")
+
+                // collect directional light contributions
+                .concat("for (int i = 0; i < rn_DirectionalLightCount; i++) {\n")
+                .concat("\trn_Direction = normalize(rn_DirectionalLightDirections[i]);\n")
+                .concat("\trn_HalfAngle = normalize(rn_Look + rn_Direction);\n")
+                .concat("\trn_DiffuseFactor = rn_DiffuseCoefficient * rn_PosDot(rn_Normal, rn_Direction);\n")
+                .concat("\trn_Diffuse = rn_DiffuseFactor * rn_DiffuseColor;\n")
+                .concat("\trn_SpecularFactor = rn_SpecularCoefficient * pow(rn_PosDot(rn_Normal, rn_HalfAngle), rn_SpecularExponent);\n")
+                .concat("\trn_Specular = rn_SpecularFactor * rn_SpecularColor;\n")
+                .concat("\trn_FinalColor += (rn_DirectionalLightIntensities[i] * (rn_Diffuse + rn_Specular));\n")
+                .concat("}\n")
+
+                // collect point light contributions
+                .concat("for (int i = 0; i < rn_PointLightCount; i++) {\n")
+                .concat("\trn_Direction = rn_PointLightPositions[i] - rn_WorldPosition;\n")
+                .concat("\trn_Attenuation = 1 / length(rn_Direction);\n")
+                .concat("\trn_Direction = normalize(rn_Direction);\n")
+                .concat("\trn_HalfAngle = normalize(rn_Look + rn_Direction);\n")
+                .concat("\trn_DiffuseFactor = rn_DiffuseCoefficient * rn_PosDot(rn_Normal, rn_Direction);\n")
+                .concat("\trn_Diffuse = rn_DiffuseFactor * rn_DiffuseColor;\n")
+                .concat("\trn_SpecularFactor = rn_SpecularCoefficient * pow(rn_PosDot(rn_Normal, rn_HalfAngle), rn_SpecularExponent);\n")
+                .concat("\trn_Specular = rn_SpecularFactor * rn_SpecularColor;\n")
+                .concat("\trn_FinalColor += (rn_Attenuation * rn_PointLightIntensities[i] * (rn_Diffuse + rn_Specular));\n")
+                .concat("}\n")
+
+                // set frag color
+                .concat("fragColor = vec4(rn_FinalColor, 1.0f);\n");
     }
 
     @VertexShaderMain

@@ -102,8 +102,17 @@ public class Shader {
         }
     }
 
-    public void setUniform(String name, Collection<Vector3f> values) {
-        final float[] valueArray = new float[values.size() * 3];
+    public void setUniform(String name, List<Vector3f> values) {
+        setUniformIfLocationExists(name, location -> {
+            float[] valueArray = new float[values.size() * 3];
+            int index = 0;
+            for (Vector3f value : values) {
+                valueArray[index++] = value.x;
+                valueArray[index++] = value.y;
+                valueArray[index++] = value.z;
+            }
+            glUniform3fv(location, valueArray);
+        });
     }
 
     public void setUniform(String name, Matrix3f value) {

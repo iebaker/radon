@@ -216,7 +216,7 @@ public class Game {
             }
 
             glfwSwapBuffers(window);
-            glfwPollEvents();
+            if (!glfwWindowShouldClose(window)) glfwPollEvents();
 
             exitOnGlErrorWithMessage("Error!");
         }

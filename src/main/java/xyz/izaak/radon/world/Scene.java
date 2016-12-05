@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 @ProvidesShaderComponents
 public class Scene {
+    public static final int MAX_DIRECTIONAL_LIGHTS = 4;
+    public static final int MAX_POINT_LIGHTS = 256;
+
     private Set<Entity> entities = new HashSet<>();
     private Set<DirectionalLight> directionalLights = new HashSet<>();
     private Set<PointLight> pointLights = new HashSet<>();
@@ -66,22 +69,32 @@ public class Scene {
         return directionalLights;
     }
 
-    @ShaderUniform(length = 256, identifier = Identifiers.DIRECTIONAL_LIGHT_DIRECTIONS)
+    @ShaderUniform(identifier = Identifiers.DIRECTIONAL_LIGHT_COUNT)
+    public int getNumDirectionalLights() {
+        return directionalLights.size();
+    }
+
+    @ShaderUniform(identifier = Identifiers.POINT_LIGHT_COUNT)
+    public int getNumPointLights() {
+        return pointLights.size();
+    }
+
+    @ShaderUniform(length = MAX_DIRECTIONAL_LIGHTS, identifier = Identifiers.DIRECTIONAL_LIGHT_DIRECTIONS)
     public List<Vector3f> getDirectionalLightDirections() {
         return directionalLights.stream().map(DirectionalLight::getDirection).collect(Collectors.toList());
     }
 
-    @ShaderUniform(length = 256, identifier = Identifiers.DIRECTIONAL_LIGHT_INTENSITIES)
+    @ShaderUniform(length = MAX_DIRECTIONAL_LIGHTS, identifier = Identifiers.DIRECTIONAL_LIGHT_INTENSITIES)
     public List<Vector3f> getDirectionalLightIntensities() {
         return directionalLights.stream().map(DirectionalLight::getIntensity).collect(Collectors.toList());
     }
 
-    @ShaderUniform(length = 256, identifier = Identifiers.POINT_LIGHT_POSITIONS)
+    @ShaderUniform(length = MAX_POINT_LIGHTS, identifier = Identifiers.POINT_LIGHT_POSITIONS)
     public List<Vector3f> getPointLightPositions() {
         return pointLights.stream().map(PointLight::getPosition).collect(Collectors.toList());
     }
 
-    @ShaderUniform(length = 256, identifier = Identifiers.POINT_LIGHT_INTENSITIES)
+    @ShaderUniform(length = MAX_POINT_LIGHTS, identifier = Identifiers.POINT_LIGHT_INTENSITIES)
     public List<Vector3f> getPointLightIntensities() {
         return pointLights.stream().map(PointLight::getIntensity).collect(Collectors.toList());
     }
