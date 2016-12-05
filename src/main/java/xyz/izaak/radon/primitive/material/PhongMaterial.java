@@ -36,11 +36,10 @@ public class PhongMaterial extends Material {
 
     @FragmentShaderBlock
     public static String positiveDotProduct() {
-        StringBuilder posDot = new StringBuilder();
-        posDot.append("float rn_PosDot(vec3 a, vec3 b) {\n");
-        posDot.append("\treturn max(0, dot(a, b));\n");
-        posDot.append("}\n");
-        return posDot.toString();
+        return ""
+                .concat("float rn_PosDot(vec3 a, vec3 b) {\n")
+                .concat("\treturn max(0, dot(a, b));\n")
+                .concat("}\n");
     }
 
     @FragmentShaderMain
@@ -77,11 +76,11 @@ public class PhongMaterial extends Material {
                 .concat("\trn_Attenuation = 1 / length(rn_Direction);\n")
                 .concat("\trn_Direction = normalize(rn_Direction);\n")
                 .concat("\trn_HalfAngle = normalize(rn_Look + rn_Direction);\n")
-                .concat("\trn_DiffuseFactor = rn_DiffuseCoefficient * rn_PosDot(rn_Normal, rn_Direction);\n")
+                .concat("\trn_DiffuseFactor = rn_PosDot(rn_Normal, rn_Direction);\n")
                 .concat("\trn_Diffuse = rn_DiffuseFactor * rn_DiffuseColor;\n")
                 .concat("\trn_SpecularFactor = rn_SpecularCoefficient * pow(rn_PosDot(rn_Normal, rn_HalfAngle), rn_SpecularExponent);\n")
                 .concat("\trn_Specular = rn_SpecularFactor * rn_SpecularColor;\n")
-                .concat("\trn_FinalColor += (rn_Attenuation * rn_PointLightIntensities[i] * (rn_Diffuse + rn_Specular));\n")
+                .concat("\trn_FinalColor += rn_Attenuation * rn_PointLightIntensities[i] * (rn_Diffuse + rn_Specular);\n")
                 .concat("}\n")
 
                 // set frag color
@@ -90,10 +89,9 @@ public class PhongMaterial extends Material {
 
     @VertexShaderMain
     public static String setVertexOutputs() {
-        StringBuilder main = new StringBuilder();
-        main.append("rn_WorldPosition = vec3(rn_EntityModel * rn_PrimitiveModel * vec4(rn_VertexPosition, 1));\n");
-        main.append("rn_Normal = vec3(rn_EntityModel * rn_PrimitiveModel * vec4(rn_VertexNormal, 0));\n");
-        return main.toString();
+        return ""
+                .concat("rn_WorldPosition = vec3(rn_EntityModel * rn_PrimitiveModel * vec4(rn_VertexPosition, 1));\n")
+                .concat("rn_Normal = normalize(vec3(rn_EntityModel * rn_PrimitiveModel * vec4(rn_VertexNormal, 0)));\n");
     }
 
     public PhongMaterial(Vector3f ambientColor, Vector3f diffuseColor, Vector3f specularColor, float specularExponent) {
@@ -137,7 +135,4 @@ public class PhongMaterial extends Material {
     public Vector3f getSpecularColor() {
         return specularColor;
     }
-
-    @Override
-    public void build(Primitive primitive) { }
 }

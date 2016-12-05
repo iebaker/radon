@@ -26,12 +26,6 @@ public class QuadGeometry extends Geometry {
         primitive.next(VERTEX_POSITION, point.set(Points.Xy_).mul(0.5f));
         primitive.addInterval(GL_TRIANGLES, 6);
 
-        primitive.next(VERTEX_POSITION, point.set(Points.xy_).mul(0.5f));
-        primitive.next(VERTEX_POSITION, point.set(Points.Xy_).mul(0.5f));
-        primitive.next(VERTEX_POSITION, point.set(Points.XY_).mul(0.5f));
-        primitive.next(VERTEX_POSITION, point.set(Points.xY_).mul(0.5f));
-        primitive.addInterval(GL_LINE_LOOP, 4);
-
         primitive.all(VERTEX_NORMAL, Points.__Z);
     }
 }

@@ -32,7 +32,4 @@ public class SolidColorMaterial extends Material {
     public Vector3f getColor() {
         return color;
     }
-
-    @Override
-    public void build(Primitive primitive) { }
 }
