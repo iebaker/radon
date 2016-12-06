@@ -1,9 +1,18 @@
 package xyz.izaak.radon.math;
 
 /**
- * Taken from http://paulbourke.net/geometry/polygonise/ et. al.
+ * Taken from http://paulbourke.net/geometry/polygonise/, lookup tables and cube vertex/edge indices for use
+ * in the Marching Cubes algorithm.
+ * Used by {@link xyz.izaak.radon.primitive.geometry.IsosurfaceGeometry IsosurfaceGeometry} to extract and
+ * tessellate an isosurface of a scalar field represented by a
+ * {@link xyz.izaak.radon.math.field.ScalarVolume ScalarVolume}.
  */
 public class MarchingCubes {
+
+    /**
+     * Offsets from the bottom-left-back corner of a cube for each vertex corresponding to vertex labels,
+     * i.e. vertex i of the cube whose min corner is (x, y, z) is (x + DELTA[i][0], y + DELTA[i][1], z + DELTA[i][2])
+     */
     public static int[][] DELTA = {
             {0, 1, 0},
             {1, 1, 0},
@@ -15,6 +24,11 @@ public class MarchingCubes {
             {0, 0, 1}
     };
 
+    /**
+     * An indexing of cube edges. Edge i of a cube whose min corner is (x, y, z) connects vertices whose coordinates
+     * are (x + DELTA[EDGES[i][0]][0], y + DELTA[EDGES[i][0]][1], z + DELTA[EDGES[i][0]][2]) and
+     * (x + DELTA[EDGES[i][1]][0], y + DELTA[EDGES[i][1]][1], z + DELTA[EDGES[i][1]][2])
+     */
     public static int[][] EDGES = {
             {0, 1},
             {1, 2},
@@ -30,6 +44,11 @@ public class MarchingCubes {
             {7, 3}
     };
 
+    /**
+     * Lookup table to find edges intersected in a cube given indices for its vertices which lie within the isosurface.
+     * When i is a binary number with 1's at all indices of the cube within the isosurface, EDGE_TABLE[i] is a
+     * binary number with 1's at all indices of edges which are intersected by the isosurface.
+     */
     public static int[] EDGE_TABLE = {
             0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
             0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -64,6 +83,11 @@ public class MarchingCubes {
             0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
             0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0   };
 
+    /**
+     * Lookup table to find a polygonalization of a cube given indices for its vertices which lie within the
+     * isosurface. When i is a binary number with 1's at all indices of the cube within the isosurface, TRIANGLES[i]
+     * is an array of edge indices representing 0 to 5 triangles making up the polygonalization of the cube.
+     */
     public static int[][] TRIANGLE_TABLE = {
         {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
         {0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},

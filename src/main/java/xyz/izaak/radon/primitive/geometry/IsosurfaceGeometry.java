@@ -16,7 +16,9 @@ import static xyz.izaak.radon.shading.Identifiers.VERTEX_NORMAL;
 import static xyz.izaak.radon.shading.Identifiers.VERTEX_POSITION;
 
 /**
- * Created by ibaker on 05/12/2016.
+ * Extracts a polygonal isosurface from a scalar field using the Marching Cubes algorithm, with edge and vertex
+ * indices as described http://paulbourke.net/geometry/polygonise/. Relevant indexing and lookup tables are static
+ * fields of {@link MarchingCubes}
  */
 public class IsosurfaceGeometry extends Geometry {
     private static final float EPSILON = 0.00001f;
@@ -29,12 +31,22 @@ public class IsosurfaceGeometry extends Geometry {
     private float[] samples;
     private boolean[] sampleParity;
 
+    /**
+     * Constructs a new IsosurfaceGeometry from a specified volume of a scalar field
+     *
+     * @param scalarVolume the scalar field function to perform extraction
+     * @param min the bottom-left-back corner of the specified volume
+     * @param dimensions the number of cubes along each axis
+     * @param isolevel the level at which to construct the isosurface
+     * @param fidelity the edge length of a single cube
+     */
     public IsosurfaceGeometry(
             ScalarVolume scalarVolume,
             Vector3f min,
             Vector3i dimensions,
             float isolevel,
             float fidelity) {
+
         this.scalarVolume = scalarVolume;
         this.min = min;
         this.dimensions = dimensions;
@@ -50,7 +62,6 @@ public class IsosurfaceGeometry extends Geometry {
         return ScalarVolume.linearIndex(dimensions.x + 1, dimensions.y + 1, dimensions.z + 1, x, y, z);
     }
 
-    // Cube vertices labeled as in http://paulbourke.net/geometry/polygonise/
     private int computeCubeIndex(int x, int y, int z) {
         int cubeIndex = 0;
         int index;
@@ -121,6 +132,8 @@ public class IsosurfaceGeometry extends Geometry {
 
         int cubeIndex;
         Map<Integer, Vector3f> pointsOnEdges = new HashMap<>();
+
+        // Foreach cube in the volume whose minimum corner is (x, y, z)...
         for (int x = 0; x < dimensions.x; x++) {
             for (int y = 0; y < dimensions.y; y++) {
                 for (int z = 0; z < dimensions.z; z++) {
@@ -147,6 +160,8 @@ public class IsosurfaceGeometry extends Geometry {
                         primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
                         primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
                     }
+
+                    pointsOnEdges.clear();
                 }
             }
         }
