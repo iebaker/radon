@@ -4,6 +4,32 @@ package xyz.izaak.radon.math;
  * Taken from http://paulbourke.net/geometry/polygonise/ et. al.
  */
 public class MarchingCubes {
+    public static int[][] DELTA = {
+            {0, 1, 0},
+            {1, 1, 0},
+            {1, 0, 0},
+            {0, 0, 0},
+            {0, 1, 1},
+            {1, 1, 1},
+            {1, 0, 1},
+            {0, 0, 1}
+    };
+
+    public static int[][] EDGES = {
+            {0, 1},
+            {1, 2},
+            {2, 3},
+            {3, 0},
+            {5, 4},
+            {6, 5},
+            {7, 6},
+            {4, 7},
+            {4, 0},
+            {5, 1},
+            {6, 2},
+            {7, 3}
+    };
+
     public static int[] EDGE_TABLE = {
             0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
             0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
