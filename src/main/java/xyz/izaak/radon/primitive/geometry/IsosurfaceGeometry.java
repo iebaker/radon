@@ -10,6 +10,7 @@ import xyz.izaak.radon.primitive.Primitive;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static xyz.izaak.radon.math.MarchingCubes.EDGES;
 import static xyz.izaak.radon.math.MarchingCubes.DELTA;
 import static xyz.izaak.radon.shading.Identifiers.VERTEX_NORMAL;
@@ -131,17 +132,21 @@ public class IsosurfaceGeometry extends Geometry {
         scalarVolume.sample(samples, min, Points.copyOf(dimensions).add(1, 1, 1), cubeStep);
 
         int cubeIndex;
+        int triangleCount = 0;
         Map<Integer, Vector3f> pointsOnEdges = new HashMap<>();
 
-        // Foreach cube in the volume whose minimum corner is (x, y, z)...
+        // (x, y, z) is an index into the volume of cubes
         for (int x = 0; x < dimensions.x; x++) {
             for (int y = 0; y < dimensions.y; y++) {
                 for (int z = 0; z < dimensions.z; z++) {
 
                     cubeIndex = computeCubeIndex(x, y, z);
+                    //System.out.printf("(%d,%d,%d): %d", x, y, z, cubeIndex);
+
                     int crossingEdges = MarchingCubes.EDGE_TABLE[cubeIndex];
                     findPointsOnEdges(pointsOnEdges, crossingEdges, x, y, z);
                     int[] triangles = MarchingCubes.TRIANGLE_TABLE[cubeIndex];
+                    triangleCount += triangles.length;
 
                     for (int i = 0; triangles[i] != -1; i += 3) {
                         primitive.next(VERTEX_POSITION, pointsOnEdges.get(triangles[i]));
@@ -165,5 +170,7 @@ public class IsosurfaceGeometry extends Geometry {
                 }
             }
         }
+
+        primitive.addInterval(GL_TRIANGLES, 3 * triangleCount);
     }
 }

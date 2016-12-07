@@ -6,8 +6,8 @@ package xyz.izaak.radon.math;
 @FunctionalInterface
 public interface AttenuationFunction {
     AttenuationFunction CONSTANT = distance -> 1;
-    AttenuationFunction LINEAR = distance -> 1 / distance;
-    AttenuationFunction QUADRATIC = distance -> 1 / distance * distance;
+    AttenuationFunction INVERSE_LINEAR = distance -> 1 / distance;
+    AttenuationFunction INVERSE_QUADRATIC = distance -> 1 / distance * distance;
 
     float valueAt(float distance);
 }
