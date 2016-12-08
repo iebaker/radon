@@ -66,6 +66,7 @@ import static org.lwjgl.opengl.GL11.GL_STENCIL_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL11.glCullFace;
 import static org.lwjgl.opengl.GL11.glEnableClientState;
+import static org.lwjgl.opengl.GL11.glPointSize;
 import static org.lwjgl.opengl.GL30.GL_INVALID_FRAMEBUFFER_OPERATION;
 
 import static org.lwjgl.opengl.GL11.glClear;
@@ -196,9 +197,10 @@ public class Game {
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
         glClearStencil(1);
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glPointSize(2.0f);
+//        glEnable(GL_LINE_SMOOTH);
+//        glEnable(GL_CULL_FACE);
+//        glCullFace(GL_BACK);
         glLineWidth(1.0f);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

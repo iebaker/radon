@@ -14,6 +14,6 @@ public class RadialFalloffVolume implements ScalarVolume {
 
     @Override
     public float sample(float x, float y, float z) {
-        return attenuation.valueAt((float) Math.sqrt(x * x + y * y + z + z));
+        return attenuation.valueAt((float) Math.sqrt(x * x + y * y + z * z));
     }
 }

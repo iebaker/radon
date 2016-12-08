@@ -10,6 +10,7 @@ import xyz.izaak.radon.primitive.Primitive;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.lwjgl.opengl.GL11.GL_POINTS;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static xyz.izaak.radon.math.MarchingCubes.EDGES;
 import static xyz.izaak.radon.math.MarchingCubes.DELTA;
@@ -29,8 +30,7 @@ public class IsosurfaceGeometry extends Geometry {
     private Vector3i dimensions;
     private float isolevel;
     private float fidelity;
-    private float[] samples;
-    private boolean[] sampleParity;
+    private float[][][] samples;
 
     /**
      * Constructs a new IsosurfaceGeometry from a specified volume of a scalar field
@@ -53,22 +53,19 @@ public class IsosurfaceGeometry extends Geometry {
         this.dimensions = dimensions;
         this.isolevel = isolevel;
         this.fidelity = fidelity;
-
-        int linearSize = (dimensions.x + 1) * (dimensions.y + 1) * (dimensions.z + 1);
-        this.samples = new float[linearSize];
-        this.sampleParity = new boolean[linearSize];
-    }
-
-    private int linearIndex(int x, int y, int z) {
-        return ScalarVolume.linearIndex(dimensions.x + 1, dimensions.y + 1, dimensions.z + 1, x, y, z);
+        this.samples = new float[dimensions.x + 1][dimensions.y + 1][dimensions.z + 1];
     }
 
     private int computeCubeIndex(int x, int y, int z) {
         int cubeIndex = 0;
-        int index;
+        int xIndex, yIndex, zIndex;
+        float sample;
         for (int i = 0; i < 8; i++) {
-            index = linearIndex(x + DELTA[i][0], y + DELTA[i][1], z + DELTA[i][2]);
-            if (samples[index] < isolevel) cubeIndex |= 1 << i;
+            xIndex = x + DELTA[i][0];
+            yIndex = y + DELTA[i][1];
+            zIndex = z + DELTA[i][2];
+            sample = samples[xIndex][yIndex][zIndex];
+            if (sample < isolevel) cubeIndex |= 1 << i;
         }
         return cubeIndex;
     }
@@ -78,6 +75,9 @@ public class IsosurfaceGeometry extends Geometry {
             float px, float py, float pz,
             float qx, float qy, float qz,
             float pValue, float qValue) {
+
+        Vector3f p = new Vector3f(px, py, pz);
+        Vector3f q = new Vector3f(qx, qy, qz);
 
         if (Math.abs(isolevel - pValue) < EPSILON) target.set(px, py, pz);
         if (Math.abs(isolevel - qValue) < EPSILON) target.set(qx, qy, qz);
@@ -95,8 +95,6 @@ public class IsosurfaceGeometry extends Geometry {
 
                 int p = EDGES[i][0];
                 int q = EDGES[i][1];
-                int pIndex = linearIndex(x + DELTA[p][0], y + DELTA[p][1], z + DELTA[p][2]);
-                int qIndex = linearIndex(x + DELTA[q][0], y + DELTA[q][1], z + DELTA[q][2]);
 
                 points.put(i, new Vector3f());
                 setToInterpolatedPoint(
@@ -114,10 +112,10 @@ public class IsosurfaceGeometry extends Geometry {
                         min.z + (fidelity * (z + DELTA[q][2])),
 
                         // sampled value at P
-                        samples[pIndex],
+                        samples[x + DELTA[p][0]][y + DELTA[p][1]][z + DELTA[p][2]],
 
                         // sampled value at Q
-                        samples[qIndex]
+                        samples[x + DELTA[q][0]][y + DELTA[q][1]][z + DELTA[q][2]]
                 );
             }
         }
@@ -141,29 +139,23 @@ public class IsosurfaceGeometry extends Geometry {
                 for (int z = 0; z < dimensions.z; z++) {
 
                     cubeIndex = computeCubeIndex(x, y, z);
-                    //System.out.printf("(%d,%d,%d): %d", x, y, z, cubeIndex);
-
                     int crossingEdges = MarchingCubes.EDGE_TABLE[cubeIndex];
                     findPointsOnEdges(pointsOnEdges, crossingEdges, x, y, z);
                     int[] triangles = MarchingCubes.TRIANGLE_TABLE[cubeIndex];
-                    triangleCount += triangles.length;
 
                     for (int i = 0; triangles[i] != -1; i += 3) {
+
                         primitive.next(VERTEX_POSITION, pointsOnEdges.get(triangles[i]));
                         primitive.next(VERTEX_POSITION, pointsOnEdges.get(triangles[i + 1]));
                         primitive.next(VERTEX_POSITION, pointsOnEdges.get(triangles[i + 2]));
-
-                        // In place compute edges i -> i + 1, i + 1 -> i + 2, storing results in i + 1
-                        // and i + 2. Then store cross product of these in i + 1 as the computed face normal
-                        pointsOnEdges.get(triangles[i + 2]).sub(pointsOnEdges.get(triangles[i + 1]));
-                        pointsOnEdges.get(triangles[i + 1]).sub(pointsOnEdges.get(triangles[i]));
-                        pointsOnEdges.get(triangles[i + 1]).cross(pointsOnEdges.get(triangles[i + 2]));
 
                         // Set all normals on this face to the face normal. This doesn't lend itself nicely
                         // to smooth shading... but whatever.
                         primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
                         primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
                         primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
+
+                        triangleCount++;
                     }
 
                     pointsOnEdges.clear();
