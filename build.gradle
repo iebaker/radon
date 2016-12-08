@@ -12,13 +12,24 @@ switch (OperatingSystem.current()) {
 		break
 }
 
-apply plugin: 'java'
-
 project.ext.lwjglVersion = "3.1.0"
 project.ext.jomlVersion = "1.8.2"
 project.ext.jsonVersion = "20160810"
 project.ext.junitVersion = "4.12"
 project.ext.jbulletVersion = "20101010-1"
+
+buildscript {
+	repositories {
+		jcenter()
+	}
+
+	dependencies {
+		classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
     mavenCentral()
@@ -42,4 +53,10 @@ test {
 
 task wrapper(type: Wrapper) {
 	gradleVersion = '3.2'
+}
+
+shadowJar {
+	baseName = 'radon-shadow'
+	classifier = null
+	version = null
 }
