@@ -197,10 +197,9 @@ public class Game {
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
         glClearStencil(1);
         glEnable(GL_DEPTH_TEST);
-        glPointSize(2.0f);
-//        glEnable(GL_LINE_SMOOTH);
-//        glEnable(GL_CULL_FACE);
-//        glCullFace(GL_BACK);
+        glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         glLineWidth(1.0f);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

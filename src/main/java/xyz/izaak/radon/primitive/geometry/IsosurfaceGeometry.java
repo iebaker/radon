@@ -154,9 +154,9 @@ public class IsosurfaceGeometry extends Geometry {
                         pointB = pointsOnEdges.get(triangles[i + 1]);
                         pointC = pointsOnEdges.get(triangles[i + 2]);
 
-                        primitive.next(VERTEX_POSITION, pointA);
-                        primitive.next(VERTEX_POSITION, pointB);
                         primitive.next(VERTEX_POSITION, pointC);
+                        primitive.next(VERTEX_POSITION, pointB);
+                        primitive.next(VERTEX_POSITION, pointA);
 
                         bMinusA.set(pointB).sub(pointA);
                         cMinusA.set(pointC).sub(pointA);
