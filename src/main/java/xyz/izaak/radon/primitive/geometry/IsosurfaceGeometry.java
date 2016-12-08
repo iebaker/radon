@@ -132,6 +132,11 @@ public class IsosurfaceGeometry extends Geometry {
         int cubeIndex;
         int triangleCount = 0;
         Map<Integer, Vector3f> pointsOnEdges = new HashMap<>();
+        Vector3f pointA, pointB, pointC, bMinusA, cMinusA, surfaceNormal;
+
+        bMinusA = new Vector3f();
+        cMinusA = new Vector3f();
+        surfaceNormal = new Vector3f();
 
         // (x, y, z) is an index into the volume of cubes
         for (int x = 0; x < dimensions.x; x++) {
@@ -145,15 +150,23 @@ public class IsosurfaceGeometry extends Geometry {
 
                     for (int i = 0; triangles[i] != -1; i += 3) {
 
-                        primitive.next(VERTEX_POSITION, pointsOnEdges.get(triangles[i]));
-                        primitive.next(VERTEX_POSITION, pointsOnEdges.get(triangles[i + 1]));
-                        primitive.next(VERTEX_POSITION, pointsOnEdges.get(triangles[i + 2]));
+                        pointA = pointsOnEdges.get(triangles[i]);
+                        pointB = pointsOnEdges.get(triangles[i + 1]);
+                        pointC = pointsOnEdges.get(triangles[i + 2]);
+
+                        primitive.next(VERTEX_POSITION, pointA);
+                        primitive.next(VERTEX_POSITION, pointB);
+                        primitive.next(VERTEX_POSITION, pointC);
+
+                        bMinusA.set(pointB).sub(pointA);
+                        cMinusA.set(pointC).sub(pointA);
+                        surfaceNormal.set(cMinusA).cross(bMinusA).normalize();
 
                         // Set all normals on this face to the face normal. This doesn't lend itself nicely
                         // to smooth shading... but whatever.
-                        primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
-                        primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
-                        primitive.next(VERTEX_NORMAL, pointsOnEdges.get(triangles[i + 1]));
+                        primitive.next(VERTEX_NORMAL, surfaceNormal);
+                        primitive.next(VERTEX_NORMAL, surfaceNormal);
+                        primitive.next(VERTEX_NORMAL, surfaceNormal);
 
                         triangleCount++;
                     }
