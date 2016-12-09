@@ -1,0 +1,11 @@
+xyz.izaak.radon
+xyz.izaak.radon.exception
+xyz.izaak.radon.gamesystem
+xyz.izaak.radon.math
+xyz.izaak.radon.math.field
+xyz.izaak.radon.primitive
+xyz.izaak.radon.primitive.geometry
+xyz.izaak.radon.primitive.material
+xyz.izaak.radon.shading
+xyz.izaak.radon.shading.annotation
+xyz.izaak.radon.world

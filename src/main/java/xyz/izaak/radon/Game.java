@@ -65,8 +65,6 @@ import static org.lwjgl.opengl.GL11.GL_STACK_UNDERFLOW;
 import static org.lwjgl.opengl.GL11.GL_STENCIL_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL11.glCullFace;
-import static org.lwjgl.opengl.GL11.glEnableClientState;
-import static org.lwjgl.opengl.GL11.glPointSize;
 import static org.lwjgl.opengl.GL30.GL_INVALID_FRAMEBUFFER_OPERATION;
 
 import static org.lwjgl.opengl.GL11.glClear;
@@ -76,6 +74,12 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glLineWidth;
 
+/**
+ * A {@link Game} is the fundamental Radon class, representing the entirety of a running game application. All of a
+ * Game's functionality should be attached to a Game via implementations of {@link GameSystem} which are added to the
+ * Game object using the {@link #addGameSystem(GameSystem)} method. Once all systems have been added, the Game can
+ * be executed using {@link #run()}.
+ */
 public class Game {
 
     private float previousTime;
@@ -92,6 +96,14 @@ public class Game {
     private GLFWCursorPosCallback cursorPosCallback;
     private GLFWMouseButtonCallback mouseButtonCallback;
 
+    /**
+     * Constructs a new Game instance
+     *
+     * @param name the title of the Game, which will also be the title of the application window
+     * @param width the initial width of the Game application window
+     * @param height the initial height of the Game application window
+     * @param clearColor the initial argument to glClearColor (the background color of the game world)
+     */
     public Game(String name, int width, int height, Vector3f clearColor) {
         this.name = name;
         this.gameSystems = new ArrayList<>();
@@ -103,8 +115,70 @@ public class Game {
         this.mouseDelta = new Vector2f();
     }
 
+    /**
+     * Adds a {@link GameSystem} to this Game instance. GameSystems will be initialized and receive callbacks
+     * in the order that they are passed to this function.
+     *
+     * @param gameSystem the GameSystem to be added
+     */
     public void addGameSystem(GameSystem gameSystem) {
         gameSystems.add(gameSystem);
+    }
+
+    /**
+     * Begin the execution of this Game instance.
+     */
+    public void run() {
+        initializeGlfw();
+        createWindow();
+        registerCallbacks();
+        initializeGl();
+        initializeGameSystems();
+        loop();
+        System.out.printf("Game %s has run!%n", name);
+    }
+
+    /**
+     * Poll OpenGL for error flags, exiting the application with that exit code should the value be anything other
+     * than GL_NO_ERROR
+     *
+     * @param message a message to be printed in addition to the error description
+     */
+    public static void exitOnGlErrorWithMessage(String message) {
+        exitOnGlErrorWithMessage(message, false);
+    }
+
+    /**
+     * Poll OpenGL for error flags, exiting the application with that exit code should the value be anything other
+     * than GL_NO_ERROR. Also optionally print on success.
+     *
+     * @param message a message to be printed in addition to the error description
+     * @param printSuccessOutput whether to also print in the case of GL_NO_ERROR
+     */
+    public static void exitOnGlErrorWithMessage(String message, boolean printSuccessOutput) {
+        int errorValue = glGetError();
+        switch(errorValue) {
+            case GL_INVALID_ENUM:
+                System.err.println(message + " (Invalid Enum, an unacceptable value is specified for an enumerated argument)"); break;
+            case GL_INVALID_VALUE:
+                System.err.println(message + " (Invalid Value, a numeric argument is out of range)"); break;
+            case GL_INVALID_OPERATION:
+                System.err.println(message + " (Invalid Operation, the specified operation is not allowed in the current state)"); break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                System.err.println(message + " (Invalid Framebuffer Operation, the framebuffer object is not complete)"); break;
+            case GL_OUT_OF_MEMORY:
+                System.err.println(message + " (Out of Memory, there is not enough memory left to execute the command)"); break;
+            case GL_STACK_OVERFLOW:
+                System.err.println(message + " (An attempt has been made to perform an operation that would cause an internal stack to underflow)"); break;
+            case GL_STACK_UNDERFLOW:
+                System.err.println(message + " (An attempt has been made to perform an operation that would cause an internal stack to overflow)"); break;
+            case GL_NO_ERROR:
+                if (printSuccessOutput) {
+                    System.out.println(message + " (No GL Error Detected!)");
+                }
+                return;
+        }
+        System.exit(errorValue);
     }
 
     private void initializeGlfw() {
@@ -227,49 +301,5 @@ public class Game {
 
             exitOnGlErrorWithMessage("Error!");
         }
-    }
-
-    public static void exitOnGlErrorWithMessage(String message) {
-        exitOnGlErrorWithMessage(message, false);
-    }
-
-    public static void exitOnGlErrorWithMessage(String message, boolean printSuccessOutput) {
-        int errorValue = glGetError();
-        switch(errorValue) {
-            case GL_INVALID_ENUM:
-                System.err.println(message + "(Invalid Enum, an unacceptable value is specified for an enumerated argument)"); break;
-            case GL_INVALID_VALUE:
-                System.err.println(message + " (Invalid Value, a numeric argument is out of range)"); break;
-            case GL_INVALID_OPERATION:
-                System.err.println(message + " (Invalid Operation, the specified operation is not allowed in the current state)"); break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
-                System.err.println(message + " (Invalid Framebuffer Operation, the framebuffer object is not complete)"); break;
-            case GL_OUT_OF_MEMORY:
-                System.err.println(message + " (Out of Memory, there is not enough memory left to execute the command)"); break;
-            case GL_STACK_OVERFLOW:
-                System.err.println(message + " (An attempt has been made to perform an operation that would cause an internal stack to underflow)"); break;
-            case GL_STACK_UNDERFLOW:
-                System.err.println(message + " (An attempt has been made to perform an operation that would cause an internal stack to overflow)"); break;
-            case GL_NO_ERROR:
-                if (printSuccessOutput) {
-                    System.out.println(message + " (No GL Error Detected!)");
-                }
-                return;
-        }
-        System.exit(errorValue);
-    }
-
-    public long getWindow() {
-        return window;
-    }
-
-    public void run() {
-        initializeGlfw();
-        createWindow();
-        registerCallbacks();
-        initializeGl();
-        initializeGameSystems();
-        loop();
-        System.out.printf("Game %s has run!%n", name);
     }
 }

@@ -3,21 +3,31 @@ package xyz.izaak.radon.world;
 import org.joml.Vector3f;
 
 /**
- * Created by ibaker on 03/12/2016.
+ * A light source which emanates from a single point in every direction.
  */
 public class PointLight {
     private Vector3f intensity;
     private Vector3f position;
 
+    /**
+     * @param intensity the RGB intensity (color) of the light source
+     * @param position the position of the light source in the Scene
+     */
     public PointLight(Vector3f intensity, Vector3f position) {
         this.intensity = intensity;
         this.position = position;
     }
 
+    /**
+     * @return the RGB intensity (color) of the light source
+     */
     public Vector3f getIntensity() {
         return intensity;
     }
 
+    /**
+     * @return the position of the light source within the Scene
+     */
     public Vector3f getPosition() {
         return position;
     }

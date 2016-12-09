@@ -22,14 +22,33 @@ import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 /**
- * Created by ibaker on 17/08/2016.
+ * An object which is capable of rendering a view of a {@link Scene} from a certain perspective.
  */
 @ProvidesShaderComponents(requires = {Geometry.class, Primitive.class, Entity.class})
 public class Camera implements Transformable {
 
+    /**
+     * A constant used to set the {@link Camera.Builder#nearPlane(float) near plane} of this Camera object using the
+     * {@link #set(int, float)} method.
+     */
     public static final int NEAR_PLANE = 0;
+
+    /**
+     * A constant used to set the {@link Camera.Builder#farPlane(float) far plane} of this Camera object using the
+     * {@link #set(int, float)} method.
+     */
     public static final int FAR_PLANE = 1;
+
+    /**
+     * A constant used to set the {@link Camera.Builder#aspectRatio(float) aspect ratio} of this Camera object using
+     * the {@link #set(int, float)} method.
+     */
     public static final int ASPECT_RATIO = 2;
+
+    /**
+     * A constant used to set the {@link Camera.Builder#fov(float) FOV} of this Camera object using the
+     * {@link #set(int, float)} method.
+     */
     public static final int FOV = 3;
 
     private static Set<Shader> shaders = new HashSet<>();
@@ -45,10 +64,29 @@ public class Camera implements Transformable {
     private float[] parameters = new float[4];
     private Shader shader;
 
+    /**
+     * Registers a {@link Shader} which can be used by Camera objects to render {@link Primitive} objects. A shader
+     * will be chosen for each Primitive based on its {@link xyz.izaak.radon.primitive.material.Material Material}.
+     * @param shader the Shader to register
+     */
     public static void registerShader(Shader shader) {
         shaders.add(shader);
     }
 
+    /**
+     * @return GLSL code which sets the value of gl_Position according to the orientation and parameters of this Camera
+     */
+    @VertexShaderMain
+    public static String setGlPosition() {
+        return "gl_Position = rn_Projection * rn_View * rn_EntityModel" +
+                " * rn_PrimitiveModel * vec4(rn_VertexPosition, 1);\n";
+    }
+
+    /**
+     * Like {@link #registerShader(Shader)}, except taking a ShaderCompiler instead and invoking its
+     * {@link ShaderCompiler#compile(String) compile()} method to generate a Shader to be registered.
+     * @param shaderCompiler a ShaderCompiler which will compile a Shader to be registered
+     */
     public static void compileAndRegisterShader(ShaderCompiler shaderCompiler) {
         try {
             Shader shader = shaderCompiler.compile("" + System.nanoTime());
@@ -58,10 +96,16 @@ public class Camera implements Transformable {
         }
     }
 
+    /**
+     * @return a Camera.Builder object
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * A builder class for {@link Camera} objects
+     */
     public static class Builder {
         private float nearPlane = 0.1f;
         private float farPlane = 1000.0f;
@@ -71,46 +115,98 @@ public class Camera implements Transformable {
         private Vector3f look = Points.copyOf(Points.__Z);
         private Vector3f up = Points.copyOf(Points._Y_);
 
+        /**
+         * The closest part of the Camera's view frustum to its eye location. Practically, anything
+         * closer to the Camera than its near plane will not be rendered.
+         *
+         * @param nearPlane the perpendicular distance from the Camera's eye to the near plane
+         * @return this builder
+         */
         public Builder nearPlane(float nearPlane) {
             this.nearPlane = nearPlane;
             return this;
         }
 
+        /**
+         * The furthest part of the Camera's viewing volume from its eye location. Practically,
+         * anything further from the camera than its far plane will not be rendered.
+         *
+         * @param farPlane the perpendicular distance from the Camera's eye to the far plane
+         * @return this builder
+         */
         public Builder farPlane(float farPlane) {
             this.farPlane = farPlane;
             return this;
         }
 
+        /**
+         * The ratio of the width of a Camera's viewing volume to the height.
+         * @param aspectRatio this Camera's aspect ratio
+         * @return this builder
+         */
         public Builder aspectRatio(float aspectRatio) {
             this.aspectRatio = aspectRatio;
             return this;
         }
 
+        /**
+         * Short for "Field of View", the angle between the top plane of the Camera's viewing volume and the bottom
+         * @param fov this Camera's FOV
+         * @return this builder
+         */
         public Builder fov(float fov) {
             this.fov = fov;
             return this;
         }
 
+        /**
+         * The location in space from which the Camera's perspective originates
+         * @param eye this Camera's eye vector
+         * @return this builder
+         */
         public Builder eye(Vector3f eye) {
             this.eye.set(eye);
             return this;
         }
 
+        /**
+         * The direction in which a Camera is facing
+         * @param look this Camera's look vector
+         * @return this builder
+         */
         public Builder look(Vector3f look) {
             this.look.set(look);
             return this;
         }
 
+        /**
+         * The direction which is vertical from a Camera's frame of reference
+         * @param up this camera's up vector
+         * @return this builder
+         */
         public Builder up(Vector3f up) {
             this.up.set(up);
             return this;
         }
 
+        /**
+         * @return a new Camera object with properties as set on this Builder object
+         */
         public Camera build() {
             return new Camera(nearPlane, farPlane, aspectRatio, fov, eye, look, up);
         }
     }
 
+    /**
+     * Constructs a new Camera object
+     * @param nearPlane the {@link Camera.Builder#nearPlane(float) near plane} of this Camera
+     * @param farPlane the {@link Camera.Builder#farPlane(float) far plane} of this Camera
+     * @param aspectRatio the {@link Camera.Builder#aspectRatio(float) aspect ratio} of this Camera
+     * @param fov the {@link Camera.Builder#fov(float) FOV} of this Camera
+     * @param eye the {@link Camera.Builder#eye(Vector3f) eye} of this Camera
+     * @param look the {@link Camera.Builder#look(Vector3f) look vector} of this Camera
+     * @param up the {@link Camera.Builder#up(Vector3f) up vector} of this Camera
+     */
     public Camera(
             float nearPlane,
             float farPlane,
@@ -129,6 +225,10 @@ public class Camera implements Transformable {
         this.set(FOV, fov);
     }
 
+    /**
+     * Constructs a Camera object which is a copy of another Camera object
+     * @param other the Camera whose parameters to copy
+     */
     public Camera(Camera other) {
         for(int i = 0; i < parameters.length; i++) {
             set(i, other.get(i));
@@ -142,10 +242,132 @@ public class Camera implements Transformable {
         this.modifier.set(other.modifier);
     }
 
-    private void recomputeView() {
-        eyePlusLook.set(eye).add(look);
-        view.setLookAt(eye, eyePlusLook, up);
+    /**
+     * Get a numeric parameter of this Camera.
+     *
+     * @param parameterIndex one of {@link Camera#NEAR_PLANE}, {@link Camera#FAR_PLANE},
+     *                       {@link Camera#FOV}, or {@link Camera#ASPECT_RATIO}.
+     * @return the value of the specified parameter
+     */
+    public float get(int parameterIndex) {
+        checkParameterIndex("get", parameterIndex);
+        return parameters[parameterIndex];
     }
+
+    /**
+     * Sets a numeric parameter of this Camera
+     *
+     * @param parameterIndex one of {@link Camera#NEAR_PLANE}, {@link Camera#FAR_PLANE},
+     *                       {@link Camera#FOV}, or {@link Camera#ASPECT_RATIO}.
+     * @param value the value to set the specified parameter to
+     */
+    public void set(int parameterIndex, float value) {
+        checkParameterIndex("set", parameterIndex);
+        parameters[parameterIndex] = value;
+        recomputeProjection();
+    }
+
+    /**
+     * Augments a numeric parameter of this Camera
+     * @param parameterIndex one of {@link Camera#NEAR_PLANE}, {@link Camera#FAR_PLANE},
+     *                       {@link Camera#FOV}, or {@link Camera#ASPECT_RATIO}.
+     * @param value the value to add to the current value of the specified parameter
+     */
+    public void add(int parameterIndex, float value) {
+        checkParameterIndex("add to", parameterIndex);
+        parameters[parameterIndex] += value;
+        recomputeProjection();
+    }
+
+    /**
+     * Subtracts a quantity from a numeric parameter of this Camera
+     * @param parameterIndex one of {@link Camera#NEAR_PLANE}, {@link Camera#FAR_PLANE},
+     *                       {@link Camera#FOV}, or {@link Camera#ASPECT_RATIO}.
+     * @param value the value to subtract from the current value of the specified parameter
+     */
+    public void sub(int parameterIndex, float value) {
+        checkParameterIndex("subtract from", parameterIndex);
+        parameters[parameterIndex] -= value;
+        recomputeProjection();
+    }
+
+    /**
+     * @return the {@link Camera.Builder#look(Vector3f) look vector} of this Camera
+     */
+    public Vector3f getLook() {
+        return look;
+    }
+
+    /**
+     * @return the {@link Camera.Builder#up(Vector3f) up vector} of this Camera
+     */
+    public Vector3f getUp() {
+        return up;
+    }
+
+    /**
+     * The view matrix encodes information about the position and orientation in 3D space of this Camera object
+     *
+     * @return this Camera's view matrix
+     */
+    @ShaderUniform(identifier = Identifiers.VIEW)
+    public Matrix4f getView() {
+        return view;
+    }
+
+    /**
+     * The projection matrix encodes information about the size and shape of this Camera's viewing volume
+     *
+     * @return this Camera's projection matrix
+     */
+    @ShaderUniform(identifier = Identifiers.PROJECTION)
+    public Matrix4f getProjection() {
+        return projection;
+    }
+
+    /**
+     * @return the {@link Camera.Builder#eye(Vector3f) eye vector} of this Camera
+     */
+    @ShaderUniform(identifier = Identifiers.CAMERA_EYE)
+    public Vector3f getEye() {
+        return eye;
+    }
+
+    /**
+     * Performs a forward rendering pipeline to render a Scene.
+     * Invokes OpenGL's drawArrays method for each component of each Primitive of each Entity in a Scene, rendering
+     * it to the currently bound Framebuffer (for example, the application window). Each Primitive will be rendered
+     * with an appropriate shader for its Material if one has been {@link Camera#registerShader(Shader) registered}.
+     *
+     * @param scene the scene to render
+     * @throws RadonException if anything detectable goes wrong during rendering
+     */
+    public void capture(Scene scene) throws RadonException {
+        for (Entity entity : scene.getEntities()) {
+            for (Primitive primitive : entity.getPrimitives()) {
+                Shader shader = selectShaderFor(primitive);
+                shader.use();
+                shader.setUniforms(this);
+                shader.setUniforms(scene);
+                shader.setUniforms(entity);
+                shader.setUniforms(primitive);
+                shader.setUniforms(primitive.getGeometry());
+                shader.setUniforms(primitive.getMaterial());
+                primitive.bufferFor(shader);
+
+                glBindVertexArray(primitive.getVertexArrayFor(shader));
+                shader.validate();
+                for (Primitive.Interval interval : primitive.getIntervals()) {
+                    glDrawArrays(interval.mode, interval.first, interval.count);
+                }
+                glBindVertexArray(0);
+            }
+        }
+    }
+
+    /* ============================================= *
+     * Implementation of the Transformable interface *
+     * ============================================= */
 
     @Override
     public void scale(float x, float y, float z) {
@@ -186,6 +408,11 @@ public class Camera implements Transformable {
         recomputeView();
     }
 
+    private void recomputeView() {
+        eyePlusLook.set(eye).add(look);
+        view.setLookAt(eye, eyePlusLook, up);
+    }
+
     private void recomputeProjection() {
         projection.setPerspective(
                 parameters[FOV],
@@ -203,59 +430,7 @@ public class Camera implements Transformable {
         }
     }
 
-    public float get(int parameterIndex) {
-        checkParameterIndex("get", parameterIndex);
-        return parameters[parameterIndex];
-    }
-
-    public void set(int parameterIndex, float value) {
-        checkParameterIndex("set", parameterIndex);
-        parameters[parameterIndex] = value;
-        recomputeProjection();
-    }
-
-    public void add(int parameterIndex, float value) {
-        checkParameterIndex("add to", parameterIndex);
-        parameters[parameterIndex] += value;
-        recomputeProjection();
-    }
-
-    public void sub(int parameterIndex, float value) {
-        checkParameterIndex("subtract from", parameterIndex);
-        parameters[parameterIndex] -= value;
-        recomputeProjection();
-    }
-
-    @ShaderUniform(identifier = Identifiers.CAMERA_EYE)
-    public Vector3f getEye() {
-        return eye;
-    }
-
-    public Vector3f getLook() {
-        return look;
-    }
-
-    public Vector3f getUp() {
-        return up;
-    }
-
-    @ShaderUniform(identifier = Identifiers.VIEW)
-    public Matrix4f getView() {
-        return view;
-    }
-
-    @ShaderUniform(identifier = Identifiers.PROJECTION)
-    public Matrix4f getProjection() {
-        return projection;
-    }
-
-    @VertexShaderMain
-    public static String setGlPosition() {
-        return "gl_Position = rn_Projection * rn_View * rn_EntityModel" +
-                " * rn_PrimitiveModel * vec4(rn_VertexPosition, 1);\n";
-    }
-
-    public Shader selectShaderFor(Primitive primitive) throws RadonException {
+    private Shader selectShaderFor(Primitive primitive) throws RadonException {
         Shader selected = null;
         for (Shader shader : shaders) {
             if (shader.supports(primitive.getMaterial().getClass())) {
@@ -269,28 +444,5 @@ public class Camera implements Transformable {
         throw new RadonException(
                 String.format("Could not find shader which supports primitive %s with material %s",
                         primitive.toString(), primitive.getMaterial().toString()));
-    }
-
-    public void capture(Scene scene) throws RadonException {
-        for (Entity entity : scene.getEntities()) {
-            for (Primitive primitive : entity.getPrimitives()) {
-                Shader shader = selectShaderFor(primitive);
-                shader.use();
-                shader.setUniforms(this);
-                shader.setUniforms(scene);
-                shader.setUniforms(entity);
-                shader.setUniforms(primitive);
-                shader.setUniforms(primitive.getGeometry());
-                shader.setUniforms(primitive.getMaterial());
-                primitive.bufferFor(shader);
-
-                glBindVertexArray(primitive.getVertexArrayFor(shader));
-                shader.validate();
-                for (Primitive.Interval interval : primitive.getIntervals()) {
-                    glDrawArrays(interval.mode, interval.first, interval.count);
-                }
-                glBindVertexArray(0);
-            }
-        }
     }
 }
