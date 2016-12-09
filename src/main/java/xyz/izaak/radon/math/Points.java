@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.joml.Vector4f;
 import org.joml.Matrix4f;
 import org.joml.Matrix3f;
@@ -197,6 +198,10 @@ public class Points {
 
     public static Vector2f copyOf(Vector2f original) {
         return new Vector2f(original);
+    }
+
+    public static Vector3i copyOf(Vector3i original) {
+        return new Vector3i(original);
     }
 
     public static FloatBuffer floatBufferOf(Matrix3f original) {
