@@ -35,7 +35,5 @@ public class CompoundScalarVolume implements ScalarVolume {
         reducers.add(reducer);
         components.add(other);
         return this;
-
-
     }
 }

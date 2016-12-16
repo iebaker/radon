@@ -38,7 +38,7 @@ public class Entity extends MatrixTransformable {
     public static class Builder {
         private float mass = 0.0f;
         private float restitution = 0.5f;
-        private float friction = 2.5f;
+        private float friction = 1.5f;
 
         /**
          * Mass is the resistance of an object to acceleration in response to force. It's default value
@@ -60,6 +60,11 @@ public class Entity extends MatrixTransformable {
          */
         public Builder restitution(float restitution) {
             this.restitution = restitution;
+            return this;
+        }
+
+        public Builder friction(float friction) {
+            this.friction = friction;
             return this;
         }
 
