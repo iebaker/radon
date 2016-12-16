@@ -1,5 +1,6 @@
 package xyz.izaak.radon.primitive.geometry;
 
+import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import xyz.izaak.radon.math.MarchingCubes;
@@ -7,7 +8,11 @@ import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.field.ScalarVolume;
 import xyz.izaak.radon.primitive.Primitive;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_POINTS;
@@ -31,6 +36,7 @@ public class IsosurfaceGeometry extends Geometry {
     private float isolevel;
     private float fidelity;
     private float[][][] samples;
+    private List<Vector3f> vertices;
 
     /**
      * Constructs a new IsosurfaceGeometry from a specified volume of a scalar field
@@ -54,6 +60,7 @@ public class IsosurfaceGeometry extends Geometry {
         this.isolevel = isolevel;
         this.fidelity = fidelity;
         this.samples = new float[dimensions.x + 1][dimensions.y + 1][dimensions.z + 1];
+        this.runMarchingCubes();
     }
 
     private int computeCubeIndex(int x, int y, int z) {
@@ -123,22 +130,63 @@ public class IsosurfaceGeometry extends Geometry {
 
     @Override
     public void build(Primitive primitive) {
+        Vector3f pointA, pointB, pointC;
+        Vector3f bMinusA = new Vector3f();
+        Vector3f cMinusA = new Vector3f();
+        Vector3f surfaceNormal = new Vector3f();
 
-        // Sample from the scalar volume at the edges of "dimensions" cubes spaced "fidelity" apart
-        // starting from "min," storing the result in "samples"
+        for (int i = 0; i < vertices.size(); i += 3) {
+            pointA = vertices.get(i);
+            pointB = vertices.get(i + 1);
+            pointC = vertices.get(i + 2);
+
+            primitive.next(VERTEX_POSITION, pointC);
+            primitive.next(VERTEX_POSITION, pointB);
+            primitive.next(VERTEX_POSITION, pointA);
+
+            bMinusA.set(pointB).sub(pointA);
+            cMinusA.set(pointC).sub(pointA);
+            surfaceNormal.set(cMinusA).cross(bMinusA).normalize();
+
+            primitive.next(VERTEX_NORMAL, surfaceNormal);
+            primitive.next(VERTEX_NORMAL, surfaceNormal);
+            primitive.next(VERTEX_NORMAL, surfaceNormal);
+        }
+
+        primitive.addInterval(GL_TRIANGLES, vertices.size());
+    }
+
+    public TriangleIndexVertexArray getAsTriangleIndexVertexArray() {
+        ByteBuffer triangleIndexBase = ByteBuffer.allocateDirect(vertices.size() * 4).order(ByteOrder.nativeOrder());
+        ByteBuffer vertexBase = ByteBuffer.allocateDirect(vertices.size() * 3 * 4).order(ByteOrder.nativeOrder());
+
+        for (int i = 0; i < vertices.size(); i++) {
+            triangleIndexBase.putInt(i);
+            vertexBase.putFloat(vertices.get(i).x);
+            vertexBase.putFloat(vertices.get(i).y);
+            vertexBase.putFloat(vertices.get(i).z);
+        }
+
+        triangleIndexBase.rewind();
+        vertexBase.rewind();
+
+        return new TriangleIndexVertexArray(
+                vertices.size() / 3,
+                triangleIndexBase,
+                3 * 4,
+                vertices.size(),
+                vertexBase,
+                3 * 4);
+    }
+
+    private void runMarchingCubes() {
         Vector3f cubeStep = new Vector3f(fidelity, fidelity, fidelity);
         scalarVolume.sample(samples, min, Points.copyOf(dimensions).add(1, 1, 1), cubeStep);
+        vertices = new LinkedList<>();
 
         int cubeIndex;
-        int triangleCount = 0;
         Map<Integer, Vector3f> pointsOnEdges = new HashMap<>();
-        Vector3f pointA, pointB, pointC, bMinusA, cMinusA, surfaceNormal;
 
-        bMinusA = new Vector3f();
-        cMinusA = new Vector3f();
-        surfaceNormal = new Vector3f();
-
-        // (x, y, z) is an index into the volume of cubes
         for (int x = 0; x < dimensions.x; x++) {
             for (int y = 0; y < dimensions.y; y++) {
                 for (int z = 0; z < dimensions.z; z++) {
@@ -149,26 +197,9 @@ public class IsosurfaceGeometry extends Geometry {
                     int[] triangles = MarchingCubes.TRIANGLE_TABLE[cubeIndex];
 
                     for (int i = 0; triangles[i] != -1; i += 3) {
-
-                        pointA = pointsOnEdges.get(triangles[i]);
-                        pointB = pointsOnEdges.get(triangles[i + 1]);
-                        pointC = pointsOnEdges.get(triangles[i + 2]);
-
-                        primitive.next(VERTEX_POSITION, pointC);
-                        primitive.next(VERTEX_POSITION, pointB);
-                        primitive.next(VERTEX_POSITION, pointA);
-
-                        bMinusA.set(pointB).sub(pointA);
-                        cMinusA.set(pointC).sub(pointA);
-                        surfaceNormal.set(cMinusA).cross(bMinusA).normalize();
-
-                        // Set all normals on this face to the face normal. This doesn't lend itself nicely
-                        // to smooth shading... but whatever.
-                        primitive.next(VERTEX_NORMAL, surfaceNormal);
-                        primitive.next(VERTEX_NORMAL, surfaceNormal);
-                        primitive.next(VERTEX_NORMAL, surfaceNormal);
-
-                        triangleCount++;
+                        vertices.add(pointsOnEdges.get(triangles[i]));
+                        vertices.add(pointsOnEdges.get(triangles[i + 1]));
+                        vertices.add(pointsOnEdges.get(triangles[i + 2]));
                     }
 
                     pointsOnEdges.clear();
@@ -176,6 +207,5 @@ public class IsosurfaceGeometry extends Geometry {
             }
         }
 
-        primitive.addInterval(GL_TRIANGLES, 3 * triangleCount);
     }
 }

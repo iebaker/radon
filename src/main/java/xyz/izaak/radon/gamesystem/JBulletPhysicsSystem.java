@@ -71,6 +71,7 @@ public class JBulletPhysicsSystem implements GameSystem {
 
             entityBodyConstructionInfo.restitution = entity.getRestitution();
             entityBodyConstructionInfo.angularDamping = entity.getFriction();
+            entityBodyConstructionInfo.friction = entity.getFriction();
 
             RigidBody entityRigidBody = new RigidBody(entityBodyConstructionInfo);
             dynamicsWorld.addRigidBody(entityRigidBody);

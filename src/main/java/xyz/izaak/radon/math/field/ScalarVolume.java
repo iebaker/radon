@@ -27,4 +27,8 @@ public interface ScalarVolume {
             }
         }
     }
+
+    default CompoundScalarVolume then(CompoundScalarVolume.Reducer reducer, ScalarVolume other) {
+        return new CompoundScalarVolume(this, reducer, other);
+    }
 }

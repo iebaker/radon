@@ -115,6 +115,10 @@ public class Game {
         this.mouseDelta = new Vector2f();
     }
 
+    public long getWindow() {
+        return window;
+    }
+
     /**
      * Adds a {@link GameSystem} to this Game instance. GameSystems will be initialized and receive callbacks
      * in the order that they are passed to this function.
