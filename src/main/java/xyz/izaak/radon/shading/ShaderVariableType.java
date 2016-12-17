@@ -39,24 +39,9 @@ public enum ShaderVariableType {
     SAMPLER_CUBE_ARRAY_SHADOW("samplerCubeArrayShadow");
 
     private String type;
-    private int[] length;
 
     public String getTypeString() {
         return type;
-    }
-
-    public int[] getLength() {
-        return length;
-    }
-
-    public ShaderVariableType array(int... length) {
-        this.length = length;
-        return this;
-    }
-
-    public ShaderVariableType g(char modifier) {
-        type = modifier + type;
-        return this;
     }
 
     ShaderVariableType(String type) {
@@ -66,5 +51,4 @@ public enum ShaderVariableType {
     ShaderVariableType() {
         this.type = this.toString().toLowerCase();
     }
-
 }
