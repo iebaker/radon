@@ -3,10 +3,12 @@ package xyz.izaak.radon.world;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import xyz.izaak.radon.exception.RadonException;
+import xyz.izaak.radon.math.Basis;
+import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
-import xyz.izaak.radon.primitive.Primitive;
-import xyz.izaak.radon.primitive.geometry.Geometry;
+import xyz.izaak.radon.mesh.Mesh;
+import xyz.izaak.radon.mesh.geometry.Geometry;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.ShaderCompiler;
@@ -18,13 +20,21 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.lwjgl.opengl.GL11.GL_DECR;
+import static org.lwjgl.opengl.GL11.GL_EQUAL;
+import static org.lwjgl.opengl.GL11.GL_INCR;
+import static org.lwjgl.opengl.GL11.GL_KEEP;
+import static org.lwjgl.opengl.GL11.glColorMask;
+import static org.lwjgl.opengl.GL11.glDepthMask;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glStencilFunc;
+import static org.lwjgl.opengl.GL11.glStencilOp;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 /**
  * An object which is capable of rendering a view of a {@link Scene} from a certain perspective.
  */
-@ProvidesShaderComponents(requires = {Geometry.class, Primitive.class, Entity.class})
+@ProvidesShaderComponents(requires = {Geometry.class, Mesh.class, Entity.class})
 public class Camera implements Transformable {
 
     /**
@@ -59,14 +69,16 @@ public class Camera implements Transformable {
     private Vector3f up = new Vector3f();
     private Matrix4f view = new Matrix4f();
     private Matrix4f projection = new Matrix4f();
+
     private Matrix4f modifier = new Matrix4f();
+    private Vector3f scratch = new Vector3f();
 
     private float[] parameters = new float[4];
     private Shader shader;
 
     /**
-     * Registers a {@link Shader} which can be used by Camera objects to render {@link Primitive} objects. A shader
-     * will be chosen for each Primitive based on its {@link xyz.izaak.radon.primitive.material.Material Material}.
+     * Registers a {@link Shader} which can be used by Camera objects to render {@link Mesh} objects. A shader
+     * will be chosen for each Primitive based on its {@link xyz.izaak.radon.mesh.material.Material Material}.
      * @param shader the Shader to register
      */
     public static void registerShader(Shader shader) {
@@ -78,8 +90,7 @@ public class Camera implements Transformable {
      */
     @VertexShaderMain
     public static String setGlPosition() {
-        return "gl_Position = rn_Projection * rn_View * rn_EntityModel" +
-                " * rn_PrimitiveModel * vec4(rn_VertexPosition, 1);\n";
+        return "gl_Position = rn_Projection * rn_View * rn_EntityModel * rn_MeshModel * vec4(rn_VertexPosition, 1);\n";
     }
 
     /**
@@ -343,26 +354,7 @@ public class Camera implements Transformable {
      * @throws RadonException if anything detectable goes wrong during rendering
      */
     public void capture(Scene scene) throws RadonException {
-        for (Entity entity : scene.getEntities()) {
-            for (Primitive primitive : entity.getPrimitives()) {
-                Shader shader = selectShaderFor(primitive);
-                shader.use();
-                shader.setUniforms(this);
-                shader.setUniforms(scene);
-                shader.setUniforms(entity);
-                shader.setUniforms(primitive);
-                shader.setUniforms(primitive.getGeometry());
-                shader.setUniforms(primitive.getMaterial());
-                primitive.bufferFor(shader);
-
-                glBindVertexArray(primitive.getVertexArrayFor(shader));
-                shader.validate();
-                for (Primitive.Interval interval : primitive.getIntervals()) {
-                    glDrawArrays(interval.mode, interval.first, interval.count);
-                }
-                glBindVertexArray(0);
-            }
-        }
+        capture(scene, 0);
     }
 
     /* ============================================= *
@@ -408,6 +400,76 @@ public class Camera implements Transformable {
         recomputeView();
     }
 
+    private void capture(Scene scene, int depth) throws RadonException {
+        for (Portal portal : scene.getPortals()) {
+            stencilPortal(portal, depth);
+            shiftPerspective(portal, portal.getChildPortal());
+            capture(portal.getChildPortal().getParentScene(), depth + 1);
+            shiftPerspective(portal.getChildPortal(), portal);
+            protectPortal(portal, depth);
+        }
+
+        glColorMask(true, true, true, true);
+        glDepthMask(true);
+        for (Entity entity : scene.getEntities()) {
+            for (Mesh mesh : entity.getMeshes()) {
+                renderMesh(mesh, this, scene, entity, mesh, mesh.getGeometry(), mesh.getMaterial());
+            }
+        }
+    }
+
+    private void stencilPortal(Portal portal, int depth) throws RadonException {
+        glColorMask(false, false, false, false);
+        glDepthMask(false);
+        glStencilFunc(GL_EQUAL, depth, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+
+        Entity portalEntity = portal.getEntity();
+        Mesh portalMesh = portalEntity.getMeshes().iterator().next();
+        renderMesh(portalMesh, this, portalEntity, portalMesh, portalMesh.getGeometry(), portalMesh.getMaterial());
+    }
+
+    private void protectPortal(Portal portal, int depth) throws RadonException {
+        glColorMask(false, false, false, false);
+        glDepthMask(true);
+        glStencilFunc(GL_EQUAL, depth + 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
+
+        Entity portalEntity = portal.getEntity();
+        Mesh portalMesh = portalEntity.getMeshes().iterator().next();
+        renderMesh(portalMesh, this, portalEntity, portalMesh, portalMesh.getGeometry(), portalMesh.getMaterial());
+    }
+
+    private void renderMesh(Mesh mesh, Object... uniformDataObjects) throws RadonException{
+        Shader shader = selectShaderFor(mesh);
+        shader.use();
+        for (Object object : uniformDataObjects) {
+            shader.setUniforms(object);
+        }
+        mesh.bufferFor(shader);
+        glBindVertexArray(mesh.getVertexArrayFor(shader));
+        shader.validate();
+        for (Mesh.Interval interval : mesh.getIntervals()) {
+            glDrawArrays(interval.mode, interval.first, interval.count);
+        }
+        glBindVertexArray(0);
+    }
+
+    private void shiftPerspective(Portal local, Portal remote) {
+        scratch.set(eye).sub(local.getPosition());
+        Basis.change(scratch, OrthonormalBasis.STANDARD, local.getFrontBasis());
+        Basis.change(scratch, remote.getBackBasis(), OrthonormalBasis.STANDARD);
+        eye.set(remote.getPosition()).add(scratch);
+
+        Basis.change(look, OrthonormalBasis.STANDARD, local.getFrontBasis());
+        Basis.change(look, remote.getBackBasis(), OrthonormalBasis.STANDARD);
+
+        Basis.change(up, OrthonormalBasis.STANDARD, local.getFrontBasis());
+        Basis.change(up, remote.getBackBasis(), OrthonormalBasis.STANDARD);
+
+        recomputeView();
+    }
+
     private void recomputeView() {
         eyePlusLook.set(eye).add(look);
         view.setLookAt(eye, eyePlusLook, up);
@@ -430,10 +492,10 @@ public class Camera implements Transformable {
         }
     }
 
-    private Shader selectShaderFor(Primitive primitive) throws RadonException {
+    private Shader selectShaderFor(Mesh mesh) throws RadonException {
         Shader selected = null;
         for (Shader shader : shaders) {
-            if (shader.supports(primitive.getMaterial().getClass())) {
+            if (shader.supports(mesh.getMaterial().getClass())) {
                 selected = shader;
                 break;
             }
@@ -442,7 +504,7 @@ public class Camera implements Transformable {
             return selected;
         }
         throw new RadonException(
-                String.format("Could not find shader which supports primitive %s with material %s",
-                        primitive.toString(), primitive.getMaterial().toString()));
+                String.format("Could not find shader which supports mesh %s with material %s",
+                        mesh.toString(), mesh.getMaterial().toString()));
     }
 }

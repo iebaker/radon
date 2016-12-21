@@ -3,7 +3,7 @@ package xyz.izaak.radon.math;
 /**
  * Taken from http://paulbourke.net/geometry/polygonise/, lookup tables and cube vertex/edge indices for use
  * in the Marching Cubes algorithm.
- * Used by {@link xyz.izaak.radon.primitive.geometry.IsosurfaceGeometry IsosurfaceGeometry} to extract and
+ * Used by {@link xyz.izaak.radon.mesh.geometry.IsosurfaceGeometry IsosurfaceGeometry} to extract and
  * tessellate an isosurface of a scalar field represented by a
  * {@link xyz.izaak.radon.math.field.ScalarVolume ScalarVolume}.
  */

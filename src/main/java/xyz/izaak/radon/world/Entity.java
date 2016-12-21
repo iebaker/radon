@@ -3,7 +3,7 @@ package xyz.izaak.radon.world;
 import com.bulletphysics.collision.shapes.CollisionShape;
 import org.joml.Matrix4f;
 import xyz.izaak.radon.math.MatrixTransformable;
-import xyz.izaak.radon.primitive.Primitive;
+import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
@@ -13,13 +13,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Any object within a Scene. Most Entity objects will have a set of {@link Primitive} objects
+ * Any object within a Scene. Most Entity objects will have a set of {@link Mesh} objects
  * which comprise its physical appearance, as well as a single CollisionShape and some constant values which govern
  * the way this Entity interacts kinematically with other Entities in the scene.
  */
 @ProvidesShaderComponents
 public class Entity extends MatrixTransformable {
-    private Set<Primitive> primitives = new HashSet<>();
+    private Set<Mesh> meshes = new HashSet<>();
     private CollisionShape collisionShape;
     private float mass;
     private float restitution;
@@ -91,10 +91,10 @@ public class Entity extends MatrixTransformable {
 
     /**
      * Add Primitives to this object, which comprise its visual appearance
-     * @param primitives the array of primitives to be added
+     * @param meshes the array of primitives to be added
      */
-    public void addPrimitives(Primitive... primitives) {
-        this.primitives.addAll(Arrays.asList(primitives));
+    public void addMeshes(Mesh... meshes) {
+        this.meshes.addAll(Arrays.asList(meshes));
     }
 
     /**
@@ -129,8 +129,8 @@ public class Entity extends MatrixTransformable {
     /**
      * @return a Set view of the Primitives which make up this object's visual appearance
      */
-    public Set<Primitive> getPrimitives() {
-        return primitives;
+    public Set<Mesh> getMeshes() {
+        return meshes;
     }
 
     /**

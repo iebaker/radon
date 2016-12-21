@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 /**
  * Created by ibaker on 17/08/2016.
  */
-class Basis {
+public class Basis {
     private static Matrix3f scratch = new Matrix3f();
     private Matrix3f matrix = new Matrix3f();
     private Vector3f i;
@@ -21,6 +21,11 @@ class Basis {
         this.i = Points.X__;
         this.j = Points._Y_;
         this.k = Points.__Z;
+        this.matrix.set(
+                i.x, j.x, k.x,
+                i.y, j.y, k.y,
+                i.z, j.z, k.z
+        ).transpose();
     }
 
     public Basis(Vector3f i, Vector3f j, Vector3f k) {
@@ -41,11 +46,7 @@ class Basis {
         return k;
     }
 
-    private Matrix3f getMatrix() {
-        return matrix.set(
-                i.x, j.x, k.x,
-                i.y, j.y, k.y,
-                i.z, j.z, k.z
-        ).transpose();
+    public Matrix3f getMatrix() {
+        return matrix;
     }
 }

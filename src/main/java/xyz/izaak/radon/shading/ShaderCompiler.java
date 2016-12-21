@@ -5,8 +5,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import xyz.izaak.radon.primitive.Primitive;
-import xyz.izaak.radon.primitive.geometry.Geometry;
+import xyz.izaak.radon.mesh.Mesh;
+import xyz.izaak.radon.mesh.geometry.Geometry;
 import xyz.izaak.radon.shading.annotation.FragmentShaderBlock;
 import xyz.izaak.radon.shading.annotation.FragmentShaderMain;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
@@ -62,7 +62,7 @@ public class ShaderCompiler {
         return blankInstance()
                 .with(Camera.class)
                 .with(Entity.class)
-                .with(Primitive.class)
+                .with(Mesh.class)
                 .with(Geometry.class)
                 .with(Scene.class);
     }

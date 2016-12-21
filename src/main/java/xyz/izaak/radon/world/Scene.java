@@ -5,9 +5,13 @@ import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +35,7 @@ public class Scene {
     private Set<Entity> entities = new HashSet<>();
     private Set<DirectionalLight> directionalLights = new HashSet<>();
     private Set<PointLight> pointLights = new HashSet<>();
+    private Map<UUID, Portal> portalsById = new HashMap<>();
     private Vector3f gravity;
 
     /**
@@ -125,6 +130,13 @@ public class Scene {
      */
     public Set<DirectionalLight> getDirectionalLights() {
         return directionalLights;
+    }
+
+    /**
+     * @return a Collection view of the Portals in the scene
+     */
+    public Collection<Portal> getPortals() {
+        return portalsById.values();
     }
 
     /**

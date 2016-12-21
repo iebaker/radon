@@ -115,6 +115,14 @@ public class Points {
         return new Vector4f(vector.x, vector.y, vector.z, 1.0f);
     }
 
+    public static void setHomogeneousVector(Vector4f target, Vector3f vector) {
+        target.set(vector.x, vector.y, vector.z, 0.0f);
+    }
+
+    public static void setHomogeneousPoint(Vector4f target, Vector3f point) {
+        target.set(point.x, point.y, point.z, 1.0f);
+    }
+
     public static Vector3f randomUnit3f() {
         return new Vector3f(random.nextFloat(), random.nextFloat(), random.nextFloat()).normalize();
     }
