@@ -430,6 +430,8 @@ public class Camera implements Transformable {
 
         glColorMask(true, true, true, true);
         glDepthMask(true);
+        glStencilFunc(GL_EQUAL, depth, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         for (Entity entity : scene.getEntities()) {
             for (Mesh mesh : entity.getMeshes()) {
                 renderMesh(mesh, this, scene, entity, mesh, mesh.getGeometry(), mesh.getMaterial());
