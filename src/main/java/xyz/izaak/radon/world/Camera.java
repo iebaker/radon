@@ -437,6 +437,13 @@ public class Camera implements Transformable {
                 renderMesh(mesh, this, scene, entity, mesh, mesh.getGeometry(), mesh.getMaterial());
             }
         }
+
+        for (Portal portal : scene.getPortals()) {
+            Entity outline = portal.getOutlineEntity();
+            for (Mesh mesh : outline.getMeshes()) {
+                renderMesh(mesh, this, scene, outline, mesh, mesh.getGeometry(), mesh.getMaterial());
+            }
+        }
     }
 
     private void stencilPortal(Portal portal, int depth) throws RadonException {

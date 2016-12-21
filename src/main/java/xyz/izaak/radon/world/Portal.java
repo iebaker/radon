@@ -8,7 +8,9 @@ import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.mesh.geometry.QuadGeometry;
+import xyz.izaak.radon.mesh.geometry.QuadOutlineGeometry;
 import xyz.izaak.radon.mesh.material.PortalMaterial;
+import xyz.izaak.radon.mesh.material.SolidColorMaterial;
 
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ public class Portal extends MatrixTransformable {
     private Scene parentScene;
     private Portal childPortal;
     private Entity entity;
+    private Entity outlineEntity;
 
     // Pre allocated workspace for crossing calculations
     private Vector4f start = new Vector4f();
@@ -40,11 +43,18 @@ public class Portal extends MatrixTransformable {
         Matrix4f rotation = OrthonormalBasis.rotation(OrthonormalBasis.STANDARD, frontBasis);
         Mesh portalQuad = new Mesh(new QuadGeometry(), new PortalMaterial());
         portalQuad.scale(3.6f, 8.0f, 1.0f);
-        portalQuad.transform(rotation);
-        portalQuad.translate(position);
-
         this.entity = Entity.builder().build();
         this.entity.addMeshes(portalQuad);
+        this.entity.transform(rotation);
+        this.entity.translate(position);
+
+        Mesh portalOutlineMesh = new Mesh(new QuadOutlineGeometry(), new SolidColorMaterial(Points.WHITE));
+        portalOutlineMesh.scale(3.6f, 8.0f, 1.0f);
+        portalOutlineMesh.scale(1.01f, 1.01f, 1.0f);
+        this.outlineEntity = Entity.builder().build();
+        this.outlineEntity.addMeshes(portalOutlineMesh);
+        this.outlineEntity.transform(rotation);
+        this.outlineEntity.translate(position);
     }
 
     public void setParentScene(Scene parentScene) {
@@ -77,6 +87,10 @@ public class Portal extends MatrixTransformable {
 
     public Entity getEntity() {
         return entity;
+    }
+
+    public Entity getOutlineEntity() {
+        return outlineEntity;
     }
 
     public void link(Portal childPortal) {

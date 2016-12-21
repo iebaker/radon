@@ -58,6 +58,7 @@ public class PolarSphereGeometry extends Geometry {
         // bottom cap
         mesh.next(VERTEX_POSITION, Points.copyOf(Points.__z));
         mesh.next(VERTEX_NORMAL, Points.copyOf(Points.__z));
+        zenithAngle = zenithAngleTop;
         for (float i = longitudeLines; i >= 0; i--) {
             azimuthAngle = i * 2 * Points.piOver(1) / (float) longitudeLines;
 

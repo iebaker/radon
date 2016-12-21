@@ -38,5 +38,11 @@ public class OrthonormalBasis extends Basis {
         this.getI().set(i);
         this.getJ().set(j);
         Points.copyOf(this.getI()).cross(j, this.getK());
+
+        this.getMatrix().set(
+                this.getI().x, this.getJ().x, this.getK().x,
+                this.getI().y, this.getJ().y, this.getK().y,
+                this.getI().z, this.getJ().z, this.getK().z
+        ).transpose();
     }
 }

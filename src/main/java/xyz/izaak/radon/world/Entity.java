@@ -144,4 +144,9 @@ public class Entity extends MatrixTransformable {
     public Matrix4f getModel() {
         return super.getModel();
     }
+
+    @Override
+    public void scale(float x, float y, float z) {
+        System.out.println("Entity level scaling not supported!");
+    }
 }
