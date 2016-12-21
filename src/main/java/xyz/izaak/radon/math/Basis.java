@@ -9,18 +9,18 @@ import org.joml.Vector3f;
 public class Basis {
     private static Matrix3f scratch = new Matrix3f();
     private Matrix3f matrix = new Matrix3f();
-    private Vector3f i;
-    private Vector3f j;
-    private Vector3f k;
+    private Vector3f i = new Vector3f();
+    private Vector3f j = new Vector3f();
+    private Vector3f k = new Vector3f();
 
     public static void change(Vector3f vector, Basis from, Basis to) {
         scratch.set(to.matrix).invert().mul(from.matrix).transform(vector);
     }
 
     Basis() {
-        this.i = Points.X__;
-        this.j = Points._Y_;
-        this.k = Points.__Z;
+        this.i.set(Points.X__);
+        this.j.set(Points._Y_);
+        this.k.set(Points.__Z);
         this.matrix.set(
                 i.x, j.x, k.x,
                 i.y, j.y, k.y,

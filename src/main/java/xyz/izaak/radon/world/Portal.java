@@ -31,19 +31,24 @@ public class Portal extends MatrixTransformable {
     private Vector4f point = new Vector4f();
     private Matrix4f inverse = new Matrix4f();
 
-    public Portal(Scene parentScene, Vector3f position, OrthonormalBasis frontBasis) {
-        this.parentScene = parentScene;
+    public Portal(Vector3f position, OrthonormalBasis frontBasis) {
+        this.uuid = UUID.randomUUID();
         this.position = position;
         this.frontBasis = frontBasis;
         this.backBasis = new OrthonormalBasis(Points.copyOf(frontBasis.getI()).negate(), Points.copyOf(frontBasis.getJ()));
-        this.uuid = UUID.randomUUID();
 
+        Matrix4f rotation = OrthonormalBasis.rotation(OrthonormalBasis.STANDARD, frontBasis);
         Mesh portalQuad = new Mesh(new QuadGeometry(), new PortalMaterial());
-        portalQuad.setTransform(new Matrix4f(frontBasis.getMatrix()));
+        portalQuad.scale(3.6f, 8.0f, 1.0f);
+        portalQuad.transform(rotation);
         portalQuad.translate(position);
 
         this.entity = Entity.builder().build();
         this.entity.addMeshes(portalQuad);
+    }
+
+    public void setParentScene(Scene parentScene) {
+        this.parentScene = parentScene;
     }
 
     public OrthonormalBasis getFrontBasis() {

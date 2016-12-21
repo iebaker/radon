@@ -104,6 +104,11 @@ public class Scene {
         directionalLights.add(directionalLight);
     }
 
+    public void addPortal(Portal portal) {
+        portal.setParentScene(this);
+        portalsById.put(portal.getUuid(), portal);
+    }
+
     /**
      * @return a 3-vector representing the direction of gravity in this Scene
      */

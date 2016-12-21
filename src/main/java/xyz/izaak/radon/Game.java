@@ -273,7 +273,7 @@ public class Game {
         GL.createCapabilities();
 
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
-        glClearStencil(1);
+        glClearStencil(0);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LINE_SMOOTH);
         glEnable(GL_CULL_FACE);

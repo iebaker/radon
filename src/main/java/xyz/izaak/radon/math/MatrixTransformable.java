@@ -10,7 +10,6 @@ import org.joml.Vector4f;
 public class MatrixTransformable implements Transformable {
     private Matrix4f model = new Matrix4f();
     private Matrix4f scratch = new Matrix4f();
-    private Vector4f scratchVector = new Vector4f();
 
     @Override
     public void scale(float x, float y, float z) {
@@ -27,19 +26,9 @@ public class MatrixTransformable implements Transformable {
         model.set(scratch.rotation(amount, x, y, z).mul(model));
     }
 
-    public void rotateSelf(float amount, Vector3f axis) {
-        rotateSelf(amount, axis.x, axis.y, axis.z);
-    }
-
-    public void rotateSelf(float amount, float x, float y, float z) {
-        scratchVector.set(Points.homogeneousPoint(Points.ORIGIN_3D));
-        model.transform(scratchVector);
-
-    }
-
     @Override
-    public void setTransform(Matrix4f transform) {
-        model.set(transform);
+    public void transform(Matrix4f transform) {
+        model.set(scratch.set(transform).mul(model));
     }
 
     @Override

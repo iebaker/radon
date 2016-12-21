@@ -10,8 +10,8 @@ public interface Transformable {
     void scale(float x, float y, float z);
     void translate(float x, float y, float z);
     void rotate(float amount, float x, float y, float z);
+    void transform(Matrix4f transform);
     void clearTransforms();
-    void setTransform(Matrix4f transform);
 
     default void scale(float factor) {
         scale(factor, factor, factor);
@@ -27,5 +27,10 @@ public interface Transformable {
 
     default void rotate(float amount, Vector3f axis) {
         rotate(amount, axis.x, axis.y, axis.z);
+    }
+
+    default void setTransform(Matrix4f transform) {
+        clearTransforms();
+        transform(transform);
     }
 }

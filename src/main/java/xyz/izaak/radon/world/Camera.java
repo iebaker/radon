@@ -24,9 +24,12 @@ import static org.lwjgl.opengl.GL11.GL_DECR;
 import static org.lwjgl.opengl.GL11.GL_EQUAL;
 import static org.lwjgl.opengl.GL11.GL_INCR;
 import static org.lwjgl.opengl.GL11.GL_KEEP;
+import static org.lwjgl.opengl.GL11.GL_STENCIL_TEST;
 import static org.lwjgl.opengl.GL11.glColorMask;
 import static org.lwjgl.opengl.GL11.glDepthMask;
+import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glStencilFunc;
 import static org.lwjgl.opengl.GL11.glStencilOp;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -74,6 +77,7 @@ public class Camera implements Transformable {
     private Vector3f scratch = new Vector3f();
 
     private float[] parameters = new float[4];
+    private int maxPortalDepth;
     private Shader shader;
 
     /**
@@ -118,6 +122,7 @@ public class Camera implements Transformable {
      * A builder class for {@link Camera} objects
      */
     public static class Builder {
+        private int maxPortalDepth = 5;
         private float nearPlane = 0.1f;
         private float farPlane = 1000.0f;
         private float aspectRatio = 1.3f;
@@ -200,11 +205,16 @@ public class Camera implements Transformable {
             return this;
         }
 
+        public Builder maxPortalDepth(int maxPortalDepth) {
+            this.maxPortalDepth = maxPortalDepth;
+            return this;
+        }
+
         /**
          * @return a new Camera object with properties as set on this Builder object
          */
         public Camera build() {
-            return new Camera(nearPlane, farPlane, aspectRatio, fov, eye, look, up);
+            return new Camera(nearPlane, farPlane, aspectRatio, fov, eye, look, up, maxPortalDepth);
         }
     }
 
@@ -225,7 +235,8 @@ public class Camera implements Transformable {
             float fov,
             Vector3f eye,
             Vector3f look,
-            Vector3f up) {
+            Vector3f up,
+            int maxPortalDepth) {
         this.eye.set(eye);
         this.up.set(up);
         this.look.set(look);
@@ -234,6 +245,8 @@ public class Camera implements Transformable {
         this.set(FAR_PLANE, farPlane);
         this.set(ASPECT_RATIO, aspectRatio);
         this.set(FOV, fov);
+        recomputeProjection();
+        this.maxPortalDepth = maxPortalDepth;
     }
 
     /**
@@ -354,7 +367,9 @@ public class Camera implements Transformable {
      * @throws RadonException if anything detectable goes wrong during rendering
      */
     public void capture(Scene scene) throws RadonException {
-        capture(scene, 0);
+        glEnable(GL_STENCIL_TEST);
+        capture(scene, 0, null);
+        glDisable(GL_STENCIL_TEST);
     }
 
     /* ============================================= *
@@ -392,21 +407,25 @@ public class Camera implements Transformable {
     }
 
     @Override
-    public void setTransform(Matrix4f transform) {
-        clearTransforms();
+    public void transform(Matrix4f transform) {
         transform.transformPosition(eye);
         transform.transformDirection(up);
         transform.transformDirection(look);
         recomputeView();
     }
 
-    private void capture(Scene scene, int depth) throws RadonException {
-        for (Portal portal : scene.getPortals()) {
-            stencilPortal(portal, depth);
-            shiftPerspective(portal, portal.getChildPortal());
-            capture(portal.getChildPortal().getParentScene(), depth + 1);
-            shiftPerspective(portal.getChildPortal(), portal);
-            protectPortal(portal, depth);
+    private void capture(Scene scene, int depth, Portal throughPortal) throws RadonException {
+        if (scene == null) return;
+
+        if (depth < maxPortalDepth) {
+            for (Portal portal : scene.getPortals()) {
+                if (portal == throughPortal || portal.getChildPortal() == null) continue;
+                stencilPortal(portal, depth);
+                shiftPerspective(portal, portal.getChildPortal());
+                capture(portal.getChildPortal().getParentScene(), depth + 1, portal.getChildPortal());
+                shiftPerspective(portal.getChildPortal(), portal);
+                protectPortal(portal, depth);
+            }
         }
 
         glColorMask(true, true, true, true);
