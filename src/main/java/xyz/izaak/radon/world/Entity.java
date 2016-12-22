@@ -10,8 +10,10 @@ import xyz.izaak.radon.shading.UniformProvider;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,7 +23,7 @@ import java.util.Set;
  */
 @ProvidesShaderComponents
 public class Entity extends MatrixTransformable implements UniformProvider {
-    private Set<Mesh> meshes = new HashSet<>();
+    private List<Mesh> meshes = new ArrayList<>();
     private CollisionShape collisionShape;
     private float mass;
     private float restitution;
@@ -88,7 +90,7 @@ public class Entity extends MatrixTransformable implements UniformProvider {
         return friction;
     }
 
-    public Set<Mesh> getMeshes() {
+    public List<Mesh> getMeshes() {
         return meshes;
     }
 
