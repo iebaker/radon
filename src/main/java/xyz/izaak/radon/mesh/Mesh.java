@@ -12,6 +12,7 @@ import xyz.izaak.radon.mesh.geometry.Geometry;
 import xyz.izaak.radon.mesh.material.Material;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
+import xyz.izaak.radon.shading.UniformProvider;
 import xyz.izaak.radon.shading.VertexAttribute;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
@@ -35,7 +36,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 @ProvidesShaderComponents
-public class Mesh extends MatrixTransformable {
+public class Mesh extends MatrixTransformable implements UniformProvider {
 
     private static final int FLOAT_SIZE = 4;
 
@@ -184,6 +185,11 @@ public class Mesh extends MatrixTransformable {
     @ShaderUniform(identifier = Identifiers.MESH_MODEL)
     public Matrix4f getModel() {
         return super.getModel();
+    }
+
+    @Override
+    public void setUniformsOn(Shader shader) {
+        shader.setUniform(Identifiers.MESH_MODEL, getModel());
     }
 
     public int getVertexArrayFor(Shader shader) {

@@ -5,6 +5,8 @@ import org.joml.Matrix4f;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.shading.Identifiers;
+import xyz.izaak.radon.shading.Shader;
+import xyz.izaak.radon.shading.UniformProvider;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
@@ -18,46 +20,27 @@ import java.util.Set;
  * the way this Entity interacts kinematically with other Entities in the scene.
  */
 @ProvidesShaderComponents
-public class Entity extends MatrixTransformable {
+public class Entity extends MatrixTransformable implements UniformProvider {
     private Set<Mesh> meshes = new HashSet<>();
     private CollisionShape collisionShape;
     private float mass;
     private float restitution;
     private float friction;
 
-    /**
-     * @return an Entity.Builder object
-     */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * A Builder class for {@link Entity} objects
-     */
     public static class Builder {
         private float mass = 0.0f;
         private float restitution = 0.5f;
         private float friction = 1.5f;
 
-        /**
-         * Mass is the resistance of an object to acceleration in response to force. It's default value
-         * is 0. This does not imply any specific system of units.
-         *
-         * @param mass the mass to be set.
-         * @return this builder
-         */
         public Builder mass(float mass) {
             this.mass = mass;
             return this;
         }
 
-        /**
-         * The elasticity of this object in collision. Must be a value between 0 and 1. The default value
-         * is 0.5.
-         * @param restitution the restitution to be set
-         * @return this builder
-         */
         public Builder restitution(float restitution) {
             this.restitution = restitution;
             return this;
@@ -68,10 +51,6 @@ public class Entity extends MatrixTransformable {
             return this;
         }
 
-        /**
-         * Constructs an Entity object from the parameters in this builder
-         * @return an Entity object
-         */
         public Entity build() {
             return new Entity(mass, restitution, friction);
         }
@@ -89,53 +68,30 @@ public class Entity extends MatrixTransformable {
         this.friction = friction;
     }
 
-    /**
-     * Add Primitives to this object, which comprise its visual appearance
-     * @param meshes the array of primitives to be added
-     */
     public void addMeshes(Mesh... meshes) {
         this.meshes.addAll(Arrays.asList(meshes));
     }
 
-    /**
-     * Add a CollisionShape to this object, so that it can be involved in a JBullet kinematic simulation
-     * @param collisionShape the JBullet CollisionShape object which represents this entity in a kinematic simulation
-     */
     public void setCollisionShape(CollisionShape collisionShape) {
         this.collisionShape = collisionShape;
     }
 
-    /**
-     * @return the resistance of this object to acceleration in response to force
-     */
     public float getMass() {
         return mass;
     }
 
-    /**
-     * @return elasticity of this object in collision, on a scale from 0 (inelastic) to 1 (elastic)
-     */
     public float getRestitution() {
         return restitution;
     }
 
-    /**
-     * @return the resistance of this object to sliding against other objects
-     */
     public float getFriction() {
         return friction;
     }
 
-    /**
-     * @return a Set view of the Primitives which make up this object's visual appearance
-     */
     public Set<Mesh> getMeshes() {
         return meshes;
     }
 
-    /**
-     * @return the JBullet CollisionShape which represents this entity in a kinematic simulation
-     */
     public CollisionShape getCollisionShape() {
         return collisionShape;
     }
@@ -143,6 +99,11 @@ public class Entity extends MatrixTransformable {
     @ShaderUniform(identifier = Identifiers.ENTITY_MODEL)
     public Matrix4f getModel() {
         return super.getModel();
+    }
+
+    @Override
+    public void setUniformsOn(Shader shader) {
+        shader.setUniform(Identifiers.ENTITY_MODEL, getModel());
     }
 
     @Override

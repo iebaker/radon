@@ -4,8 +4,10 @@ import org.joml.Vector3f;
 import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.mesh.geometry.Geometry;
 import xyz.izaak.radon.shading.Identifiers;
+import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.ShaderCompiler;
 import xyz.izaak.radon.shading.ShaderVariableType;
+import xyz.izaak.radon.shading.UniformProvider;
 import xyz.izaak.radon.shading.annotation.FragmentShaderBlock;
 import xyz.izaak.radon.shading.annotation.FragmentShaderMain;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
@@ -134,5 +136,16 @@ public class PhongMaterial extends Material {
     @ShaderUniform(identifier = Identifiers.SPECULAR_COLOR)
     public Vector3f getSpecularColor() {
         return specularColor;
+    }
+
+    @Override
+    public void setUniformsOn(Shader shader) {
+        shader.setUniform(Identifiers.AMBIENT_COEFFICIENT, getAmbientCoefficient());
+        shader.setUniform(Identifiers.DIFFUSE_COEFFICIENT, getDiffuseCoefficient());
+        shader.setUniform(Identifiers.SPECULAR_COEFFICIENT, getSpecularCoefficient());
+        shader.setUniform(Identifiers.SPECULAR_EXPONENT, getSpecularExponent());
+        shader.setUniform(Identifiers.AMBIENT_COLOR, getAmbientColor());
+        shader.setUniform(Identifiers.DIFFUSE_COLOR, getDiffuseColor());
+        shader.setUniform(Identifiers.SPECULAR_COLOR, getSpecularColor());
     }
 }
