@@ -5,14 +5,18 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.BufferUtils;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
 import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.FloatBuffer;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,6 +47,7 @@ public class Shader {
     private String fragmentSource;
     private String name;
     private Set<Class<?>> providerClasses;
+    private Map<String, FloatBuffer> uniformStorage = new HashMap<>();
 
     @FunctionalInterface
     interface SetUniform { void set(int uniformLocation); }
@@ -67,56 +72,97 @@ public class Shader {
         return glGetUniformLocation(program, name);
     }
 
-    private void setUniformIfLocationExists(String name, SetUniform setUniform) {
-        int uniformLocation = getUniformLocation(name);
+    public void setUniform(String name, int maxLength, List<Vector3f> values) {
+        int uniformLocation = glGetUniformLocation(program, name);
         if (uniformLocation >= 0) {
-            setUniform.set(uniformLocation);
+            if (!uniformStorage.containsKey(name)) {
+                uniformStorage.put(name, BufferUtils.createFloatBuffer(maxLength * 3));
+            }
+            int index = 0;
+            for (Vector3f value : values) {
+                uniformStorage.get(name).put(value.x);
+                uniformStorage.get(name).put(value.y);
+                uniformStorage.get(name).put(value.z);
+            }
+            uniformStorage.get(name).rewind();
+            glUniform3fv(uniformLocation, uniformStorage.get(name));
         }
     }
 
-    public void setUniform(String name, List<Vector3f> values) {
-        setUniformIfLocationExists(name, location -> {
-            float[] valueArray = new float[values.size() * 3];
-            int index = 0;
-            for (Vector3f value : values) {
-                valueArray[index++] = value.x;
-                valueArray[index++] = value.y;
-                valueArray[index++] = value.z;
-            }
-            glUniform3fv(location, valueArray);
-        });
-    }
-
     public void setUniform(String name, Matrix3f value) {
-        setUniformIfLocationExists(name, location -> glUniformMatrix3fv(location, false, Points.floatBufferOf(value)));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            if (!uniformStorage.containsKey(name)) {
+                uniformStorage.put(name, BufferUtils.createFloatBuffer(3 * 3));
+            }
+            value.get(uniformStorage.get(name));
+            glUniformMatrix3fv(uniformLocation, false, uniformStorage.get(name));
+        }
     }
 
     public void setUniform(String name, Matrix4f value) {
-        setUniformIfLocationExists(name, location -> glUniformMatrix4fv(location, false, Points.floatBufferOf(value)));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            if (!uniformStorage.containsKey(name)) {
+                uniformStorage.put(name, BufferUtils.createFloatBuffer(4 * 4));
+            }
+            value.get(uniformStorage.get(name));
+            glUniformMatrix4fv(uniformLocation, false, uniformStorage.get(name));
+        }
     }
 
     public void setUniform(String name, Vector2f value) {
-        setUniformIfLocationExists(name, location -> glUniform2fv(location, Points.floatBufferOf(value)));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            if (!uniformStorage.containsKey(name)) {
+                uniformStorage.put(name, BufferUtils.createFloatBuffer(2));
+            }
+            value.get(uniformStorage.get(name));
+            glUniform2fv(uniformLocation, uniformStorage.get(name));
+        }
     }
 
     public void setUniform(String name, Vector3f value) {
-        setUniformIfLocationExists(name, location -> glUniform3fv(location, Points.floatBufferOf(value)));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            if (!uniformStorage.containsKey(name)) {
+                uniformStorage.put(name, BufferUtils.createFloatBuffer(3));
+            }
+            value.get(uniformStorage.get(name));
+            glUniform3fv(uniformLocation, uniformStorage.get(name));
+        }
     }
 
     public void setUniform(String name, Vector4f value) {
-        setUniformIfLocationExists(name, location -> glUniform4fv(location, Points.floatBufferOf(value)));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            if (!uniformStorage.containsKey(name)) {
+                uniformStorage.put(name, BufferUtils.createFloatBuffer(4));
+            }
+            value.get(uniformStorage.get(name));
+            glUniform4fv(uniformLocation, uniformStorage.get(name));
+        }
     }
 
     public void setUniform(String name, float value) {
-        setUniformIfLocationExists(name, location -> glUniform1f(location, value));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            glUniform1f(uniformLocation, value);
+        }
     }
 
     public void setUniform(String name, int value) {
-        setUniformIfLocationExists(name, location -> glUniform1i(location, value));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            glUniform1i(uniformLocation, value);
+        }
     }
 
     public void setUniform(String name, boolean value) {
-        setUniformIfLocationExists(name, location -> glUniform1i(location, value ? 1 : 0));
+        int uniformLocation = glGetUniformLocation(program, name);
+        if (uniformLocation >= 0) {
+            glUniform1i(uniformLocation, value ? 1 : 0);
+        }
     }
 
     public List<VertexAttribute> getVertexAttributes() {
