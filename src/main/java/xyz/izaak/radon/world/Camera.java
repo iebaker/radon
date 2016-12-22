@@ -19,6 +19,7 @@ import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.lwjgl.opengl.GL11.GL_DECR;
@@ -300,15 +301,25 @@ public class Camera implements Transformable, UniformProvider {
         glDepthMask(true);
         glStencilFunc(GL_EQUAL, depth, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        for (Entity entity : scene.getEntities()) {
-            for (Mesh mesh : entity.getMeshes()) {
+
+        List<Entity> entities = scene.getEntities();
+        int entityCount = entities.size();
+        for (int i = 0; i < entityCount; i++) {
+            Entity entity = entities.get(i);
+            List<Mesh> meshes = entity.getMeshes();
+            int meshCount = meshes.size();
+            for (int j = 0; j < meshCount; j++) {
+                Mesh mesh = meshes.get(j);
                 renderMesh(mesh, this, scene, entity, mesh, mesh.getGeometry(), mesh.getMaterial());
             }
         }
 
         for (Portal portal : scene.getPortals()) {
             Entity outline = portal.getOutlineEntity();
-            for (Mesh mesh : outline.getMeshes()) {
+            List<Mesh> meshes = outline.getMeshes();
+            int meshCount = meshes.size();
+            for (int i = 0; i < meshCount; i++) {
+                Mesh mesh = meshes.get(i);
                 renderMesh(mesh, this, scene, outline, mesh, mesh.getGeometry(), mesh.getMaterial());
             }
         }
@@ -339,15 +350,22 @@ public class Camera implements Transformable, UniformProvider {
     private void renderMesh(Mesh mesh, UniformProvider... uniformProviders) throws RadonException{
         Shader shader = selectShaderFor(mesh);
         shader.use();
-        for (UniformProvider uniformProvider : uniformProviders) {
-            uniformProvider.setUniformsOn(shader);
+
+        int uniformProviderCount = uniformProviders.length;
+        for (int i = 0; i < uniformProviderCount; i++) {
+            uniformProviders[i].setUniformsOn(shader);
         }
+
         mesh.bufferFor(shader);
         glBindVertexArray(mesh.getVertexArrayFor(shader));
         shader.validate();
-        for (Mesh.Interval interval : mesh.getIntervals()) {
+
+        int numIntervals = mesh.getIntervals().size();
+        for (int i = 0; i < numIntervals; i++) {
+            Mesh.Interval interval = mesh.getIntervals().get(i);
             glDrawArrays(interval.mode, interval.first, interval.count);
         }
+
         glBindVertexArray(0);
     }
 

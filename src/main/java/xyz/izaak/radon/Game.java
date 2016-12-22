@@ -221,20 +221,20 @@ public class Game {
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 switch (action) {
                     case GLFW_PRESS:
-                        for (GameSystem gameSystem : gameSystems) {
-                            gameSystem.onKeyDown(key);
-                            gameSystem.onKeyHeld(key);
+                        for (int i = 0; i < gameSystems.size(); i++) {
+                            gameSystems.get(i).onKeyDown(key);
+                            gameSystems.get(i).onKeyHeld(key);
                         }
                         break;
                     case GLFW_REPEAT:
-                        for (GameSystem gameSystem : gameSystems) {
-                            gameSystem.onKeyRepeat(key);
-                            gameSystem.onKeyHeld(key);
+                        for (int i = 0; i < gameSystems.size(); i++) {
+                            gameSystems.get(i).onKeyRepeat(key);
+                            gameSystems.get(i).onKeyHeld(key);
                         }
                         break;
                     case GLFW_RELEASE:
-                        for (GameSystem gameSystem : gameSystems) {
-                            gameSystem.onKeyUp(key);
+                        for (int i = 0; i < gameSystems.size(); i++) {
+                            gameSystems.get(i).onKeyUp(key);
                         }
                         break;
                 }
@@ -245,8 +245,8 @@ public class Game {
             public void invoke(long window, double xPos, double yPos) {
                 mouseDelta.set((float) xPos, (float) yPos).sub(previousMousePosition);
                 previousMousePosition.set((float) xPos, (float) yPos);
-                for (GameSystem gameSystem : gameSystems) {
-                    gameSystem.onMouseMove(mouseDelta);
+                for (int i = 0; i < gameSystems.size(); i++) {
+                    gameSystems.get(i).onMouseMove(mouseDelta);
                 }
             }
         });
@@ -255,13 +255,13 @@ public class Game {
             public void invoke(long window, int button, int action, int mods) {
                 switch (action) {
                     case GLFW_PRESS:
-                        for (GameSystem gameSystem : gameSystems) {
-                            gameSystem.onMouseDown(previousMousePosition, button);
+                        for (int i = 0; i < gameSystems.size(); i++) {
+                            gameSystems.get(i).onMouseDown(previousMousePosition, button);
                         }
                         break;
                     case GLFW_RELEASE:
-                        for (GameSystem gameSystem : gameSystems) {
-                            gameSystem.onMouseUp(previousMousePosition, button);
+                        for (int i = 0; i < gameSystems.size(); i++) {
+                            gameSystems.get(i).onMouseUp(previousMousePosition, button);
                         }
                         break;
                 }
@@ -296,8 +296,8 @@ public class Game {
             elapsedTime = rightNow - previousTime;
             previousTime = rightNow;
 
-            for (GameSystem gameSystem : gameSystems) {
-                gameSystem.update(elapsedTime);
+            for (int i = 0; i < gameSystems.size(); i++) {
+                gameSystems.get(i).update(elapsedTime);
             }
 
             glfwSwapBuffers(window);

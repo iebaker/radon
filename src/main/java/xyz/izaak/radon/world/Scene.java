@@ -29,9 +29,9 @@ public class Scene implements UniformProvider {
     public static final int MAX_DIRECTIONAL_LIGHTS = 4;
     public static final int MAX_POINT_LIGHTS = 256;
 
-    private Set<Entity> entities = new HashSet<>();
-    private Set<DirectionalLight> directionalLights = new HashSet<>();
-    private Set<PointLight> pointLights = new HashSet<>();
+    private List<Entity> entities = new ArrayList<>();
+    private List<DirectionalLight> directionalLights = new ArrayList<>(MAX_DIRECTIONAL_LIGHTS);
+    private List<PointLight> pointLights = new ArrayList<>(MAX_POINT_LIGHTS);
 
     private List<Vector3f> directionalLightDirections = new ArrayList<>(MAX_DIRECTIONAL_LIGHTS);
     private List<Vector3f> directionalLightIntensities = new ArrayList<>(MAX_DIRECTIONAL_LIGHTS);
@@ -87,15 +87,15 @@ public class Scene implements UniformProvider {
         return gravity;
     }
 
-    public Set<Entity> getEntities() {
+    public List<Entity> getEntities() {
         return entities;
     }
 
-    public Set<PointLight> getPointLights() {
+    public List<PointLight> getPointLights() {
         return pointLights;
     }
 
-    public Set<DirectionalLight> getDirectionalLights() {
+    public List<DirectionalLight> getDirectionalLights() {
         return directionalLights;
     }
 
