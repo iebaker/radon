@@ -272,4 +272,13 @@ public class Points {
         float z = (float) (Math.cos(zenithAngle));
         target.set(x, y, z);
     }
+
+    public static void project(Vector3f original, Vector3f onto, Vector3f target) {
+        target.set(onto).mul(onto.dot(original) / onto.lengthSquared());
+    }
+
+    public static void projectPerpendicular(Vector3f original, Vector3f onto, Vector3f target) {
+        project(original, onto, target);
+        target.negate().add(original);
+    }
 }
