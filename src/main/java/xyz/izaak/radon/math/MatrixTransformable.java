@@ -36,6 +36,10 @@ public class MatrixTransformable implements Transformable {
         model.identity();
     }
 
+    public void setTransform(float[] transform) {
+        model.set(transform);
+    }
+
     public Matrix4f getModel() {
         return model;
     }

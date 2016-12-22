@@ -21,6 +21,7 @@ import xyz.izaak.radon.world.Scene;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,11 +31,15 @@ import java.util.Set;
 public class JBulletPhysicsSystem implements GameSystem {
     private Scene scene;
     private DynamicsWorld dynamicsWorld;
+    private Transform entityTransform;
+    private float[] matrixData;
     private Map<Entity, RigidBody> rigidBodiesByEntity;
 
     public JBulletPhysicsSystem(Scene scene) {
         this.scene = scene;
         this.rigidBodiesByEntity = new HashMap<>();
+        this.entityTransform = new Transform();
+        this.matrixData = new float[16];
     }
 
     @Override
@@ -82,17 +87,14 @@ public class JBulletPhysicsSystem implements GameSystem {
     @Override
     public void update(float seconds) {
         dynamicsWorld.stepSimulation(seconds);
-        rigidBodiesByEntity.entrySet().forEach(entry -> {
-            Entity entity = entry.getKey();
-            RigidBody rigidBody = entry.getValue();
-
-            Transform entityTransform = new Transform();
+        List<Entity> entities = scene.getEntities();
+        int entityCount = entities.size();
+        for (int i = 0; i < entityCount; i++) {
+            RigidBody rigidBody = rigidBodiesByEntity.get(entities.get(i));
+            if (rigidBody == null) continue;
             rigidBody.getMotionState().getWorldTransform(entityTransform);
-            float[] matrixData = new float[16];
             entityTransform.getOpenGLMatrix(matrixData);
-
-            Matrix4f entityMatrix = new Matrix4f(matrixData);
-            entity.setTransform(Points.toJoml(entityMatrix));
-        });
+            entities.get(i).setTransform(matrixData);
+        }
     }
 }

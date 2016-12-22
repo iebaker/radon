@@ -18,6 +18,7 @@ import xyz.izaak.radon.shading.annotation.ShaderUniform;
 import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class Camera implements Transformable, UniformProvider {
     public static final int ASPECT_RATIO = 2;
     public static final int FOV = 3;
 
-    private static Set<Shader> shaders = new HashSet<>();
+    private static List<Shader> shaders = new ArrayList<>();
 
     private Vector3f eye = new Vector3f();
     private Vector3f eyePlusLook = new Vector3f();
@@ -286,8 +287,12 @@ public class Camera implements Transformable, UniformProvider {
     private void capture(Scene scene, int depth, Portal throughPortal) throws RadonException {
         if (scene == null) return;
 
+        List<Portal> portals = scene.getPortals();
+        int portalCount = portals.size();
+
         if (depth < maxPortalDepth) {
-            for (Portal portal : scene.getPortals()) {
+            for (int i = 0; i < portalCount; i++) {
+                Portal portal = portals.get(i);
                 if (portal == throughPortal || portal.getChildPortal() == null) continue;
                 stencilPortal(portal, depth);
                 shiftPerspective(portal, portal.getChildPortal());
@@ -314,12 +319,12 @@ public class Camera implements Transformable, UniformProvider {
             }
         }
 
-        for (Portal portal : scene.getPortals()) {
-            Entity outline = portal.getOutlineEntity();
+        for (int i = 0; i < portalCount; i++) {
+            Entity outline = portals.get(i).getOutlineEntity();
             List<Mesh> meshes = outline.getMeshes();
             int meshCount = meshes.size();
-            for (int i = 0; i < meshCount; i++) {
-                Mesh mesh = meshes.get(i);
+            for (int j = 0; j < meshCount; j++) {
+                Mesh mesh = meshes.get(j);
                 renderMesh(mesh, this, scene, outline, mesh, mesh.getGeometry(), mesh.getMaterial());
             }
         }
@@ -332,7 +337,7 @@ public class Camera implements Transformable, UniformProvider {
         glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
         Entity portalEntity = portal.getEntity();
-        Mesh portalMesh = portalEntity.getMeshes().iterator().next();
+        Mesh portalMesh = portalEntity.getMeshes().get(0);
         renderMesh(portalMesh, this, portalEntity, portalMesh, portalMesh.getGeometry(), portalMesh.getMaterial());
     }
 
@@ -343,7 +348,7 @@ public class Camera implements Transformable, UniformProvider {
         glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
 
         Entity portalEntity = portal.getEntity();
-        Mesh portalMesh = portalEntity.getMeshes().iterator().next();
+        Mesh portalMesh = portalEntity.getMeshes().get(0);
         renderMesh(portalMesh, this, portalEntity, portalMesh, portalMesh.getGeometry(), portalMesh.getMaterial());
     }
 
@@ -408,9 +413,10 @@ public class Camera implements Transformable, UniformProvider {
 
     private Shader selectShaderFor(Mesh mesh) throws RadonException {
         Shader selected = null;
-        for (Shader shader : shaders) {
-            if (shader.supports(mesh.getMaterial().getClass())) {
-                selected = shader;
+        int shaderCount = shaders.size();
+        for (int i = 0; i < shaderCount; i++) {
+            if (shaders.get(i).supports(mesh.getMaterial().getClass())) {
+                selected = shaders.get(i);
                 break;
             }
         }

@@ -38,6 +38,7 @@ public class Scene implements UniformProvider {
     private List<Vector3f> pointLightPositions = new ArrayList<>(MAX_POINT_LIGHTS);
     private List<Vector3f> pointLightIntensities = new ArrayList<>(MAX_POINT_LIGHTS);
 
+    private List<Portal> portals = new ArrayList<>();
     private Map<UUID, Portal> portalsById = new HashMap<>();
     private Vector3f gravity;
 
@@ -81,6 +82,7 @@ public class Scene implements UniformProvider {
     public void addPortal(Portal portal) {
         portal.setParentScene(this);
         portalsById.put(portal.getUuid(), portal);
+        portals.add(portal);
     }
 
     public Vector3f getGravity() {
@@ -99,8 +101,8 @@ public class Scene implements UniformProvider {
         return directionalLights;
     }
 
-    public Collection<Portal> getPortals() {
-        return portalsById.values();
+    public List<Portal> getPortals() {
+        return portals;
     }
 
     @ShaderUniform(identifier = Identifiers.DIRECTIONAL_LIGHT_COUNT)

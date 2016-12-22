@@ -79,10 +79,11 @@ public class Shader {
                 uniformStorage.put(name, BufferUtils.createFloatBuffer(maxLength * 3));
             }
             int index = 0;
-            for (Vector3f value : values) {
-                uniformStorage.get(name).put(value.x);
-                uniformStorage.get(name).put(value.y);
-                uniformStorage.get(name).put(value.z);
+            int valueCount = values.size();
+            for (int i = 0; i < valueCount; i++) {
+                uniformStorage.get(name).put(values.get(i).x);
+                uniformStorage.get(name).put(values.get(i).y);
+                uniformStorage.get(name).put(values.get(i).z);
             }
             uniformStorage.get(name).rewind();
             glUniform3fv(uniformLocation, uniformStorage.get(name));
