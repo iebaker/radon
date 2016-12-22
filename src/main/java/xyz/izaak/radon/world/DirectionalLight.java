@@ -18,16 +18,10 @@ public class DirectionalLight {
         this.direction = direction;
     }
 
-    /**
-     * @return the RGB intensity (color and brightness) of the light source
-     */
     public Vector3f getIntensity() {
         return intensity;
     }
 
-    /**
-     * @return the direction in which the light source is facing
-     */
     public Vector3f getDirection() {
         return direction;
     }

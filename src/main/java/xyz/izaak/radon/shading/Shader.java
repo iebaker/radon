@@ -63,34 +63,6 @@ public class Shader {
         this.providerClasses = providerClasses;
     }
 
-    public void setUniforms(Object object) throws IllegalArgumentException {
-        ProvidesShaderComponents test = object.getClass().getAnnotation(ProvidesShaderComponents.class);
-        if (test == null) {
-            throw new IllegalArgumentException(
-                    String.format("Class %s does not provide shader components", object.getClass().getSimpleName()));
-        }
-
-        for (Method targetMethod : object.getClass().getMethods()) {
-            ShaderUniform uniform = targetMethod.getAnnotation(ShaderUniform.class);
-            if (uniform == null) {
-                continue;
-            }
-
-            try {
-                Method setUniform = Shader.class.getMethod("setUniform", String.class, targetMethod.getReturnType());
-                setUniform.invoke(this, uniform.identifier(), targetMethod.invoke(object));
-            } catch (NoSuchMethodException e) {
-                throw new IllegalArgumentException(
-                        String.format("Shader class does not support uniform %s of type %s from class %s",
-                                uniform.identifier(),
-                                targetMethod.getReturnType().getSimpleName(),
-                                object.getClass().getSimpleName()));
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private int getUniformLocation(String name) {
         return glGetUniformLocation(program, name);
     }

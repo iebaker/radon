@@ -18,16 +18,10 @@ public class PointLight {
         this.position = position;
     }
 
-    /**
-     * @return the RGB intensity (color) of the light source
-     */
     public Vector3f getIntensity() {
         return intensity;
     }
 
-    /**
-     * @return the position of the light source within the Scene
-     */
     public Vector3f getPosition() {
         return position;
     }
