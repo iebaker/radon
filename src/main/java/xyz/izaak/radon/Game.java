@@ -138,7 +138,9 @@ public class Game {
         createWindow();
         registerCallbacks();
         initializeGl();
+        Channel.stopAll();
         initializeGameSystems();
+        Channel.flowAll();
         loop();
         System.out.printf("Game %s has run!%n", name);
     }

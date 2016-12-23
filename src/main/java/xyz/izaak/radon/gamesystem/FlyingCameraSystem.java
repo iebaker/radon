@@ -3,8 +3,11 @@ package xyz.izaak.radon.gamesystem;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import xyz.izaak.radon.Channel;
+import xyz.izaak.radon.Game;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.world.Camera;
+import xyz.izaak.radon.world.Scene;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
@@ -33,32 +36,39 @@ public class FlyingCameraSystem implements GameSystem {
     private float accelerationFactor;
     private float rotationFactor;
 
-    public FlyingCameraSystem(Camera camera, Vector3f worldVertical) {
-        this(camera, worldVertical, 0.1f, 0.5f, 1 / 500.0f);
+    private Channel<Camera> currentCameraChannel;
+
+    public FlyingCameraSystem(Vector3f worldVertical) {
+        this(worldVertical, 0.1f, 0.5f, 1 / 500.0f);
     }
 
     public FlyingCameraSystem(
-            Camera camera,
             Vector3f worldVertical,
             float topSpeed,
             float accelerationFactor,
             float rotationFactor) {
 
-        this.camera = camera;
         this.worldVertical = worldVertical;
         this.topSpeed = topSpeed;
         this.accelerationFactor = accelerationFactor;
         this.rotationFactor = rotationFactor;
-
         this.modifier = new Matrix4f();
         this.cameraForward = new Vector3f();
-        Points.projectPerpendicular(camera.getLook(), worldVertical, cameraForward);
-        this.cameraLeft = new Vector3f(cameraForward);
-        modifier.rotation(Points.piOver(2), worldVertical).transformDirection(cameraLeft);
-
         this.cameraVelocity = new Vector3f();
         this.cameraVelocityDelta = new Vector3f();
         this.cameraTargetVelocity = new Vector3f();
+    }
+
+    @Override
+    public void initialize() {
+        currentCameraChannel = Channel.request(Camera.class, Channel.CURRENT_CAMERA);
+
+        currentCameraChannel.subscribe(camera -> {
+            Points.projectPerpendicular(camera.getLook(), worldVertical, cameraForward);
+            this.cameraLeft = new Vector3f(cameraForward);
+            modifier.rotation(Points.piOver(2), worldVertical).transformDirection(cameraLeft);
+            this.camera = camera;
+        });
     }
 
     @Override
