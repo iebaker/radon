@@ -300,9 +300,9 @@ public class Camera implements Transformable, UniformProvider {
                 Portal portal = portals.get(i);
                 if (portal == throughPortal || portal.getChildPortal() == null) continue;
                 stencilPortal(portal, depth);
-                shiftPerspective(portal, portal.getChildPortal());
+                shiftPerspective(portal);
                 capture(portal.getChildPortal().getParentScene(), depth + 1, portal.getChildPortal());
-                shiftPerspective(portal.getChildPortal(), portal);
+                shiftPerspective(portal.getChildPortal());
                 protectPortal(portal, depth);
             }
         }
@@ -379,18 +379,10 @@ public class Camera implements Transformable, UniformProvider {
         glBindVertexArray(0);
     }
 
-    private void shiftPerspective(Portal local, Portal remote) {
-        scratch.set(eye).sub(local.getPosition());
-        Basis.change(scratch, OrthonormalBasis.STANDARD, local.getFrontBasis());
-        Basis.change(scratch, remote.getBackBasis(), OrthonormalBasis.STANDARD);
-        eye.set(remote.getPosition()).add(scratch);
-
-        Basis.change(look, OrthonormalBasis.STANDARD, local.getFrontBasis());
-        Basis.change(look, remote.getBackBasis(), OrthonormalBasis.STANDARD);
-
-        Basis.change(up, OrthonormalBasis.STANDARD, local.getFrontBasis());
-        Basis.change(up, remote.getBackBasis(), OrthonormalBasis.STANDARD);
-
+    public void shiftPerspective(Portal portal) {
+        portal.transformPosition(eye);
+        portal.transformDirection(look);
+        portal.transformDirection(up);
         recomputeView();
     }
 

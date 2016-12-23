@@ -1,8 +1,10 @@
 package xyz.izaak.radon.world;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import xyz.izaak.radon.math.Basis;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
@@ -18,6 +20,8 @@ import java.util.UUID;
  * Created by ibaker on 17/12/2016.
  */
 public class Portal extends MatrixTransformable {
+    public static Vector2f PORTAL_DIMENSIONS = new Vector2f(3.6f, 8.0f);
+
     private UUID uuid;
     private OrthonormalBasis frontBasis;
     private OrthonormalBasis backBasis;
@@ -27,12 +31,8 @@ public class Portal extends MatrixTransformable {
     private Entity entity;
     private Entity outlineEntity;
 
-    // Pre allocated workspace for crossing calculations
-    private Vector4f start = new Vector4f();
-    private Vector4f ray = new Vector4f();
-    private Vector4f normal = new Vector4f();
-    private Vector4f point = new Vector4f();
-    private Matrix4f inverse = new Matrix4f();
+    private Vector3f scratch = new Vector3f();
+    private Vector3f projection = new Vector3f();
 
     public Portal(Vector3f position, OrthonormalBasis frontBasis) {
         this.uuid = UUID.randomUUID();
@@ -42,14 +42,14 @@ public class Portal extends MatrixTransformable {
 
         Matrix4f rotation = OrthonormalBasis.rotationBetween(OrthonormalBasis.STANDARD, frontBasis);
         Mesh portalQuad = new Mesh(new QuadGeometry(), new PortalMaterial());
-        portalQuad.scale(3.6f, 8.0f, 1.0f);
+        portalQuad.scale(PORTAL_DIMENSIONS.x, PORTAL_DIMENSIONS.y, 1.0f);
         this.entity = Entity.builder().build();
         this.entity.addMeshes(portalQuad);
         this.entity.transform(rotation);
         this.entity.translate(position);
 
         Mesh portalOutlineMesh = new Mesh(new QuadOutlineGeometry(), new SolidColorMaterial(Points.WHITE));
-        portalOutlineMesh.scale(3.6f, 8.0f, 1.0f);
+        portalOutlineMesh.scale(PORTAL_DIMENSIONS.x, PORTAL_DIMENSIONS.y, 1.0f);
         portalOutlineMesh.scale(1.01f, 1.01f, 1.0f);
         this.outlineEntity = Entity.builder().build();
         this.outlineEntity.addMeshes(portalOutlineMesh);
@@ -97,30 +97,39 @@ public class Portal extends MatrixTransformable {
         this.childPortal = childPortal;
     }
 
-    public boolean crossedBy(Vector3f startPosition, Vector3f endPosition) {
-        start.set(startPosition.x, startPosition.y, startPosition.z, 1.0f);
-        ray.set(endPosition.x - startPosition.x, endPosition.y - startPosition.y, endPosition.z - startPosition.z, 0.0f);
+    public void transformPosition(Vector3f position) {
+        if (childPortal == null) return;
+        scratch.set(position).sub(getPosition());
+        Basis.change(scratch, OrthonormalBasis.STANDARD, frontBasis);
+        Basis.change(scratch, childPortal.getBackBasis(), OrthonormalBasis.STANDARD);
+        position.set(childPortal.getPosition()).add(scratch);
+    }
 
-        normal.set(0, 0, 1, 0);
-        point.set(0, 0, 0, 1);
+    public void transformDirection(Vector3f direction) {
+        Basis.change(direction, OrthonormalBasis.STANDARD, frontBasis);
+        Basis.change(direction, childPortal.getBackBasis(), OrthonormalBasis.STANDARD);
+    }
 
-        inverse.set(getModel()).invert();
-        inverse.transform(start);
-        inverse.transform(ray);
+    public boolean crossedBy(Vector3f source, Vector3f direction) {
+        float directionDotNormal = direction.dot(frontBasis.getK());
+        if (directionDotNormal >= 0) return false;
 
-        float term1 = normal.dot(point);
-        float term2 = normal.dot(start);
-        float term3 = normal.dot(ray);
+        // t is the distance to the plane in units of the length of direction
+        float t = scratch.set(position).sub(source).dot(frontBasis.getK()) / directionDotNormal;
+        if (t < 0 || t > 1) return false;
 
-        if (term3 >= 0) return false;
+        // scratch now points from the center of the portal to the point the
+        // ray intersects the portal's plane
+        scratch.set(direction).mul(t).add(source).sub(position);
 
-        float t = (term1 - term2) / term3;
-        if (t >= 0 && t <= 1) {
-            start.add(ray.mul(t));
-            if (Math.abs(start.x) <= 1 && Math.abs(start.y) <= 1) {
-                return true;
-            }
-        }
-        return false;
+        // projection is the horizontal component relative to the portal
+        Points.project(scratch, frontBasis.getI(), projection);
+        boolean hitsHorizontally = projection.lengthSquared() <= PORTAL_DIMENSIONS.x * PORTAL_DIMENSIONS.x / 4.0f;
+
+        // projection is the vertical component relative to the portal
+        Points.project(scratch, frontBasis.getJ(), projection);
+        boolean hitsVertically = projection.lengthSquared() <= PORTAL_DIMENSIONS.y * PORTAL_DIMENSIONS.y / 4.0f;
+
+        return hitsHorizontally && hitsVertically;
     }
 }

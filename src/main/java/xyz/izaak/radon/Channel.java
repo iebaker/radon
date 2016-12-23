@@ -42,6 +42,7 @@ public class Channel<T> {
 
     public void onFlow() {
         subscriptions.forEach(subscription -> queue.forEach(subscription::receive));
+        queue.clear();
     }
 
     public void publish(T message) {

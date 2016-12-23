@@ -5,8 +5,10 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import xyz.izaak.radon.Channel;
 import xyz.izaak.radon.Game;
+import xyz.izaak.radon.math.Basis;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.world.Camera;
+import xyz.izaak.radon.world.Portal;
 import xyz.izaak.radon.world.Scene;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
@@ -25,6 +27,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
  */
 public class FlyingCameraSystem implements GameSystem {
     private Camera camera;
+    private Scene scene;
+
     private Vector3f worldVertical;
     private Matrix4f modifier;
     private Vector3f cameraForward;
@@ -32,11 +36,12 @@ public class FlyingCameraSystem implements GameSystem {
     private Vector3f cameraVelocity;
     private Vector3f cameraVelocityDelta;
     private Vector3f cameraTargetVelocity;
+
     private float topSpeed;
     private float accelerationFactor;
     private float rotationFactor;
 
-    private Channel<Camera> currentCameraChannel;
+    private Channel<Scene> currentSceneChannel;
 
     public FlyingCameraSystem(Vector3f worldVertical) {
         this(worldVertical, 0.1f, 0.5f, 1 / 500.0f);
@@ -61,9 +66,10 @@ public class FlyingCameraSystem implements GameSystem {
 
     @Override
     public void initialize() {
-        currentCameraChannel = Channel.request(Camera.class, Channel.CURRENT_CAMERA);
+        currentSceneChannel = Channel.request(Scene.class, Channel.CURRENT_SCENE);
+        currentSceneChannel.subscribe(scene -> this.scene = scene);
 
-        currentCameraChannel.subscribe(camera -> {
+        Channel.request(Camera.class, Channel.CURRENT_CAMERA).subscribe(camera -> {
             Points.projectPerpendicular(camera.getLook(), worldVertical, cameraForward);
             this.cameraLeft = new Vector3f(cameraForward);
             modifier.rotation(Points.piOver(2), worldVertical).transformDirection(cameraLeft);
@@ -117,6 +123,21 @@ public class FlyingCameraSystem implements GameSystem {
     public void update(float seconds) {
         cameraVelocityDelta.set(cameraTargetVelocity).sub(cameraVelocity).mul(accelerationFactor);
         cameraVelocity.add(cameraVelocityDelta);
+
+        Portal crossed = null;
+        int portalCount = scene.getPortals().size();
+        for (int i = 0; i < portalCount; i++) {
+            Portal portal = scene.getPortals().get(i);
+            if (portal.crossedBy(camera.getEye(), cameraVelocity)) {
+                crossed = portal;
+                break;
+            }
+        }
+
         camera.translate(cameraVelocity);
+        if (crossed != null) {
+            camera.shiftPerspective(crossed);
+            currentSceneChannel.publish(crossed.getChildPortal().getParentScene());
+        }
     }
 }
