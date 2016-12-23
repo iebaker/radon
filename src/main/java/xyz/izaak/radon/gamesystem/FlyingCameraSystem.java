@@ -10,8 +10,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 
@@ -75,21 +77,23 @@ public class FlyingCameraSystem implements GameSystem {
     @Override
     public void onKeyHeld(int key) {
         switch (key) {
-            case GLFW_KEY_UP:
             case GLFW_KEY_W:
                 cameraTargetVelocity.set(cameraForward).mul(topSpeed);
                 break;
-            case GLFW_KEY_DOWN:
             case GLFW_KEY_S:
                 cameraTargetVelocity.set(cameraForward).negate().mul(topSpeed);
                 break;
-            case GLFW_KEY_LEFT:
             case GLFW_KEY_A:
                 cameraTargetVelocity.set(cameraLeft).mul(topSpeed);
                 break;
-            case GLFW_KEY_RIGHT:
             case GLFW_KEY_D:
                 cameraTargetVelocity.set(cameraLeft).negate().mul(topSpeed);
+                break;
+            case GLFW_KEY_SPACE:
+                cameraTargetVelocity.set(worldVertical).mul(topSpeed);
+                break;
+            case GLFW_KEY_LEFT_SHIFT:
+                cameraTargetVelocity.set(worldVertical).negate().mul(topSpeed);
                 break;
         }
     }
