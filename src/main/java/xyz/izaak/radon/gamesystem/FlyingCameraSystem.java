@@ -64,14 +64,12 @@ public class FlyingCameraSystem implements GameSystem {
         float rotationAmountX = -delta.x * rotationFactor;
         float rotationAmountY = delta.y * rotationFactor;
 
-        System.out.println("whet");
-        System.out.flush();
-        camera.rotate(rotationAmountX, worldVertical);
-        //camera.rotate(rotationAmountY, cameraLeft);
-
         modifier.rotation(rotationAmountX, worldVertical);
         modifier.transformDirection(cameraForward);
         modifier.transformDirection(cameraLeft);
+        camera.rotate(rotationAmountX, worldVertical);
+
+        camera.rotate(rotationAmountY, cameraLeft);
     }
 
     @Override

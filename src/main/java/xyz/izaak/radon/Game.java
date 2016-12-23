@@ -31,12 +31,14 @@ import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
 
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
+import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
 import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetCursorPos;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
@@ -48,6 +50,7 @@ import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
+import static org.lwjgl.glfw.GLFW.nglfwGetCursorPos;
 import static org.lwjgl.opengl.GL11.GL_BACK;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
@@ -110,8 +113,6 @@ public class Game {
         this.width = width;
         this.height = height;
         this.clearColor = clearColor;
-
-        this.previousMousePosition = new Vector2f(width / 2, height / 2);
         this.mouseDelta = new Vector2f();
     }
 
@@ -243,6 +244,7 @@ public class Game {
         glfwSetCursorPosCallback(window, cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xPos, double yPos) {
+                if (previousMousePosition == null) previousMousePosition = new Vector2f((float) xPos, (float) yPos);
                 mouseDelta.set((float) xPos, (float) yPos).sub(previousMousePosition);
                 previousMousePosition.set((float) xPos, (float) yPos);
                 for (int i = 0; i < gameSystems.size(); i++) {
@@ -292,6 +294,7 @@ public class Game {
     private void loop() {
         float rightNow, elapsedTime;
         while (!glfwWindowShouldClose(window)) {
+
             rightNow = (float) glfwGetTime();
             elapsedTime = rightNow - previousTime;
             previousTime = rightNow;
