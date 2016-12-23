@@ -9,7 +9,11 @@ import org.joml.Vector3f;
 public class OrthonormalBasis extends Basis {
     public static OrthonormalBasis STANDARD = new OrthonormalBasis(Points.X__, Points._Y_);
 
-    public static Matrix4f rotation(OrthonormalBasis from, OrthonormalBasis to) {
+    public static Matrix4f rotationTo(OrthonormalBasis to) {
+        return rotationBetween(OrthonormalBasis.STANDARD, to);
+    }
+
+    public static Matrix4f rotationBetween(OrthonormalBasis from, OrthonormalBasis to) {
         Matrix4f firstRotation = new Matrix4f();
         Matrix4f secondRotation = new Matrix4f();
         Vector3f axis = new Vector3f();

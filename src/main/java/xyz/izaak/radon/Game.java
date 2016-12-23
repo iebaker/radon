@@ -111,7 +111,7 @@ public class Game {
         this.height = height;
         this.clearColor = clearColor;
 
-        this.previousMousePosition = new Vector2f();
+        this.previousMousePosition = new Vector2f(width / 2, height / 2);
         this.mouseDelta = new Vector2f();
     }
 

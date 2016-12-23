@@ -19,9 +19,7 @@ import xyz.izaak.radon.shading.annotation.VertexShaderMain;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.lwjgl.opengl.GL11.GL_DECR;
 import static org.lwjgl.opengl.GL11.GL_EQUAL;
@@ -41,7 +39,6 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 @ProvidesShaderComponents(requires = {Geometry.class, Mesh.class, Entity.class})
 public class Camera implements Transformable, UniformProvider {
 
-
     public static final int NEAR_PLANE = 0;
     public static final int FAR_PLANE = 1;
     public static final int ASPECT_RATIO = 2;
@@ -49,6 +46,7 @@ public class Camera implements Transformable, UniformProvider {
 
     private static List<Shader> shaders = new ArrayList<>();
 
+    private OrthonormalBasis defaultOrientation;
     private Vector3f eye = new Vector3f();
     private Vector3f eyePlusLook = new Vector3f();
     private Vector3f look = new Vector3f();
@@ -91,9 +89,10 @@ public class Camera implements Transformable, UniformProvider {
         private float farPlane = 1000.0f;
         private float aspectRatio = 1.3f;
         private float fov = Points.piOver(2);
-        private Vector3f eye = Points.copyOf(Points.__z);
-        private Vector3f look = Points.copyOf(Points.__Z);
-        private Vector3f up = Points.copyOf(Points._Y_);
+        private Vector3f eye = Points.copyOf(Points.ORIGIN_3D);
+        private Vector3f look = Points.copyOf(Points._Y_);
+        private Vector3f up = Points.copyOf(Points.__Z);
+        private OrthonormalBasis defaultOrientation = new OrthonormalBasis(look, up);
 
         public Builder nearPlane(float nearPlane) {
             this.nearPlane = nearPlane;
@@ -136,11 +135,12 @@ public class Camera implements Transformable, UniformProvider {
         }
 
         public Camera build() {
-            return new Camera(nearPlane, farPlane, aspectRatio, fov, eye, look, up, maxPortalDepth);
+            return new Camera(defaultOrientation, nearPlane, farPlane, aspectRatio, fov, eye, look, up, maxPortalDepth);
         }
     }
 
     public Camera(
+            OrthonormalBasis defaultOrientation,
             float nearPlane,
             float farPlane,
             float aspectRatio,
@@ -149,15 +149,20 @@ public class Camera implements Transformable, UniformProvider {
             Vector3f look,
             Vector3f up,
             int maxPortalDepth) {
+
+        this.defaultOrientation = defaultOrientation;
+
         this.eye.set(eye);
         this.up.set(up);
         this.look.set(look);
         recomputeView();
+
         this.set(NEAR_PLANE, nearPlane);
         this.set(FAR_PLANE, farPlane);
         this.set(ASPECT_RATIO, aspectRatio);
         this.set(FOV, fov);
         recomputeProjection();
+
         this.maxPortalDepth = maxPortalDepth;
     }
 
@@ -271,8 +276,8 @@ public class Camera implements Transformable, UniformProvider {
     @Override
     public void clearTransforms() {
         eye.set(Points.ORIGIN_3D);
-        up.set(Points._Y_);
-        look.set(Points.__Z);
+        look.set(defaultOrientation.getI());
+        up.set(defaultOrientation.getJ());
         recomputeView();
     }
 

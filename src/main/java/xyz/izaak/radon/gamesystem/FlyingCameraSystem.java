@@ -32,7 +32,7 @@ public class FlyingCameraSystem implements GameSystem {
     private float rotationFactor;
 
     public FlyingCameraSystem(Camera camera, Vector3f worldVertical) {
-        this(camera, worldVertical, 1.0f, 0.05f, 1 / 150.0f);
+        this(camera, worldVertical, 0.1f, 0.5f, 1 / 500.0f);
     }
 
     public FlyingCameraSystem(
@@ -50,7 +50,7 @@ public class FlyingCameraSystem implements GameSystem {
 
         this.modifier = new Matrix4f();
         this.cameraForward = new Vector3f();
-        Points.projectPerpendicular(camera.getEye(), worldVertical, cameraForward);
+        Points.projectPerpendicular(camera.getLook(), worldVertical, cameraForward);
         this.cameraLeft = new Vector3f(cameraForward);
         modifier.rotation(Points.piOver(2), worldVertical).transformDirection(cameraLeft);
 
@@ -64,10 +64,12 @@ public class FlyingCameraSystem implements GameSystem {
         float rotationAmountX = -delta.x * rotationFactor;
         float rotationAmountY = delta.y * rotationFactor;
 
+        System.out.println("whet");
+        System.out.flush();
         camera.rotate(rotationAmountX, worldVertical);
-        camera.rotate(rotationAmountY, cameraLeft);
+        //camera.rotate(rotationAmountY, cameraLeft);
 
-        modifier.rotation(rotationAmountY, worldVertical);
+        modifier.rotation(rotationAmountX, worldVertical);
         modifier.transformDirection(cameraForward);
         modifier.transformDirection(cameraLeft);
     }
