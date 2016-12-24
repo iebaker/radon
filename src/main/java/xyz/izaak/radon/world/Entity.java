@@ -7,21 +7,16 @@ import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;
-import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Any object within a Scene. Most Entity objects will have a set of {@link Mesh} objects
  * which comprise its physical appearance, as well as a single CollisionShape and some constant values which govern
  * the way this Entity interacts kinematically with other Entities in the scene.
  */
-@ProvidesShaderComponents
 public class Entity extends MatrixTransformable implements UniformProvider {
     private List<Mesh> meshes = new ArrayList<>();
     private CollisionShape collisionShape;
@@ -98,7 +93,6 @@ public class Entity extends MatrixTransformable implements UniformProvider {
         return collisionShape;
     }
 
-    @ShaderUniform(identifier = Identifiers.ENTITY_MODEL)
     public Matrix4f getModel() {
         return super.getModel();
     }

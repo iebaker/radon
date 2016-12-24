@@ -3,22 +3,14 @@ package xyz.izaak.radon.world;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import xyz.izaak.radon.exception.RadonException;
-import xyz.izaak.radon.math.Basis;
 import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
 import xyz.izaak.radon.mesh.Mesh;
-import xyz.izaak.radon.mesh.geometry.Geometry;
+import xyz.izaak.radon.mesh.material.Material;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
-import xyz.izaak.radon.shading.ShaderCompiler;
 import xyz.izaak.radon.shading.UniformProvider;
-import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.shading.annotation.ShaderUniform;
-import xyz.izaak.radon.shading.annotation.VertexShaderMain;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.GL_DECR;
@@ -35,16 +27,12 @@ import static org.lwjgl.opengl.GL11.glStencilFunc;
 import static org.lwjgl.opengl.GL11.glStencilOp;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
-
-@ProvidesShaderComponents(requires = {Geometry.class, Mesh.class, Entity.class})
 public class Camera implements Transformable, UniformProvider {
 
     public static final int NEAR_PLANE = 0;
     public static final int FAR_PLANE = 1;
     public static final int ASPECT_RATIO = 2;
     public static final int FOV = 3;
-
-    private static List<Shader> shaders = new ArrayList<>();
 
     private OrthonormalBasis defaultOrientation;
     private Vector3f eye = new Vector3f();
@@ -55,29 +43,9 @@ public class Camera implements Transformable, UniformProvider {
     private Matrix4f projection = new Matrix4f();
 
     private Matrix4f modifier = new Matrix4f();
-    private Vector3f scratch = new Vector3f();
 
     private float[] parameters = new float[4];
     private int maxPortalDepth;
-    private Shader shader;
-
-    public static void registerShader(Shader shader) {
-        shaders.add(shader);
-    }
-
-    @VertexShaderMain
-    public static String setGlPosition() {
-        return "gl_Position = rn_Projection * rn_View * rn_EntityModel * rn_MeshModel * vec4(rn_VertexPosition, 1);\n";
-    }
-
-    public static void compileAndRegisterShader(ShaderCompiler shaderCompiler) {
-        try {
-            Shader shader = shaderCompiler.compile("" + System.nanoTime());
-            shaders.add(shader);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static Builder builder() {
         return new Builder();
@@ -210,37 +178,17 @@ public class Camera implements Transformable, UniformProvider {
         return up;
     }
 
-    @ShaderUniform(identifier = Identifiers.VIEW)
-    public Matrix4f getView() {
-        return view;
-    }
-
-    @ShaderUniform(identifier = Identifiers.PROJECTION)
-    public Matrix4f getProjection() {
-        return projection;
-    }
-
-    @ShaderUniform(identifier = Identifiers.CAMERA_EYE)
     public Vector3f getEye() {
         return eye;
     }
 
     @Override
     public void setUniformsOn(Shader shader) {
-        shader.setUniform(Identifiers.VIEW, getView());
-        shader.setUniform(Identifiers.PROJECTION, getProjection());
-        shader.setUniform(Identifiers.CAMERA_EYE, getEye());
+        shader.setUniform(Identifiers.VIEW, view);
+        shader.setUniform(Identifiers.PROJECTION, projection);
+        shader.setUniform(Identifiers.CAMERA_EYE, eye);
     }
 
-    /**
-     * Performs a forward rendering pipeline to render a Scene.
-     * Invokes OpenGL's drawArrays method for each component of each Primitive of each Entity in a Scene, rendering
-     * it to the currently bound Framebuffer (for example, the application window). Each Primitive will be rendered
-     * with an appropriate shader for its Material if one has been {@link Camera#registerShader(Shader) registered}.
-     *
-     * @param scene the scene to render
-     * @throws RadonException if anything detectable goes wrong during rendering
-     */
     public void capture(Scene scene) throws RadonException {
         glEnable(GL_STENCIL_TEST);
         capture(scene, 0, null);
@@ -358,7 +306,7 @@ public class Camera implements Transformable, UniformProvider {
     }
 
     private void renderMesh(Mesh mesh, UniformProvider... uniformProviders) throws RadonException{
-        Shader shader = selectShaderFor(mesh);
+        Shader shader = mesh.getMaterial().getShader();
         shader.use();
 
         int uniformProviderCount = uniformProviders.length;
@@ -406,22 +354,5 @@ public class Camera implements Transformable, UniformProvider {
                             "Cannot %s Camera parameter at index %d (max %d)",
                             operation, parameterIndex, parameters.length));
         }
-    }
-
-    private Shader selectShaderFor(Mesh mesh) throws RadonException {
-        Shader selected = null;
-        int shaderCount = shaders.size();
-        for (int i = 0; i < shaderCount; i++) {
-            if (shaders.get(i).supports(mesh.getMaterial().getClass())) {
-                selected = shaders.get(i);
-                break;
-            }
-        }
-        if (selected != null) {
-            return selected;
-        }
-        throw new RadonException(
-                String.format("Could not find shader which supports mesh %s with material %s",
-                        mesh.toString(), mesh.getMaterial().toString()));
     }
 }

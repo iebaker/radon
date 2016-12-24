@@ -6,18 +6,11 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
-import xyz.izaak.radon.math.Points;
-import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.FloatBuffer;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
@@ -46,30 +39,20 @@ public class Shader {
     private String vertexSource;
     private String fragmentSource;
     private String name;
-    private Set<Class<?>> providerClasses;
     private Map<String, FloatBuffer> uniformStorage = new HashMap<>();
-
-    @FunctionalInterface
-    interface SetUniform { void set(int uniformLocation); }
 
     Shader(
             String name,
             int program,
             List<VertexAttribute> vertexAttributes,
             String vertexSource,
-            String fragmentSource,
-            Set<Class<?>> providerClasses) {
+            String fragmentSource) {
         this.program = program;
         this.vertexAttributes = vertexAttributes;
         this.stride = vertexAttributes.stream().collect(Collectors.summingInt(VertexAttribute::getLength));
         this.vertexSource = vertexSource;
         this.fragmentSource = fragmentSource;
         this.name = name;
-        this.providerClasses = providerClasses;
-    }
-
-    private int getUniformLocation(String name) {
-        return glGetUniformLocation(program, name);
     }
 
     public void setUniform(String name, int maxLength, List<Vector3f> values) {
@@ -78,7 +61,6 @@ public class Shader {
             if (!uniformStorage.containsKey(name)) {
                 uniformStorage.put(name, BufferUtils.createFloatBuffer(maxLength * 3));
             }
-            int index = 0;
             int valueCount = values.size();
             for (int i = 0; i < valueCount; i++) {
                 uniformStorage.get(name).put(values.get(i).x);
@@ -168,10 +150,6 @@ public class Shader {
 
     public List<VertexAttribute> getVertexAttributes() {
         return vertexAttributes;
-    }
-
-    public boolean supports(Class<?> providerClass) {
-        return providerClasses.contains(providerClass);
     }
 
     public void use() {

@@ -1,6 +1,5 @@
 package xyz.izaak.radon.mesh;
 
-import org.joml.AxisAngle4f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -14,8 +13,6 @@ import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;
 import xyz.izaak.radon.shading.VertexAttribute;
-import xyz.izaak.radon.shading.annotation.ProvidesShaderComponents;
-import xyz.izaak.radon.shading.annotation.ShaderUniform;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -35,7 +32,6 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
-@ProvidesShaderComponents
 public class Mesh extends MatrixTransformable implements UniformProvider {
 
     private static final int FLOAT_SIZE = 4;
@@ -56,7 +52,6 @@ public class Mesh extends MatrixTransformable implements UniformProvider {
     private Map<String, List<Float>> defaultVertexData = new HashMap<>();
     private Map<Shader, Integer> vertexArrays = new HashMap<>();
     private List<Interval> intervals = new ArrayList<>();
-    private AxisAngle4f axisAngle = new AxisAngle4f();
     private int vertexCount = 0;
     private Geometry geometry;
     private Material material;
@@ -126,41 +121,6 @@ public class Mesh extends MatrixTransformable implements UniformProvider {
         next(count, attributeName, value.x, value.y, value.z, value.w);
     }
 
-    public void range(int start, int count, String attributeName, float... values) {
-        vertexData.putIfAbsent(attributeName, new ArrayList<>());
-        List<Float> vertexDataArray = vertexData.get(attributeName);
-        int arity = values.length;
-
-        if (vertexDataArray.size() % arity != 0) {
-            throw new IllegalArgumentException(
-                    String.format("Attribute %s does not have arity %d", attributeName, arity));
-        }
-
-        int vertices = vertexDataArray.size() / arity;
-        if (start > vertices) {
-            throw new IllegalArgumentException(
-                    String.format("Attribute range start %d greater than array length %d", start, vertices));
-        }
-
-        for (int i = 0; i < count; i++) {
-            for (int j = 0; j < values.length; j++) {
-                vertexDataArray.add(((start + i) * arity) + j, values[j]);
-            }
-        }
-    }
-
-    public void range(int start, int count, String attributeName, Vector2f value) {
-        range(start, count, attributeName, value.x, value.y);
-    }
-
-    public void range(int start, int count, String attributeName, Vector3f value) {
-        range(start, count, attributeName, value.x, value.y, value.z);
-    }
-
-    public void range(int start, int count, String attributeName, Vector4f value) {
-        range(start, count, attributeName, value.x, value.y, value.z, value.w);
-    }
-
     public void all(String attributeName, float... values) {
         defaultVertexData.putIfAbsent(attributeName, new ArrayList<>());
         List<Float> defaultVertexDataArray = defaultVertexData.get(attributeName);
@@ -182,7 +142,6 @@ public class Mesh extends MatrixTransformable implements UniformProvider {
         all(attributeName, value.x, value.y, value.z, value.w);
     }
 
-    @ShaderUniform(identifier = Identifiers.MESH_MODEL)
     public Matrix4f getModel() {
         return super.getModel();
     }
