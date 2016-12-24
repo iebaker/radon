@@ -17,8 +17,6 @@ public class Identifiers {
     public static final String VERTEX_DIFFUSE_COLOR = "rn_VertexDiffuseColor";
     public static final String VERTEX_SPECULAR_COLOR = "rn_VertexSpecularColor";
     public static final String AMBIENT_COEFFICIENT = "rn_AmbientCoefficient";
-    public static final String DIFFUSE_COEFFICIENT = "rn_DiffuseCoefficient";
-    public static final String SPECULAR_COEFFICIENT = "rn_VertexSpecularCoefficient";
     public static final String VERTEX_SPECULAR_EXPONENT = "rn_VertexSpecularExponent";
     public static final String DIRECTIONAL_LIGHT_DIRECTIONS = "rn_DirectionalLightDirections";
     public static final String DIRECTIONAL_LIGHT_INTENSITIES = "rn_DirectionalLightIntensities";
@@ -26,4 +24,6 @@ public class Identifiers {
     public static final String POINT_LIGHT_INTENSITIES = "rn_PointLightIntensities";
     public static final String DIRECTIONAL_LIGHT_COUNT = "rn_DirectionalLightCount";
     public static final String POINT_LIGHT_COUNT = "rn_PointLightCount";
+    public static final String DISCARD_PLANE = "rn_DiscardPlane";
+    public static final String USE_DISCARD_PLANE = "rn_UseDiscardPlane";
 }

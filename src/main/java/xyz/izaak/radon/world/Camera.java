@@ -2,12 +2,12 @@ package xyz.izaak.radon.world;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import xyz.izaak.radon.exception.RadonException;
 import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
 import xyz.izaak.radon.mesh.Mesh;
-import xyz.izaak.radon.mesh.material.Material;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;
@@ -41,9 +41,8 @@ public class Camera implements Transformable, UniformProvider {
     private Vector3f up = new Vector3f();
     private Matrix4f view = new Matrix4f();
     private Matrix4f projection = new Matrix4f();
-
     private Matrix4f modifier = new Matrix4f();
-
+    private Vector4f fragmentDiscardPlane = new Vector4f();
     private float[] parameters = new float[4];
     private int maxPortalDepth;
 
@@ -187,6 +186,12 @@ public class Camera implements Transformable, UniformProvider {
         shader.setUniform(Identifiers.VIEW, view);
         shader.setUniform(Identifiers.PROJECTION, projection);
         shader.setUniform(Identifiers.CAMERA_EYE, eye);
+        if (fragmentDiscardPlane != null) {
+            shader.setUniform(Identifiers.USE_DISCARD_PLANE, true);
+            shader.setUniform(Identifiers.DISCARD_PLANE, fragmentDiscardPlane);
+        } else {
+            shader.setUniform(Identifiers.USE_DISCARD_PLANE, false);
+        }
     }
 
     public void capture(Scene scene) throws RadonException {
@@ -259,6 +264,12 @@ public class Camera implements Transformable, UniformProvider {
         glDepthMask(true);
         glStencilFunc(GL_EQUAL, depth, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+        if (throughPortal != null) {
+            fragmentDiscardPlane = throughPortal.getPlane();
+        } else {
+            fragmentDiscardPlane = null;
+        }
 
         List<Entity> entities = scene.getEntities();
         int entityCount = entities.size();

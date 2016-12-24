@@ -30,6 +30,7 @@ public class Portal extends MatrixTransformable {
     private Portal childPortal;
     private Entity entity;
     private Entity outlineEntity;
+    private Vector4f plane;
 
     private Vector3f scratch = new Vector3f();
     private Vector3f projection = new Vector3f();
@@ -55,6 +56,9 @@ public class Portal extends MatrixTransformable {
         this.outlineEntity.addMeshes(portalOutlineMesh);
         this.outlineEntity.transform(rotation);
         this.outlineEntity.translate(position);
+
+        Vector3f normal = this.frontBasis.getK();
+        this.plane = new Vector4f(normal.x, normal.y, normal.z, -normal.dot(this.position));
     }
 
     public void setParentScene(Scene parentScene) {
@@ -91,6 +95,10 @@ public class Portal extends MatrixTransformable {
 
     public Entity getOutlineEntity() {
         return outlineEntity;
+    }
+
+    public Vector4f getPlane() {
+        return plane;
     }
 
     public void link(Portal childPortal) {
