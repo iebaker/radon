@@ -19,7 +19,7 @@ public class Identifiers {
     public static final String AMBIENT_COEFFICIENT = "rn_AmbientCoefficient";
     public static final String DIFFUSE_COEFFICIENT = "rn_DiffuseCoefficient";
     public static final String SPECULAR_COEFFICIENT = "rn_VertexSpecularCoefficient";
-    public static final String VERTEX_SPECULAR_EXPONENT = "rn_SpecularExponent";
+    public static final String VERTEX_SPECULAR_EXPONENT = "rn_VertexSpecularExponent";
     public static final String DIRECTIONAL_LIGHT_DIRECTIONS = "rn_DirectionalLightDirections";
     public static final String DIRECTIONAL_LIGHT_INTENSITIES = "rn_DirectionalLightIntensities";
     public static final String POINT_LIGHT_POSITIONS = "rn_PointLightPositions";

@@ -14,9 +14,7 @@ public class PhongMaterial extends Material {
             Resource.stringFromFile("materials/phong/phong.vert"),
             Resource.stringFromFile("materials/phong/phong.frag"));
 
-    private final float ambientCoefficient = 0.2f;
-    private final float diffuseCoefficient = 0.5f;
-    private final float specularCoefficient = 0.3f;
+    private final float ambientCoefficient = 0.5f;
 
     private Vector3f ambientColor;
     private Vector3f diffuseColor;
@@ -38,8 +36,6 @@ public class PhongMaterial extends Material {
     @Override
     public void setUniformsOn(Shader shader) {
         shader.setUniform(Identifiers.AMBIENT_COEFFICIENT, ambientCoefficient);
-        shader.setUniform(Identifiers.DIFFUSE_COEFFICIENT, diffuseCoefficient);
-        shader.setUniform(Identifiers.SPECULAR_COEFFICIENT, specularCoefficient);
         shader.setUniform(Identifiers.AMBIENT_COLOR, ambientColor);
     }
 

@@ -8,8 +8,6 @@ in float rn_SpecularExponent;
 
 uniform vec3 rn_AmbientColor;
 uniform float rn_AmbientCoefficient;
-uniform float rn_DiffuseCoefficient;
-uniform float rn_SpecularCoefficient;
 
 uniform int rn_DirectionalLightCount;
 uniform int rn_PointLightCount;
@@ -17,50 +15,43 @@ uniform int rn_PointLightCount;
 uniform vec3 rn_DirectionalLightDirections[4];
 uniform vec3 rn_DirectionalLightIntensities[4];
 uniform vec3 rn_PointLightPositions[256];
-uniform vec3 rn_PointLighIntensities[256];
+uniform vec3 rn_PointLightIntensities[256];
 
 uniform vec3 rn_CameraEye;
 
 out vec4 rn_FragmentColor;
 
-float posDot(vec3 a, vec3 b) {
-    return max(0, dot(a, b));
-}
-
 void main() {
-    vec3 direction;
-    vec3 halfAngle;
-    vec3 diffuse;
-    vec3 specular;
-    vec3 look;
-    vec3 finalRgb;
 
-    float specularFactor;
-    float diffuseFactor;
-    float attenuation;
-
-    finalRgb = rn_AmbientCoefficient * rn_AmbientColor;
-    look = normalize(rn_CameraEye - rn_Position);
+    vec3 surfaceToCamera = normalize(rn_CameraEye - rn_Position);
+    vec3 normal = normalize(rn_Normal);
+    vec3 finalRgb = rn_AmbientCoefficient * rn_AmbientColor;
 
     for (int i = 0; i < rn_DirectionalLightCount; i++) {
-        direction = normalize(rn_DirectionalLightDirections[i]);
-        halfAngle = normalize(look + direction);
-        diffuseFactor = rn_DiffuseCoefficient * posDot(rn_Normal, direction);
-        specularFactor = rn_SpecularCoefficient * pow(posDot(rn_Normal, halfAngle), rn_SpecularExponent);
-        diffuse = diffuseFactor * rn_DiffuseColor;
-        specular = specularFactor * rn_SpecularColor;
-        finalRgb += rn_DirectionalLightIntensities[i] * (diffuse + specular);
+        vec3 surfaceToLight = normalize(rn_DirectionalLightDirections[i]);
+        vec3 incidence = -surfaceToLight;
+        float diffuseCoefficient = max(0.0, dot(normal, surfaceToLight));
+        finalRgb += diffuseCoefficient * rn_DiffuseColor * rn_DirectionalLightIntensities[i];
+
+        vec3 reflection = reflect(incidence, normal);
+        float cosAngle = max(0.0, dot(surfaceToCamera, reflection));
+        float specularCoefficient = pow(cosAngle, rn_SpecularExponent);
+        finalRgb += specularCoefficient * rn_SpecularColor * rn_DirectionalLightIntensities[i];
     }
 
     for (int i = 0; i < rn_PointLightCount; i++) {
-        direction = normalize(rn_PointLightPositions[i] - rn_Position);
-        attenuation = 1 / length(direction);
-        halfAngle = normalize(look + direction);
-        diffuseFactor = rn_DiffuseCoefficient * posDot(rn_Normal, direction);
-        specularFactor = rn_SpecularCoefficient * pow(posDot(rn_Normal, halfAngle), rn_SpecularCoefficient);
-        diffuse = diffuseFactor * rn_DiffuseColor;
-        specular = specularFactor * rn_SpecularColor;
-        finalRgb += attenuation * rn_PointLighIntensities[i] * (diffuse + specular);
+        vec3 incidence = rn_Position - rn_PointLightPositions[i];
+        float attenuation = 1 / dot(incidence, incidence);
+
+        incidence = normalize(incidence);
+        vec3 surfaceToLight = -incidence;
+        float diffuseCoefficient = max(0.0, dot(normal, surfaceToLight));
+        finalRgb += attenuation * diffuseCoefficient * rn_DiffuseColor * rn_PointLightIntensities[i];
+
+        vec3 reflection = reflect(incidence, normal);
+        float cosAngle = max(0.0, dot(surfaceToCamera, reflection));
+        float specularCoefficient = pow(cosAngle, rn_SpecularExponent);
+        finalRgb += attenuation * specularCoefficient * rn_SpecularColor * rn_PointLightIntensities[i];
     }
 
     rn_FragmentColor = vec4(finalRgb, 1.0f);
