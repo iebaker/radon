@@ -4,6 +4,7 @@ in vec3 rn_Normal;
 in vec3 rn_Position;
 in vec3 rn_DiffuseColor;
 in vec3 rn_SpecularColor;
+in vec3 rn_EmissiveColor;
 in float rn_SpecularExponent;
 
 uniform vec3 rn_AmbientColor;
@@ -33,6 +34,7 @@ void main() {
     vec3 surfaceToCamera = normalize(rn_CameraEye - rn_Position);
     vec3 normal = normalize(rn_Normal);
     vec3 finalRgb = rn_AmbientCoefficient * rn_AmbientColor;
+    finalRgb += rn_EmissiveColor;
 
     for (int i = 0; i < rn_DirectionalLightCount; i++) {
         vec3 surfaceToLight = normalize(rn_DirectionalLightDirections[i]);

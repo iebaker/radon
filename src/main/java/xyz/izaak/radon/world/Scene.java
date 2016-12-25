@@ -40,18 +40,24 @@ public class Scene implements UniformProvider {
 
     public static class Builder {
         private Vector3f gravity = new Vector3f(0.0f, -10.0f, 0.0f);
+        private String name = UUID.randomUUID().toString();
 
         public Builder gravity(Vector3f gravity) {
             this.gravity.set(gravity);
             return this;
         }
 
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
         public Scene build() {
-            return new Scene(gravity);
+            return new Scene(name, gravity);
         }
     }
 
-    public Scene(Vector3f gravity) {
+    public Scene(String name, Vector3f gravity) {
         this.gravity = gravity;
     }
 

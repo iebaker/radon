@@ -1,12 +1,13 @@
 #version 400
 
+in vec3 rn_Position;
+
 uniform vec3 rn_Color;
-
-out vec4 rn_FragmentColor;
-
 uniform vec3 rn_CameraEye;
 uniform bool rn_UseDiscardPlane;
 uniform vec4 rn_DiscardPlane;
+
+out vec4 rn_FragmentColor;
 
 void main() {
     if (rn_UseDiscardPlane) {

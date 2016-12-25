@@ -38,7 +38,7 @@ public class FlyingCameraSystem implements GameSystem {
     private Channel<Scene> currentSceneChannel;
 
     public FlyingCameraSystem(Vector3f worldVertical) {
-        this(worldVertical, 0.1f, 0.5f, 1 / 500.0f);
+        this(worldVertical, 0.2f, 0.1f, 1 / 500.0f);
     }
 
     public FlyingCameraSystem(

@@ -16,6 +16,7 @@ public class Identifiers {
     public static final String AMBIENT_COLOR = "rn_AmbientColor";
     public static final String VERTEX_DIFFUSE_COLOR = "rn_VertexDiffuseColor";
     public static final String VERTEX_SPECULAR_COLOR = "rn_VertexSpecularColor";
+    public static final String VERTEX_EMISSIVE_COLOR = "rn_VertexEmissiveColor";
     public static final String AMBIENT_COEFFICIENT = "rn_AmbientCoefficient";
     public static final String VERTEX_SPECULAR_EXPONENT = "rn_VertexSpecularExponent";
     public static final String DIRECTIONAL_LIGHT_DIRECTIONS = "rn_DirectionalLightDirections";

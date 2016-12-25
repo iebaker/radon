@@ -1,5 +1,6 @@
 #version 400
 
+in vec3 rn_Position;
 in vec3 rn_Normal;
 
 out vec4 rn_FragmentColor;

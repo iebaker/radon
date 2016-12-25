@@ -9,8 +9,10 @@ uniform mat4 rn_View;
 uniform mat4 rn_Projection;
 
 out vec3 rn_Normal;
+out vec3 rn_Position;
 
 void main() {
     gl_Position = rn_Projection * rn_View * rn_EntityModel * rn_MeshModel * vec4(rn_VertexPosition, 1);
+    rn_Position = vec3(rn_EntityModel * rn_MeshModel * vec4(rn_VertexPosition, 1));
     rn_Normal = vec3(rn_EntityModel * rn_MeshModel * vec4(rn_VertexNormal, 0));
 }
