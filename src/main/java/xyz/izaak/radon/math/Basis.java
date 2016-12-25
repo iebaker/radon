@@ -2,6 +2,7 @@ package xyz.izaak.radon.math;
 
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
+import org.lwjgl.system.CallbackI;
 
 /**
  * Created by ibaker on 17/08/2016.
@@ -17,7 +18,7 @@ public class Basis {
         scratch.set(to.matrix).invert().mul(from.matrix).transform(vector);
     }
 
-    Basis() {
+    public Basis() {
         this.i.set(Points.X__);
         this.j.set(Points._Y_);
         this.k.set(Points.__Z);
@@ -32,6 +33,11 @@ public class Basis {
         this.i = i;
         this.j = j;
         this.k = k;
+        this.matrix.set(
+                i.x, j.x, k.x,
+                i.y, j.y, k.y,
+                i.z, j.z, k.z
+        ).transpose();
     }
 
     public Vector3f getI() {
@@ -48,5 +54,12 @@ public class Basis {
 
     public Matrix3f getMatrix() {
         return matrix;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "i: (%.2f, %.2f, %.2f)%nj: (%.2f, %.2f, %.2f)%nk: (%.2f, %.2f, %.2f)%n",
+                i.x, i.y, i.z, j.x, j.y, j.z, k.x, k.y, k.z);
     }
 }

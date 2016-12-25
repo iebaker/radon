@@ -92,7 +92,17 @@ public class SceneLoaderV0 {
 
             scratch.set(corner.x, corner.y, 0.0f).sub(nextCorner.x, nextCorner.y, 0.0f);
             float wallWidth = scratch.length();
-            rotation = OrthonormalBasis.rotationTo(new OrthonormalBasis(scratch.normalize(), Points.__Z));
+            OrthonormalBasis wallBasis = new OrthonormalBasis(scratch.normalize(), Points.__Z);
+            rotation = OrthonormalBasis.rotationTo(wallBasis);
+
+            Vector3f test = Points.copyOf(Points.X__);
+            rotation.transformDirection(test);
+            System.out.printf("(%.2f, %.2f, %.2f)%n", test.x, test.y, test.z);
+
+            System.out.printf("Wall basis i, j: (%.1f, %.1f), (%.1f, %.1f)%n", wallBasis.getI().x, wallBasis.getI().y, wallBasis.getJ().x, wallBasis.getJ().x);
+
+
+
             scratch.negate();
 
             if (portalMap.containsKey(i)) {

@@ -3,6 +3,9 @@ package xyz.izaak.radon.math;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by ibaker on 17/08/2016.
  */
@@ -17,16 +20,18 @@ public class OrthonormalBasis extends Basis {
         Matrix4f firstRotation = new Matrix4f();
         Matrix4f secondRotation = new Matrix4f();
         Vector3f axis = new Vector3f();
-        Vector3f toJ = new Vector3f();
+        Vector3f fromJ = new Vector3f();
         float angle;
 
-        axis.set(from.getI()).cross(to.getI());
+        axis.set(from.getI()).cross(to.getI()).normalize();
         angle = (float) Math.acos(from.getI().dot(to.getI()));
+        System.out.printf("First rotation is %.1f around (%.1f, %.1f, %.1f)%n", angle, axis.x, axis.y, axis.z);
         firstRotation.rotation(angle, axis);
 
-        toJ.set(to.getJ());
-        firstRotation.transformDirection(toJ);
-        angle = (float) Math.acos(from.getJ().dot(toJ));
+        fromJ.set(from.getJ());
+        firstRotation.transformDirection(fromJ);
+        angle = (float) Math.acos(fromJ.dot(to.getJ()));
+        System.out.printf("First rotation is %.1f around (%.1f, %.1f, %.1f)%n", angle, to.getI().x, to.getI().y, to.getI().z);
         secondRotation.rotation(angle, to.getI());
 
         return secondRotation.mul(firstRotation);
