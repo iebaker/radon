@@ -25,7 +25,7 @@ public class Portal extends MatrixTransformable {
     private UUID uuid;
     private OrthonormalBasis frontBasis;
     private OrthonormalBasis backBasis;
-    private Vector3f position;
+    private Vector3f position = new Vector3f();
     private Scene parentScene;
     private Portal childPortal;
     private Entity entity;
@@ -37,7 +37,7 @@ public class Portal extends MatrixTransformable {
 
     public Portal(Vector3f position, OrthonormalBasis frontBasis) {
         this.uuid = UUID.randomUUID();
-        this.position = position;
+        this.position.set(position);
         this.frontBasis = frontBasis;
         this.backBasis = new OrthonormalBasis(Points.copyOf(frontBasis.getI()).negate(), Points.copyOf(frontBasis.getJ()));
 

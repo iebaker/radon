@@ -116,6 +116,11 @@ public class SceneLoaderV0 implements SceneLoader {
                     scratch.sub(corner.x, corner.y, Portal.PORTAL_DIMENSIONS.y / 2).normalize();
                     roomEntity.addMeshes(wallSegmentMesh);
 
+                    scratch.mul(portalPosition).add(corner.x, corner.y, Portal.PORTAL_DIMENSIONS.y / 2);
+                    Portal portal = new Portal(scratch, wallBasis);
+                    scene.addPortal(portal);
+                    scratch.sub(corner.x, corner.y, Portal.PORTAL_DIMENSIONS.y / 2).normalize();
+
                     currentPosition = portalPosition + Portal.PORTAL_DIMENSIONS.x / 2;
                 }
 
@@ -142,7 +147,6 @@ public class SceneLoaderV0 implements SceneLoader {
                 scratch.mul(wallWidth / 2).add(corner.x, corner.y, Portal.PORTAL_DIMENSIONS.y + remainingHeight / 2);
                 wallTopMesh.translate(scratch);
                 roomEntity.addMeshes(wallTopMesh);
-
             } else {
 
                 QuadGeometry wallGeometry = new QuadGeometry();

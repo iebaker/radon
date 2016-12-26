@@ -129,7 +129,7 @@ public class FlyingCameraSystem implements GameSystem {
         }
 
         camera.translate(cameraVelocity);
-        if (crossed != null) {
+        if (crossed != null && crossed.getChildPortal() != null) {
             camera.shiftPerspective(crossed);
             currentSceneChannel.publish(crossed.getChildPortal().getParentScene());
         }
