@@ -56,24 +56,28 @@ public class SceneLoaderV0 {
         Matrix4f rotation;
 
         Vector2f maxCorner = new Vector2f(Float.MIN_VALUE, Float.MIN_VALUE);
+        Vector2f minCorner = new Vector2f(Float.MAX_VALUE, Float.MAX_VALUE);
         for (int i = 0; i < corners; i++) {
             Points.from2f(footprint.getJSONArray(i), corner);
             maxCorner.x = Math.max(maxCorner.x, corner.x);
             maxCorner.y = Math.max(maxCorner.y, corner.y);
+            minCorner.x = Math.min(minCorner.x, corner.x);
+            minCorner.y = Math.min(minCorner.y, corner.y);
         }
 
         QuadGeometry floorGeometry = new QuadGeometry();
         Mesh floorMesh = new Mesh(floorGeometry, phongMaterial);
         floorMesh.translate(0.5f, 0.5f, 0.0f);
-        floorMesh.scale(maxCorner.x, maxCorner.y, 1.0f);
+        floorMesh.scale(maxCorner.x - minCorner.x, maxCorner.y - minCorner.y, 1.0f);
+        floorMesh.translate(minCorner.x, minCorner.y, 0.0f);
         roomEntity.addMeshes(floorMesh);
 
         QuadGeometry ceilingGeometry = new QuadGeometry();
         Mesh ceilingMesh = new Mesh(ceilingGeometry, phongMaterial);
         ceilingMesh.rotate(Points.piOver(1), Points._Y_);
         ceilingMesh.translate(0.5f, 0.5f, 0.0f);
-        ceilingMesh.scale(maxCorner.x, maxCorner.y, 1.0f);
-        ceilingMesh.translate(0, 0, height);
+        ceilingMesh.scale(maxCorner.x - minCorner.x, maxCorner.y - minCorner.y, 1.0f);
+        ceilingMesh.translate(minCorner.x, minCorner.y, height);
         roomEntity.addMeshes(ceilingMesh);
 
         for (int i = 0; i <= corners; i++) {
@@ -88,21 +92,10 @@ public class SceneLoaderV0 {
                 Points.from2f(footprint.getJSONArray(i), nextCorner);
             }
 
-            System.out.printf("%d: (%.1f, %.1f) -> (%.1f, %.1f)%n", i, corner.x, corner.y, nextCorner.x, nextCorner.y);
-
             scratch.set(corner.x, corner.y, 0.0f).sub(nextCorner.x, nextCorner.y, 0.0f);
             float wallWidth = scratch.length();
             OrthonormalBasis wallBasis = new OrthonormalBasis(scratch.normalize(), Points.__Z);
             rotation = OrthonormalBasis.rotationTo(wallBasis);
-
-            Vector3f test = Points.copyOf(Points.X__);
-            rotation.transformDirection(test);
-            System.out.printf("(%.2f, %.2f, %.2f)%n", test.x, test.y, test.z);
-
-            System.out.printf("Wall basis i, j: (%.1f, %.1f), (%.1f, %.1f)%n", wallBasis.getI().x, wallBasis.getI().y, wallBasis.getJ().x, wallBasis.getJ().x);
-
-
-
             scratch.negate();
 
             if (portalMap.containsKey(i)) {

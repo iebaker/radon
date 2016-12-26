@@ -23,15 +23,25 @@ public class OrthonormalBasis extends Basis {
         Vector3f fromJ = new Vector3f();
         float angle;
 
-        axis.set(from.getI()).cross(to.getI()).normalize();
+        axis.set(from.getI()).cross(to.getI());
+        if (axis.x == 0 && axis.y == 0 && axis.z == 0) {
+            float x = from.getI().x;
+            float y = from.getI().y;
+            float z = from.getI().z;
+            if ((z != 0) && (-x != y)) {
+                axis.set(-y - z, x, x);
+            } else {
+                axis.set(z, z, -x - y);
+            }
+        }
+        axis.normalize();
+
         angle = (float) Math.acos(from.getI().dot(to.getI()));
-        System.out.printf("First rotation is %.1f around (%.1f, %.1f, %.1f)%n", angle, axis.x, axis.y, axis.z);
         firstRotation.rotation(angle, axis);
 
         fromJ.set(from.getJ());
         firstRotation.transformDirection(fromJ);
         angle = (float) Math.acos(fromJ.dot(to.getJ()));
-        System.out.printf("First rotation is %.1f around (%.1f, %.1f, %.1f)%n", angle, to.getI().x, to.getI().y, to.getI().z);
         secondRotation.rotation(angle, to.getI());
 
         return secondRotation.mul(firstRotation);
