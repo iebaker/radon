@@ -14,9 +14,9 @@ switch (OperatingSystem.current()) {
 
 project.ext.lwjglVersion = "3.1.0"
 project.ext.jomlVersion = "1.8.2"
-project.ext.jsonVersion = "20160810"
 project.ext.junitVersion = "4.12"
 project.ext.jbulletVersion = "20101010-1"
+project.ext.gsonVersion = "2.8.0"
 
 buildscript {
 	repositories {
@@ -39,8 +39,8 @@ dependencies {
    	compile "org.lwjgl:lwjgl-opengl:${lwjglVersion}"
 	compile "org.lwjgl:lwjgl-glfw:${lwjglVersion}"
 	compile "org.joml:joml:${jomlVersion}"
-	compile "org.json:json:${jsonVersion}"
 	compile "cz.advel.jbullet:jbullet:${jbulletVersion}"
+	compile "com.google.code.gson:gson:${gsonVersion}"
 	runtime "org.lwjgl:lwjgl:${lwjglVersion}:${lwjglNatives}"
 	runtime "org.lwjgl:lwjgl-glfw:${lwjglVersion}:${lwjglNatives}"
 	testCompile "junit:junit:${junitVersion}"

@@ -1,10 +1,9 @@
 package xyz.izaak.radon.external;
 
+import com.google.gson.Gson;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import xyz.izaak.radon.Resource;
 import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
@@ -24,33 +23,34 @@ import java.util.Map;
 /**
  * Created by ibaker on 24/12/2016.
  */
-public class SceneLoaderV0 {
-    private static Vector3f scratch = new Vector3f();
+public class SceneLoaderV0 implements SceneLoader {
+    private static Gson gson = new Gson();
 
-    public static Scene load(String filename) {
+    private SceneModelV0 sceneModel;
+    private Vector3f scratch = new Vector3f();
+
+    public SceneLoaderV0(String filename) {
+        String fileContents = Resource.stringFromFile(filename);
+        this.sceneModel = gson.fromJson(fileContents, SceneModelV0.class);
+    }
+
+    public Scene newInstance() {
         PhongMaterial phongMaterial = new PhongMaterial(Points.WHITE, Points.WHITE, Points.WHITE, Points.BLACK, 50.0f);
 
-        JSONObject sceneJson = new JSONObject(Resource.stringFromFile(filename));
-        String sceneName = sceneJson.getString("SceneName");
-        Scene scene = Scene.builder().name(sceneName).build();
+        Scene scene = Scene.builder().name(sceneModel.sceneName).build();
         Entity roomEntity = Entity.builder().build();
 
-        float height = (float) sceneJson.getDouble("Height");
-
         Map<Integer, List<Float>> portalMap = new HashMap<>();
-        JSONArray portalJson = sceneJson.getJSONArray("Portals");
-        int portalCount = portalJson.length();
+        int portalCount = sceneModel.portals.length;
         for (int i = 0; i < portalCount; i++) {
-            JSONArray singlePortalJson = portalJson.getJSONArray(i);
-            int wallIndex = singlePortalJson.getInt(0);
+            int wallIndex = (int) sceneModel.portals[i][0];
             if (!portalMap.containsKey(wallIndex)) {
                 portalMap.put(wallIndex, new ArrayList<>());
             }
-            portalMap.get(wallIndex).add((float) singlePortalJson.getDouble(1));
+            portalMap.get(wallIndex).add(sceneModel.portals[i][1]);
         }
 
-        JSONArray footprint = sceneJson.getJSONArray("Footprint");
-        int corners = footprint.length();
+        int corners = sceneModel.footprint.length;
         Vector2f corner = new Vector2f();
         Vector2f nextCorner = new Vector2f();
         Matrix4f rotation;
@@ -58,7 +58,7 @@ public class SceneLoaderV0 {
         Vector2f maxCorner = new Vector2f(Float.MIN_VALUE, Float.MIN_VALUE);
         Vector2f minCorner = new Vector2f(Float.MAX_VALUE, Float.MAX_VALUE);
         for (int i = 0; i < corners; i++) {
-            Points.from2f(footprint.getJSONArray(i), corner);
+            corner.set(sceneModel.footprint[i][0], sceneModel.footprint[i][1]);
             maxCorner.x = Math.max(maxCorner.x, corner.x);
             maxCorner.y = Math.max(maxCorner.y, corner.y);
             minCorner.x = Math.min(minCorner.x, corner.x);
@@ -77,19 +77,19 @@ public class SceneLoaderV0 {
         ceilingMesh.rotate(Points.piOver(1), Points._Y_);
         ceilingMesh.translate(0.5f, 0.5f, 0.0f);
         ceilingMesh.scale(maxCorner.x - minCorner.x, maxCorner.y - minCorner.y, 1.0f);
-        ceilingMesh.translate(minCorner.x, minCorner.y, height);
+        ceilingMesh.translate(minCorner.x, minCorner.y, sceneModel.height);
         roomEntity.addMeshes(ceilingMesh);
 
         for (int i = 0; i <= corners; i++) {
             if (i == 0) {
                 corner.set(0, 0);
-                Points.from2f(footprint.getJSONArray(i), nextCorner);
+                nextCorner.set(sceneModel.footprint[i][0], sceneModel.footprint[i][1]);
             } else if (i == corners) {
-                Points.from2f(footprint.getJSONArray(i - 1), corner);
+                corner.set(sceneModel.footprint[i - 1][0], sceneModel.footprint[i - 1][1]);
                 nextCorner.set(0, 0);
             } else {
-                Points.from2f(footprint.getJSONArray(i - 1), corner);
-                Points.from2f(footprint.getJSONArray(i), nextCorner);
+                corner.set(sceneModel.footprint[i - 1][0], sceneModel.footprint[i - 1][1]);
+                nextCorner.set(sceneModel.footprint[i][0], sceneModel.footprint[i][1]);
             }
 
             scratch.set(corner.x, corner.y, 0.0f).sub(nextCorner.x, nextCorner.y, 0.0f);
@@ -132,7 +132,7 @@ public class SceneLoaderV0 {
                 scratch.sub(corner.x, corner.y, Portal.PORTAL_DIMENSIONS.y / 2).normalize();
                 roomEntity.addMeshes(finalWallSegmentMesh);
 
-                float remainingHeight = height - Portal.PORTAL_DIMENSIONS.y;
+                float remainingHeight = sceneModel.height - Portal.PORTAL_DIMENSIONS.y;
 
                 QuadGeometry wallTopGeometry = new QuadGeometry();
                 Mesh wallTopMesh = new Mesh(wallTopGeometry, phongMaterial);
@@ -147,10 +147,10 @@ public class SceneLoaderV0 {
 
                 QuadGeometry wallGeometry = new QuadGeometry();
                 Mesh wallMesh = new Mesh(wallGeometry, phongMaterial);
-                wallMesh.scale(wallWidth, height, 1.0f);
+                wallMesh.scale(wallWidth, sceneModel.height, 1.0f);
                 wallMesh.transform(rotation);
 
-                scratch.mul(wallWidth / 2).add(corner.x, corner.y, height / 2);
+                scratch.mul(wallWidth / 2).add(corner.x, corner.y, sceneModel.height / 2);
                 wallMesh.translate(scratch);
                 roomEntity.addMeshes(wallMesh);
             }

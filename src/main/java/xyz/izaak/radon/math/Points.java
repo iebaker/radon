@@ -8,7 +8,6 @@ import org.joml.Vector3i;
 import org.joml.Vector4f;
 import org.joml.Matrix4f;
 import org.joml.Matrix3f;
-import org.json.JSONArray;
 
 import java.nio.FloatBuffer;
 
@@ -191,19 +190,6 @@ public class Points {
 
     public static Vector3f rgbToHsb(float red, float green, float blue) {
         return new Vector3f();
-    }
-
-    public static void from3f(JSONArray array, Vector3f target) {
-        float x = (float) array.getDouble(0);
-        float y = (float) array.getDouble(1);
-        float z = (float) array.getDouble(2);
-        target.set(x, y, z);
-    }
-
-    public static void from2f(JSONArray array, Vector2f target) {
-        float x = (float) array.getDouble(0);
-        float y = (float) array.getDouble(1);
-        target.set(x, y);
     }
 
     public static Vector3f copyOf(Vector3f original) {
