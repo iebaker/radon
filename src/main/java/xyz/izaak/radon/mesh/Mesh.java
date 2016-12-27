@@ -16,9 +16,11 @@ import xyz.izaak.radon.shading.VertexAttribute;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -48,17 +50,27 @@ public class Mesh extends MatrixTransformable implements UniformProvider {
         }
     }
 
+    public interface DerivationFromVector4f extends Function<Vector4f, float[]> { }
+    public interface DerivationFromVector3f extends Function<Vector3f, float[]> { }
+    public interface DerivationFromVector2f extends Function<Vector2f, float[]> { }
+    public interface DerivationFromFloat    extends Function<Float   , float[]> { }
+
     private Map<String, List<Float>> vertexData = new HashMap<>();
     private Map<String, List<Float>> defaultVertexData = new HashMap<>();
     private Map<Shader, Integer> vertexArrays = new HashMap<>();
+    private List<Runnable> derivations = new ArrayList<>();
     private List<Interval> intervals = new ArrayList<>();
+    private List<MeshBuilder> meshBuilders = new ArrayList<>();
     private int vertexCount = 0;
     private Geometry geometry;
     private Material material;
 
-    public Mesh(Geometry geometry, Material material) {
+    public Mesh(Geometry geometry, Material material, MeshBuilder... otherMeshBuilders) {
         this.geometry = geometry;
         this.material = material;
+        this.meshBuilders.add(geometry);
+        this.meshBuilders.add(material);
+        this.meshBuilders.addAll(Arrays.asList(otherMeshBuilders));
     }
 
     public Geometry getGeometry() {
@@ -70,8 +82,8 @@ public class Mesh extends MatrixTransformable implements UniformProvider {
     }
 
     public void build() {
-        geometry.build(this);
-        material.build(this);
+        meshBuilders.forEach(meshBuilder -> meshBuilder.build(this));
+        derivations.forEach(Runnable::run);
     }
 
     public void addInterval(int mode, int count) {
@@ -140,6 +152,64 @@ public class Mesh extends MatrixTransformable implements UniformProvider {
 
     public void all(String attributeName, Vector4f value) {
         all(attributeName, value.x, value.y, value.z, value.w);
+    }
+
+    public void derive(String outAttributeName, String inAttributeName, DerivationFromVector4f derivation) {
+        derivations.add(() -> {
+            List<Float> input = vertexData.get(inAttributeName);
+            vertexData.put(outAttributeName, new ArrayList<>());
+            Vector4f functionInput = new Vector4f();
+            int originalDataCount = input.size();
+            for (int i = 0; i < originalDataCount; i += 4) {
+                functionInput.set(input.get(i), input.get(i + 1), input.get(i + 2), input.get(i + 3));
+                for (float f : derivation.apply(functionInput)) {
+                    vertexData.get(outAttributeName).add(f);
+                }
+            }
+        });
+    }
+
+    public void derive(String outAttributeName, String inAttributeName, DerivationFromVector3f derivation) {
+        derivations.add(() -> {
+            List<Float> input = vertexData.get(inAttributeName);
+            vertexData.put(outAttributeName, new ArrayList<>());
+            Vector3f functionInput = new Vector3f();
+            int originalDataCount = input.size();
+            for (int i = 0; i < originalDataCount; i += 3) {
+                functionInput.set(input.get(i), input.get(i + 1), input.get(i + 2));
+                for (float f : derivation.apply(functionInput)) {
+                    vertexData.get(outAttributeName).add(f);
+                }
+            }
+        });
+    }
+
+    public void derive(String outAttributeName, String inAttributeName, DerivationFromVector2f derivation) {
+        derivations.add(() -> {
+            List<Float> input = vertexData.get(inAttributeName);
+            vertexData.put(outAttributeName, new ArrayList<>());
+            Vector2f functionInput = new Vector2f();
+            int originalDataCount = input.size();
+            for (int i = 0; i < originalDataCount; i += 2) {
+                functionInput.set(input.get(i), input.get(i + 1));
+                for (float f : derivation.apply(functionInput)) {
+                    vertexData.get(outAttributeName).add(f);
+                }
+            }
+        });
+    }
+
+    public void derive(String outAttributeName, String inAttributeName, DerivationFromFloat derivation) {
+        derivations.add(() -> {
+            List<Float> input = vertexData.get(inAttributeName);
+            vertexData.put(outAttributeName, new ArrayList<>());
+            int originalDataCount = input.size();
+            for (int i = 0; i < originalDataCount; i++) {
+                for (float f : derivation.apply(input.get(i))) {
+                    vertexData.get(outAttributeName).add(f);
+                }
+            }
+        });
     }
 
     public Matrix4f getModel() {

@@ -5,6 +5,7 @@ package xyz.izaak.radon.shading;
  */
 public class Identifiers {
     public static final String VERTEX_COLOR = "rn_VertexColor";
+    public static final String VERTEX_UV = "rn_VertexUv";
     public static final String COLOR = "rn_Color";
     public static final String VERTEX_POSITION = "rn_VertexPosition";
     public static final String VERTEX_NORMAL = "rn_VertexNormal";
