@@ -39,21 +39,17 @@ public class Shader {
     private String vertexSource;
     private String fragmentSource;
     private String name;
-
     private List<VertexAttribute> vertexAttributes = new ArrayList<>();
     private Map<String, FloatBuffer> uniformStorage = new HashMap<>();
     private Map<String, Integer> uniformLocations = new HashMap<>();
 
-    Shader(
-            String name,
-            int program,
-            String vertexSource,
-            String fragmentSource) {
+    Shader(String name, int program, String vertexSource, String fragmentSource) {
         this.program = program;
         this.vertexSource = vertexSource;
         this.fragmentSource = fragmentSource;
         this.name = name;
-        parseAttributesAndUniforms();
+        parseVertexAttributes();
+        this.stride = vertexAttributes.stream().collect(Collectors.summingInt(VertexAttribute::getLength));
     }
 
     public void setUniform(String name, int maxLength, List<Vector3f> values) {
@@ -167,10 +163,10 @@ public class Shader {
         }
     }
 
-    private void parseAttributesAndUniforms() {
+    public void parseVertexAttributes() {
         int offset = 0;
         String[] vertexShaderLines = vertexSource.split("\\r?\\n");
-        for(String line : vertexShaderLines) {
+        for (String line : vertexShaderLines) {
             String[] tokens = line.split("\\s+");
             if (tokens.length < 3) continue;
 
@@ -179,7 +175,7 @@ public class Shader {
             String variableName = tokens[2].trim();
 
             if (variableKind.equals("in")) {
-                variableName = variableName.substring(0, variableName.length() - 1); // trim ;
+                variableName = variableName.substring(0, variableName.length() - 1);
                 switch (variableType) {
                     case "float":
                         vertexAttributes.add(new VertexAttribute(variableName, 1, offset));
@@ -199,15 +195,30 @@ public class Shader {
                         break;
                     default:
                         throw new IllegalStateException(
-                                String.format("Illegal variable type for fragment in: %s", tokens[1].trim()));
+                                String.format("Illegal variable type for fragment in: %s", variableType));
                 }
             } else if (variableKind.equals("uniform")) {
-                variableName = variableName.substring(0, variableName.length() - 1); // trim ;
+                variableName = variableName.substring(0, variableName.length() - 1);
                 int uniformLocation = glGetUniformLocation(program, variableName);
                 if (uniformLocation < 0) continue;
                 uniformLocations.put(variableName, uniformLocation);
             }
         }
-        stride = vertexAttributes.stream().collect(Collectors.summingInt(VertexAttribute::getLength));
+
+        String[] fragmentShaderLines = fragmentSource.split("\\r?\\n");
+        for (String line : fragmentShaderLines) {
+            String[] tokens = line.split("\\s+");
+            if (tokens.length < 3) continue;
+
+            String variableKind = tokens[0].trim();
+            String variableName = tokens[2].trim();
+
+            if (variableKind.equals("uniform")) {
+                variableName = variableName.substring(0, variableName.length() - 1);
+                int uniformLocation = glGetUniformLocation(program, variableName);
+                if (uniformLocation < 0) continue;
+                uniformLocations.put(variableName, uniformLocation);
+            }
+        }
     }
 }

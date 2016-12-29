@@ -64,7 +64,6 @@ public class ShaderCompiler {
         glDetachShader(shaderProgram, vertexShader);
         glDetachShader(shaderProgram, fragmentShader);
 
-        System.out.println(name);
         return new Shader(name, shaderProgram, vertexShaderSource, fragmentShaderSource);
     }
 }
