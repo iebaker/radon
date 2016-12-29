@@ -18,7 +18,7 @@ import java.util.Scanner;
 public class Resource {
 
     public static BufferedImage imageFromFile(String filepath, boolean flip) throws IOException {
-        InputStream inputStream = new FileInputStream(filepath);
+        InputStream inputStream = Resource.class.getClassLoader().getResourceAsStream(filepath);
         BufferedImage image = ImageIO.read(inputStream);
 
         if (flip) {

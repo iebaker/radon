@@ -1,7 +1,7 @@
 #version 400
 
 in vec3 rn_Position;
-in vec3 rn_Uv;
+in vec2 rn_Uv;
 
 uniform sampler2D rn_TextureImage;
 uniform vec3 rn_CameraEye;
