@@ -64,37 +64,7 @@ public class ShaderCompiler {
         glDetachShader(shaderProgram, vertexShader);
         glDetachShader(shaderProgram, fragmentShader);
 
-        int offset = 0;
-        final List<VertexAttribute> vertexAttributes = new ArrayList<>();
-        String[] vertexShaderLines = vertexShaderSource.split("\\r?\\n");
-        for(String line : vertexShaderLines) {
-            String[] tokens = line.split("\\s+");
-            if (!tokens[0].trim().equals("in")) continue;
-            String variableName = tokens[2].trim();
-            variableName = variableName.substring(0, variableName.length() - 1);
-            switch (tokens[1].trim()) {
-                case "float":
-                    vertexAttributes.add(new VertexAttribute(variableName, 1, offset));
-                    offset += 1;
-                    break;
-                case "vec2":
-                    vertexAttributes.add(new VertexAttribute(variableName, 2, offset));
-                    offset += 2;
-                    break;
-                case "vec3":
-                    vertexAttributes.add(new VertexAttribute(variableName, 3, offset));
-                    offset += 3;
-                    break;
-                case "vec4":
-                    vertexAttributes.add(new VertexAttribute(variableName, 4, offset));
-                    offset += 4;
-                    break;
-                default:
-                    throw new IllegalStateException(
-                            String.format("Illegal variable type for fragment in: %s", tokens[1].trim()));
-            }
-        }
-
-        return new Shader(name, shaderProgram, vertexAttributes, vertexShaderSource, fragmentShaderSource);
+        System.out.println(name);
+        return new Shader(name, shaderProgram, vertexShaderSource, fragmentShaderSource);
     }
 }

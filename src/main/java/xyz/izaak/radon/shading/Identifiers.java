@@ -28,4 +28,5 @@ public class Identifiers {
     public static final String POINT_LIGHT_COUNT = "rn_PointLightCount";
     public static final String DISCARD_PLANE = "rn_DiscardPlane";
     public static final String USE_DISCARD_PLANE = "rn_UseDiscardPlane";
+    public static final String TEXTURE_IMAGE = "rn_TextureImage";
 }
