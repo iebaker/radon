@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
@@ -42,6 +44,7 @@ public class Shader {
     private List<VertexAttribute> vertexAttributes = new ArrayList<>();
     private Map<String, FloatBuffer> uniformStorage = new HashMap<>();
     private Map<String, Integer> uniformLocations = new HashMap<>();
+    private Pattern shaderVariableDeclaration = Pattern.compile("(.*)\\s+(.*)\\s+(.*?)(\\[\\d+\\]|);");
 
     Shader(String name, int program, String vertexSource, String fragmentSource) {
         this.program = program;
@@ -167,15 +170,14 @@ public class Shader {
         int offset = 0;
         String[] vertexShaderLines = vertexSource.split("\\r?\\n");
         for (String line : vertexShaderLines) {
-            String[] tokens = line.split("\\s+");
-            if (tokens.length < 3) continue;
+            Matcher matcher = shaderVariableDeclaration.matcher(line);
+            if (!matcher.matches()) continue;
 
-            String variableKind = tokens[0].trim();
-            String variableType = tokens[1].trim();
-            String variableName = tokens[2].trim();
+            String variableKind = matcher.group(1);
+            String variableType = matcher.group(2);
+            String variableName = matcher.group(3);
 
             if (variableKind.equals("in")) {
-                variableName = variableName.substring(0, variableName.length() - 1);
                 switch (variableType) {
                     case "float":
                         vertexAttributes.add(new VertexAttribute(variableName, 1, offset));
@@ -198,7 +200,6 @@ public class Shader {
                                 String.format("Illegal variable type for fragment in: %s", variableType));
                 }
             } else if (variableKind.equals("uniform")) {
-                variableName = variableName.substring(0, variableName.length() - 1);
                 int uniformLocation = glGetUniformLocation(program, variableName);
                 if (uniformLocation < 0) continue;
                 uniformLocations.put(variableName, uniformLocation);
@@ -207,18 +208,19 @@ public class Shader {
 
         String[] fragmentShaderLines = fragmentSource.split("\\r?\\n");
         for (String line : fragmentShaderLines) {
-            String[] tokens = line.split("\\s+");
-            if (tokens.length < 3) continue;
+            Matcher matcher = shaderVariableDeclaration.matcher(line);
+            if (!matcher.matches()) continue;
 
-            String variableKind = tokens[0].trim();
-            String variableName = tokens[2].trim();
+            String variableKind = matcher.group(1);
+            String variableName = matcher.group(3);
 
             if (variableKind.equals("uniform")) {
-                variableName = variableName.substring(0, variableName.length() - 1);
                 int uniformLocation = glGetUniformLocation(program, variableName);
                 if (uniformLocation < 0) continue;
                 uniformLocations.put(variableName, uniformLocation);
             }
         }
+
+        System.out.println(uniformLocations);
     }
 }
