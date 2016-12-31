@@ -7,8 +7,8 @@ import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.exception.RadonException;
-import xyz.izaak.radon.mesh.geometry.Geometry;
-import xyz.izaak.radon.mesh.material.Material;
+import xyz.izaak.radon.geometry.Geometry;
+import xyz.izaak.radon.material.Material;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;

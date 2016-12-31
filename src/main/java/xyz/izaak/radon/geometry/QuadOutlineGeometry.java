@@ -1,4 +1,4 @@
-package xyz.izaak.radon.mesh.geometry;
+package xyz.izaak.radon.geometry;
 
 import org.joml.Vector3f;
 import xyz.izaak.radon.math.Points;

@@ -1,4 +1,4 @@
-package xyz.izaak.radon.math.field;
+package xyz.izaak.radon.math;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;

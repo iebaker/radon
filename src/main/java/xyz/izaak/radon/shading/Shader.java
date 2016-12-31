@@ -220,7 +220,5 @@ public class Shader {
                 uniformLocations.put(variableName, uniformLocation);
             }
         }
-
-        System.out.println(uniformLocations);
     }
 }

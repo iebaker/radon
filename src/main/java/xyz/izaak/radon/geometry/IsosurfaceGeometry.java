@@ -1,11 +1,11 @@
-package xyz.izaak.radon.mesh.geometry;
+package xyz.izaak.radon.geometry;
 
 import com.bulletphysics.collision.shapes.TriangleIndexVertexArray;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import xyz.izaak.radon.math.MarchingCubes;
 import xyz.izaak.radon.math.Points;
-import xyz.izaak.radon.math.field.ScalarVolume;
+import xyz.izaak.radon.math.ScalarVolume;
 import xyz.izaak.radon.mesh.Mesh;
 
 import java.nio.ByteBuffer;

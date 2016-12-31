@@ -1,4 +1,4 @@
-package xyz.izaak.radon.mesh.material;
+package xyz.izaak.radon.material;
 
 import org.joml.Vector3f;
 import xyz.izaak.radon.Resource;

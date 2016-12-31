@@ -1,4 +1,4 @@
-package xyz.izaak.radon.math.field;
+package xyz.izaak.radon.math;
 
 import java.util.LinkedList;
 import java.util.List;

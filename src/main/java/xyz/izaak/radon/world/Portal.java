@@ -9,10 +9,10 @@ import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.mesh.Mesh;
-import xyz.izaak.radon.mesh.geometry.QuadGeometry;
-import xyz.izaak.radon.mesh.geometry.QuadOutlineGeometry;
-import xyz.izaak.radon.mesh.material.PortalMaterial;
-import xyz.izaak.radon.mesh.material.SolidColorMaterial;
+import xyz.izaak.radon.geometry.QuadGeometry;
+import xyz.izaak.radon.geometry.QuadOutlineGeometry;
+import xyz.izaak.radon.material.PortalMaterial;
+import xyz.izaak.radon.material.SolidColorMaterial;
 
 import java.util.UUID;
 

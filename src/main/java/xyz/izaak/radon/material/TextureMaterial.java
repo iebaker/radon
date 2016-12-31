@@ -1,7 +1,7 @@
-package xyz.izaak.radon.mesh.material;
+package xyz.izaak.radon.material;
 
 import xyz.izaak.radon.Resource;
-import xyz.izaak.radon.mesh.texture.Texture;
+import xyz.izaak.radon.texture.Texture;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.ShaderCompiler;

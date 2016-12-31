@@ -1,4 +1,4 @@
-package xyz.izaak.radon.mesh.material;
+package xyz.izaak.radon.material;
 
 import xyz.izaak.radon.mesh.MeshBuilder;
 import xyz.izaak.radon.shading.Shader;

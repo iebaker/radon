@@ -1,4 +1,4 @@
-package xyz.izaak.radon.mesh.texture;
+package xyz.izaak.radon.texture;
 
 
 import org.joml.Vector2f;
