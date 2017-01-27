@@ -1,4 +1,4 @@
-package xyz.izaak.radon.mesh;
+package xyz.izaak.radon.scene;
 
 /**
  * Created by ibaker on 30/11/2016.

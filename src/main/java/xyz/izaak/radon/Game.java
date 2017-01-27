@@ -105,7 +105,7 @@ public class Game {
      * @param name the title of the Game, which will also be the title of the application window
      * @param width the initial width of the Game application window
      * @param height the initial height of the Game application window
-     * @param clearColor the initial argument to glClearColor (the background color of the game world)
+     * @param clearColor the initial argument to glClearColor (the background color of the game scene)
      */
     public Game(String name, int width, int height, Vector3f clearColor) {
         this.name = name;

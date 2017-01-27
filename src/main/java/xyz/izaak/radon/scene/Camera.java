@@ -1,4 +1,4 @@
-package xyz.izaak.radon.world;
+package xyz.izaak.radon.scene;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -7,7 +7,6 @@ import xyz.izaak.radon.exception.RadonException;
 import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.Transformable;
-import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;

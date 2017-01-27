@@ -55,9 +55,13 @@ public class Resource {
     }
 
     public static Scanner scannerForFile(String filepath, String delimiter) {
-        InputStream inputStream = Resource.class.getClassLoader().getResourceAsStream(filepath);
+        InputStream inputStream = streamFromFile(filepath);
         Scanner scanner = new Scanner(inputStream);
         if(delimiter != null) scanner.useDelimiter(delimiter);
         return scanner;
+    }
+
+    public static InputStream streamFromFile(String filepath) {
+        return Resource.class.getClassLoader().getResourceAsStream(filepath);
     }
 }

@@ -3,8 +3,8 @@ package xyz.izaak.radon.texture;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import xyz.izaak.radon.mesh.Mesh;
-import xyz.izaak.radon.mesh.MeshBuilder;
+import xyz.izaak.radon.scene.Mesh;
+import xyz.izaak.radon.scene.MeshBuilder;
 
 import static xyz.izaak.radon.shading.Identifiers.VERTEX_POSITION;
 import static xyz.izaak.radon.shading.Identifiers.VERTEX_UV;

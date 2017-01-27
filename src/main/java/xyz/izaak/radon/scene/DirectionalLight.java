@@ -1,4 +1,4 @@
-package xyz.izaak.radon.world;
+package xyz.izaak.radon.scene;
 
 import org.joml.Vector3f;
 

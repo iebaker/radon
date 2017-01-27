@@ -1,6 +1,6 @@
 package xyz.izaak.radon.material;
 
-import xyz.izaak.radon.mesh.MeshBuilder;
+import xyz.izaak.radon.scene.MeshBuilder;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;
 

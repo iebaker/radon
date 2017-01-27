@@ -1,4 +1,4 @@
-package xyz.izaak.radon.world;
+package xyz.izaak.radon.scene;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -8,7 +8,6 @@ import xyz.izaak.radon.math.Basis;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.math.OrthonormalBasis;
 import xyz.izaak.radon.math.Points;
-import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.geometry.QuadGeometry;
 import xyz.izaak.radon.geometry.QuadOutlineGeometry;
 import xyz.izaak.radon.material.PortalMaterial;

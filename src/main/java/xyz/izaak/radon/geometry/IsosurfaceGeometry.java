@@ -6,7 +6,7 @@ import org.joml.Vector3i;
 import xyz.izaak.radon.math.MarchingCubes;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.math.ScalarVolume;
-import xyz.izaak.radon.mesh.Mesh;
+import xyz.izaak.radon.scene.Mesh;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

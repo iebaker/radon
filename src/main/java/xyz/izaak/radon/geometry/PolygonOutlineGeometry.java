@@ -1,7 +1,7 @@
 package xyz.izaak.radon.geometry;
 
 import xyz.izaak.radon.math.Points;
-import xyz.izaak.radon.mesh.Mesh;
+import xyz.izaak.radon.scene.Mesh;
 
 import static org.lwjgl.opengl.GL11.GL_LINE_LOOP;
 import static xyz.izaak.radon.shading.Identifiers.VERTEX_NORMAL;

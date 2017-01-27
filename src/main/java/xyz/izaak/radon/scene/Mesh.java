@@ -1,4 +1,4 @@
-package xyz.izaak.radon.mesh;
+package xyz.izaak.radon.scene;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;

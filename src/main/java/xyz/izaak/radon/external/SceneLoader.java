@@ -1,6 +1,6 @@
 package xyz.izaak.radon.external;
 
-import xyz.izaak.radon.world.Scene;
+import xyz.izaak.radon.scene.Scene;
 
 /**
  * Created by ibaker on 25/12/2016.

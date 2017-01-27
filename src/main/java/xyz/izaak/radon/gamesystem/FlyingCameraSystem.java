@@ -5,9 +5,9 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import xyz.izaak.radon.Channel;
 import xyz.izaak.radon.math.Points;
-import xyz.izaak.radon.world.Camera;
-import xyz.izaak.radon.world.Portal;
-import xyz.izaak.radon.world.Scene;
+import xyz.izaak.radon.scene.Camera;
+import xyz.izaak.radon.scene.Portal;
+import xyz.izaak.radon.scene.Scene;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;

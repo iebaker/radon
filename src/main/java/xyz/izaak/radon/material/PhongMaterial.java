@@ -2,7 +2,7 @@ package xyz.izaak.radon.material;
 
 import org.joml.Vector3f;
 import xyz.izaak.radon.Resource;
-import xyz.izaak.radon.mesh.Mesh;
+import xyz.izaak.radon.scene.Mesh;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.ShaderCompiler;

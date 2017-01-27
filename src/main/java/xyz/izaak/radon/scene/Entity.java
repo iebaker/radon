@@ -1,9 +1,8 @@
-package xyz.izaak.radon.world;
+package xyz.izaak.radon.scene;
 
 import com.bulletphysics.collision.shapes.CollisionShape;
 import org.joml.Matrix4f;
 import xyz.izaak.radon.math.MatrixTransformable;
-import xyz.izaak.radon.mesh.Mesh;
 import xyz.izaak.radon.shading.Identifiers;
 import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;

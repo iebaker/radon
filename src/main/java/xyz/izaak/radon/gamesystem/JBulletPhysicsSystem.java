@@ -15,15 +15,13 @@ import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
 import xyz.izaak.radon.math.Points;
-import xyz.izaak.radon.world.Entity;
-import xyz.izaak.radon.world.Scene;
+import xyz.izaak.radon.scene.Entity;
+import xyz.izaak.radon.scene.Scene;
 
-import javax.vecmath.Matrix4f;
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by ibaker on 28/11/2016.
