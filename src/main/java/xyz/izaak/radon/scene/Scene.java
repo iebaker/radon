@@ -6,6 +6,7 @@ import xyz.izaak.radon.shading.Shader;
 import xyz.izaak.radon.shading.UniformProvider;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ public class Scene implements UniformProvider {
     private Map<UUID, Portal> portalsById = new HashMap<>();
     private Vector3f gravity;
 
+    private Node root;
+
     public static Builder builder() {
         return new Builder();
     }
@@ -41,6 +44,7 @@ public class Scene implements UniformProvider {
     public static class Builder {
         private Vector3f gravity = new Vector3f(0.0f, -10.0f, 0.0f);
         private String name = UUID.randomUUID().toString();
+        private Node root = new Node("root");
 
         public Builder gravity(Vector3f gravity) {
             this.gravity.set(gravity);
@@ -52,13 +56,30 @@ public class Scene implements UniformProvider {
             return this;
         }
 
+        public Builder root(Node root) {
+            this.root = root;
+            return this;
+        }
+
         public Scene build() {
-            return new Scene(name, gravity);
+            return new Scene(name, gravity, root);
         }
     }
 
-    public Scene(String name, Vector3f gravity) {
+    public Scene(String name, Vector3f gravity, Node root) {
         this.gravity = gravity;
+        this.root = root;
+    }
+
+    public Node getNode(String path) {
+        String[] steps = path.split(":");
+        if (!steps[0].equals(root.getPath())) return null;
+        Node current = root;
+        for (int i = 1; i < steps.length; i++) {
+            current = current.getChild(steps[i]);
+            if (current == null) return null;
+        }
+        return current;
     }
 
     public void addEntity(Entity entity) {

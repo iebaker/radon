@@ -13,18 +13,22 @@ import java.util.Map;
 @XmlElement(namespace = "rn", element = "Node")
 public class Node {
     private Map<String, Node> children = new HashMap<>();
-    private String name;
+    private String path;
 
-    public Node(@XmlParam("name") String name) {
-        this.name = name;
+    public Node(@XmlParam("path") String path) {
+        this.path = path;
     }
 
     @XmlChild
     public void addChild(Node child) {
-        children.put(child.getName(), child);
+        children.put(child.getPath(), child);
     }
 
-    public String getName() {
-        return name;
+    public Node getChild(String path) {
+        return children.get(path);
+    }
+
+    public String getPath() {
+        return path;
     }
 }

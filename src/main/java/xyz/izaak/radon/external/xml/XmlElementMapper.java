@@ -22,7 +22,7 @@ public abstract class XmlElementMapper<T> {
 
     public abstract String getNamespace();
     public abstract String getElement();
-    public abstract void handleParameters(Map<String, String> rawParameters);
+    public abstract void handleAttributes(Map<String, String> rawParameters);
     public abstract void handleChild(Object child, String target);
     public abstract T get();
 
@@ -61,7 +61,7 @@ public abstract class XmlElementMapper<T> {
         }
 
         @Override
-        public void handleParameters(Map<String, String> rawParameters) {
+        public void handleAttributes(Map<String, String> rawParameters) {
             for (int i = 0; i < constructorArgumentParamNames.length; i++) {
                 String paramName = constructorArgumentParamNames[i];
                 if (!rawParameters.containsKey(paramName) && paramName != null) {
@@ -96,7 +96,7 @@ public abstract class XmlElementMapper<T> {
             }
 
             if (childAcceptersByClass.containsKey(child.getClass())) {
-                Method method = childAcceptersByClass.get(target);
+                Method method = childAcceptersByClass.get(child.getClass());
                 methodsToParameters.putIfAbsent(method, new ArrayList<>());
                 methodsToParameters.get(method).add(child);
             }
@@ -180,7 +180,6 @@ public abstract class XmlElementMapper<T> {
                     }
                 }
             }
-
         }
 
         private Object parseRawParameterAs(Class<?> type, String rawParameter) {

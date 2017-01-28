@@ -1,6 +1,7 @@
 package xyz.izaak.radon.external.xml;
 
 import org.xml.sax.SAXException;
+import xyz.izaak.radon.Resource;
 import xyz.izaak.radon.external.SceneLoader;
 import xyz.izaak.radon.scene.Node;
 import xyz.izaak.radon.scene.Scene;
@@ -16,6 +17,8 @@ import java.util.List;
  * Created by ibaker on 11/01/2017.
  */
 public class XmlSceneLoader implements SceneLoader {
+    public static final String TARGET_ATTRIBUTE_QNAME = "rn:target";
+
     private List<XmlElementMapper> xmlElementMappers = new LinkedList<>();
     private SAXParser saxParser;
     private String filename;
@@ -40,11 +43,12 @@ public class XmlSceneLoader implements SceneLoader {
     public Scene newInstance() {
         XmlSceneContentHandler handler = new XmlSceneContentHandler(xmlElementMappers);
         try {
-            saxParser.parse(filename, handler);
+            saxParser.parse(Resource.streamFromFile(filename), handler);
         } catch (SAXException | IOException e) {
             e.printStackTrace();
             return null;
         }
-        return null;
+        Node root = (Node) handler.result();
+        return Scene.builder().root(root).build();
     }
 }
