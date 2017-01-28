@@ -41,14 +41,14 @@ public class Portal extends MatrixTransformable {
         this.backBasis = new OrthonormalBasis(Points.copyOf(frontBasis.getI()).negate(), Points.copyOf(frontBasis.getJ()));
 
         Matrix4f rotation = OrthonormalBasis.rotationBetween(OrthonormalBasis.STANDARD, frontBasis);
-        Mesh portalQuad = new Mesh(new QuadGeometry(), new PortalMaterial());
+        Mesh portalQuad = new Mesh("portal-quad", new QuadGeometry(), new PortalMaterial());
         portalQuad.scale(PORTAL_DIMENSIONS.x, PORTAL_DIMENSIONS.y, 1.0f);
         this.entity = Entity.builder().build();
         this.entity.addMeshes(portalQuad);
         this.entity.transform(rotation);
         this.entity.translate(position);
 
-        Mesh portalOutlineMesh = new Mesh(new QuadOutlineGeometry(), new SolidColorMaterial(Points.WHITE));
+        Mesh portalOutlineMesh = new Mesh("portal-outline", new QuadOutlineGeometry(), new SolidColorMaterial(Points.WHITE));
         portalOutlineMesh.scale(PORTAL_DIMENSIONS.x, PORTAL_DIMENSIONS.y, 1.0f);
         portalOutlineMesh.scale(1.01f, 1.01f, 1.0f);
         this.outlineEntity = Entity.builder().build();

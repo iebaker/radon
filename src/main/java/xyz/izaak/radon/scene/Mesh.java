@@ -5,6 +5,9 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
+import xyz.izaak.radon.external.xml.annotation.XmlChild;
+import xyz.izaak.radon.external.xml.annotation.XmlElement;
+import xyz.izaak.radon.external.xml.annotation.XmlParam;
 import xyz.izaak.radon.math.MatrixTransformable;
 import xyz.izaak.radon.exception.RadonException;
 import xyz.izaak.radon.geometry.Geometry;
@@ -34,7 +37,8 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
-public class Mesh extends MatrixTransformable implements UniformProvider {
+@XmlElement(namespace = "rn", element="Mesh")
+public class Mesh extends Node implements UniformProvider {
 
     private static final int FLOAT_SIZE = 4;
 
@@ -65,11 +69,16 @@ public class Mesh extends MatrixTransformable implements UniformProvider {
     private Geometry geometry;
     private Material material;
 
-    public Mesh(Geometry geometry, Material material, MeshBuilder... otherMeshBuilders) {
-        this.geometry = geometry;
-        this.material = material;
-        this.meshBuilders.add(geometry);
-        this.meshBuilders.add(material);
+    public Mesh(@XmlParam("path") String path, @XmlChild Geometry geometry, @XmlChild Material material) {
+        super(path);
+        this.meshBuilders.add(this.geometry = geometry);
+        this.meshBuilders.add(this.material = material);
+    }
+
+    public Mesh(String path, Geometry geometry, Material material, MeshBuilder... otherMeshBuilders) {
+        super(path);
+        this.meshBuilders.add(this.geometry = geometry);
+        this.meshBuilders.add(this.material = material);
         this.meshBuilders.addAll(Arrays.asList(otherMeshBuilders));
     }
 

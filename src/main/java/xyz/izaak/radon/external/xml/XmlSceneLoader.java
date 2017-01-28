@@ -3,6 +3,9 @@ package xyz.izaak.radon.external.xml;
 import org.xml.sax.SAXException;
 import xyz.izaak.radon.Resource;
 import xyz.izaak.radon.external.SceneLoader;
+import xyz.izaak.radon.geometry.PolarSphereGeometry;
+import xyz.izaak.radon.material.SolidColorMaterial;
+import xyz.izaak.radon.scene.Mesh;
 import xyz.izaak.radon.scene.Node;
 import xyz.izaak.radon.scene.Scene;
 
@@ -33,6 +36,9 @@ public class XmlSceneLoader implements SceneLoader {
         }
 
         addFactory(XmlElementMapperFactory.forClass(Node.class));
+        addFactory(XmlElementMapperFactory.forClass(Mesh.class));
+        addFactory(XmlElementMapperFactory.forClass(PolarSphereGeometry.class));
+        addFactory(XmlElementMapperFactory.forClass(SolidColorMaterial.class));
     }
 
     public void addFactory(XmlElementMapperFactory xmlElementMapperFactory) {

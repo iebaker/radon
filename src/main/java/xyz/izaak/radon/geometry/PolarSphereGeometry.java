@@ -1,6 +1,8 @@
 package xyz.izaak.radon.geometry;
 
 import org.joml.Vector3f;
+import xyz.izaak.radon.external.xml.annotation.XmlElement;
+import xyz.izaak.radon.external.xml.annotation.XmlParam;
 import xyz.izaak.radon.math.Points;
 import xyz.izaak.radon.scene.Mesh;
 
@@ -9,11 +11,12 @@ import static org.lwjgl.opengl.GL11.GL_TRIANGLE_STRIP;
 import static xyz.izaak.radon.shading.Identifiers.VERTEX_NORMAL;
 import static xyz.izaak.radon.shading.Identifiers.VERTEX_POSITION;
 
+@XmlElement(namespace = "rn", element = "PolarSphereGeometry")
 public class PolarSphereGeometry extends Geometry {
     private int longitudeLines;
     private int latitudeLines;
 
-    public PolarSphereGeometry(int longitudeLines, int latitudeLines) {
+    public PolarSphereGeometry(@XmlParam("long") int longitudeLines, @XmlParam("lat") int latitudeLines) {
         this.longitudeLines = longitudeLines;
         this.latitudeLines = latitudeLines;
     }

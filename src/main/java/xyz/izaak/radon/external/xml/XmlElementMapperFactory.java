@@ -10,10 +10,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by ibaker on 27/01/2017.
@@ -69,7 +71,8 @@ public abstract class XmlElementMapperFactory<T> {
         public void handleAttributes(Map<String, String> rawParameters) {
             for (int i = 0; i < constructorArgumentParamNames.length; i++) {
                 String paramName = constructorArgumentParamNames[i];
-                if (!rawParameters.containsKey(paramName) && paramName != null) {
+                if (paramName == null) continue;
+                if (!rawParameters.containsKey(paramName)) {
                     throw new IllegalStateException("xml element missing a param");
                 }
                 String rawParameter = rawParameters.get(paramName);
@@ -100,10 +103,14 @@ public abstract class XmlElementMapperFactory<T> {
                 return;
             }
 
-            if (childAcceptorsByClass.containsKey(child.getClass())) {
-                Method method = childAcceptorsByClass.get(child.getClass());
-                methodsToParameters.putIfAbsent(method, new ArrayList<>());
-                methodsToParameters.get(method).add(child);
+            Class<?> childClass = child.getClass();
+            for (Map.Entry<Class<?>, Method> entry : childAcceptorsByClass.entrySet()) {
+                Class<?> parameterClass = entry.getKey();
+                Method method = entry.getValue();
+                if (parameterClass.isAssignableFrom(childClass)) {
+                    methodsToParameters.putIfAbsent(method, new ArrayList<>());
+                    methodsToParameters.get(method).add(child);
+                }
             }
         }
 
@@ -112,6 +119,7 @@ public abstract class XmlElementMapperFactory<T> {
             K instance;
             try {
                 instance = validConstructor.newInstance(constructorArguments);
+                System.out.println("Constructed " + instance + " with args [" + String.join(",", Arrays.stream(constructorArguments).map(Object::toString).collect(Collectors.toList())) + "]");
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
                 throw new IllegalStateException("couldn't initialize from found constructor!");
@@ -121,6 +129,7 @@ public abstract class XmlElementMapperFactory<T> {
                 Method method = entry.getKey();
                 for (Object parameter : entry.getValue()) {
                     try {
+                        System.out.println("Invoking method " + method + " on " + instance + " with parameter " + parameter);
                         method.invoke(instance, parameter);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
@@ -197,7 +206,7 @@ public abstract class XmlElementMapperFactory<T> {
             if (type.isAssignableFrom(Character.TYPE)) return rawParameter.charAt(0);
             if (type.isAssignableFrom(Double.TYPE)) return Double.parseDouble(rawParameter);
             if (type.isAssignableFrom(Byte.TYPE)) return Byte.parseByte(rawParameter);
-            throw new IllegalStateException("xml param was not primitive or string");
+            throw new IllegalStateException(String.format("Parameter type %s is not String or primitive", type.getName()));
         }
     }
 }

@@ -55,6 +55,7 @@ public class XmlContentHandler extends DefaultHandler {
         XmlElementMapper xmlElementMapper = mapperStack.removeFirst();
         String target = targetStack.removeFirst();
         Object produced = xmlElementMapper.get();
+        System.out.println("Ended element with qName " + qName + " and produced " + produced);
         if (!mapperStack.isEmpty()) {
             mapperStack.peekFirst().handleChild(produced, target);
         } else {
