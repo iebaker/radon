@@ -19,7 +19,7 @@ import java.util.List;
 public class XmlSceneLoader implements SceneLoader {
     public static final String TARGET_ATTRIBUTE_QNAME = "rn:target";
 
-    private List<XmlElementMapper> xmlElementMappers = new LinkedList<>();
+    private List<XmlElementMapperFactory> xmlElementMapperFactories = new LinkedList<>();
     private SAXParser saxParser;
     private String filename;
 
@@ -32,16 +32,16 @@ public class XmlSceneLoader implements SceneLoader {
             e.printStackTrace();
         }
 
-        addXmlElementMapper(XmlElementMapper.fromAnnotatedClass(Node.class));
+        addFactory(XmlElementMapperFactory.forClass(Node.class));
     }
 
-    public void addXmlElementMapper(XmlElementMapper xmlElementMapper) {
-        xmlElementMappers.add(xmlElementMapper);
+    public void addFactory(XmlElementMapperFactory xmlElementMapperFactory) {
+        xmlElementMapperFactories.add(xmlElementMapperFactory);
     }
 
     @Override
     public Scene newInstance() {
-        XmlSceneContentHandler handler = new XmlSceneContentHandler(xmlElementMappers);
+        XmlContentHandler handler = new XmlContentHandler(xmlElementMapperFactories);
         try {
             saxParser.parse(Resource.streamFromFile(filename), handler);
         } catch (SAXException | IOException e) {
